@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"io/fs"
 	"net"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/vishvananda/netlink"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -53,6 +57,29 @@ func (i *infiniband) ConfigureVfGUID(vfAddr string, pfAddr string, vfID int, pfL
 	log.Log.Info("ConfigureVfGUID(): set vf guid", "address", vfAddr, "guid", guid)
 
 	return i.applyVfGUIDToInterface(guid, vfAddr, vfID, pfLink)
+}
+
+// GetVfGUID gets a GUID from sysfs for an IB VF device
+func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
+	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "node")
+	data, err := os.ReadFile(guidPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Log.Info("GetVfGUID(): GUID file doesn't exist", "path", guidPath)
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to read GUID file %s: %v", guidPath, err)
+	}
+	guidStr := strings.TrimSpace(string(data))
+	if guidStr == "" {
+		return nil, nil
+	}
+	guid, err := net.ParseMAC(guidStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse GUID %s: %v", guidStr, err)
+	}
+	log.Log.Info("GetVfGUID(): found guid", "guid", guid)
+	return guid, nil
 }
 
 func (i *infiniband) applyVfGUIDToInterface(guid net.HardwareAddr, vfAddr string, vfID int, pfLink netlink.Link) error {

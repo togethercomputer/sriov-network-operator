@@ -11,7 +11,7 @@ export OPERATOR_EXEC?=oc
 
 BUILD_GOPATH=$(TARGET_DIR):$(TARGET_DIR)/vendor:$(CURPATH)/cmd
 IMAGE_BUILDER?=docker
-IMAGE_BUILD_OPTS?=
+IMAGE_BUILD_OPTS?=--platform linux/amd64
 DOCKERFILE?=Dockerfile
 DOCKERFILE_CONFIG_DAEMON?=Dockerfile.sriov-network-config-daemon
 DOCKERFILE_WEBHOOK?=Dockerfile.webhook

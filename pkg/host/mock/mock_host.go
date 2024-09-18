@@ -10,6 +10,7 @@
 package mock_host
 
 import (
+	"net"
 	reflect "reflect"
 
 	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
@@ -127,6 +128,11 @@ func (mr *MockHostManagerInterfaceMockRecorder) BindDriverByBusAndDevice(bus, de
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindDriverByBusAndDevice", reflect.TypeOf((*MockHostManagerInterface)(nil).BindDriverByBusAndDevice), bus, device, driver)
 }
 
+func (mr *MockHostManagerInterfaceMockRecorder) GetVfGUID(vfAddr string, pfAddr string, vfID int) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVfGUID", reflect.TypeOf((*MockHostManagerInterface)(nil).GetVfGUID), vfAddr, pfAddr, vfID)
+}
+
 // CheckRDMAEnabled mocks base method.
 func (m *MockHostManagerInterface) CheckRDMAEnabled() (bool, error) {
 	m.ctrl.T.Helper()
@@ -225,6 +231,15 @@ func (m *MockHostManagerInterface) ConfigureVfGUID(vfAddr, pfAddr string, vfID i
 func (mr *MockHostManagerInterfaceMockRecorder) ConfigureVfGUID(vfAddr, pfAddr, vfID, pfLink any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConfigureVfGUID", reflect.TypeOf((*MockHostManagerInterface)(nil).ConfigureVfGUID), vfAddr, pfAddr, vfID, pfLink)
+}
+
+// GetVfGUID mocks base method.
+func (m *MockHostManagerInterface) GetVfGUID(vfAddr, pfAddr string, vfID int) (net.HardwareAddr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVfGUID", vfAddr, pfAddr, vfID)
+	ret0, _ := ret[0].(net.HardwareAddr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateVDPADevice mocks base method.

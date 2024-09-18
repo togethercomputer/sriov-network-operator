@@ -10,6 +10,7 @@
 package mock_helper
 
 import (
+	"net"
 	reflect "reflect"
 
 	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
@@ -1340,6 +1341,15 @@ func (m *MockHostHelpersInterface) WriteConfFile(newState *v1.SriovNetworkNodeSt
 	return ret0, ret1
 }
 
+// GetVfGUID mocks base method
+func (m *MockHostHelpersInterface) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVfGUID", vfAddr, pfAddr, vfID)
+	ret0, _ := ret[0].(net.HardwareAddr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // WriteConfFile indicates an expected call of WriteConfFile.
 func (mr *MockHostHelpersInterfaceMockRecorder) WriteConfFile(newState any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
@@ -1372,4 +1382,10 @@ func (m *MockHostHelpersInterface) WriteSriovSupportedNics() error {
 func (mr *MockHostHelpersInterfaceMockRecorder) WriteSriovSupportedNics() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteSriovSupportedNics", reflect.TypeOf((*MockHostHelpersInterface)(nil).WriteSriovSupportedNics))
+}
+
+// GetVfGUID indicates an expected call of GetVfGUID
+func (mr *MockHostHelpersInterfaceMockRecorder) GetVfGUID(vfAddr, pfAddr string, vfID int) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVfGUID", reflect.TypeOf((*MockHostHelpersInterface)(nil).GetVfGUID), vfAddr, pfAddr, vfID)
 }

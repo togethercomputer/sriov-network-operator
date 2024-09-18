@@ -38,6 +38,10 @@ spec:
 {{- if .CapabilitiesConfigured -}}
   "capabilities":{{.SriovCniCapabilities}},
 {{- end -}}
+{{- if .pKeyConfigured -}}
+  "pkey":"{{.pKey}}",
+  "guid_saved_in_ufm": "{{.GUIDSavedInUFM}}",
+{{- end -}}
 {{- if .StateConfigured -}}
   "link_state":"{{.SriovCniState}}",
 {{- end -}}

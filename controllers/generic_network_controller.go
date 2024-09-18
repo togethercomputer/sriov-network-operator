@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	netattdefv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -278,8 +279,32 @@ func (r *genericNetworkReconciler) deleteNetAttDef(ctx context.Context, cr Netwo
 	if namespace == "" {
 		namespace = cr.GetNamespace()
 	}
-	instance := &netattdefv1.NetworkAttachmentDefinition{ObjectMeta: metav1.ObjectMeta{Name: cr.GetName(), Namespace: namespace}}
-	err := r.Delete(ctx, instance)
+
+	// First get the NetworkAttachmentDefinition to check if GUIDSavedInUFM is True
+	instance := &netattdefv1.NetworkAttachmentDefinition{}
+	err := r.Get(ctx, types.NamespacedName{Name: cr.GetName(), Namespace: namespace}, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+
+	// Check the GUIDSavedInUFM in the spec's config JSON
+	// The CNI config is a JSON string in the spec
+	if instance.Spec.Config != "" {
+		// Check if the config contains "GUIDSavedInUFM": "true"
+		if strings.Contains(instance.Spec.Config, `"GUIDSavedInUFM": "true"`) {
+			// Skip deletion because GUIDSavedInUFM is True
+			logger := log.Log.WithName("deleteNetAttDef")
+			logger.Info("Skipping NetworkAttachmentDefinition deletion because GUIDSavedInUFM is true in spec",
+				"Namespace", namespace, "Name", cr.GetName())
+			return nil
+		}
+	}
+
+	// Proceed with deletion since GUIDSavedInUFM is not True
+	err = r.Delete(ctx, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil
