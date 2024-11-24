@@ -89,6 +89,7 @@ We have introduced the following Chart parameters.
 | `operator.metricsExporter.prometheusOperator.enabled` | bool | false | Wheter the operator shoud configure Prometheus resources or not (e.g. `ServiceMonitors`). |
 | `operator.metricsExporter.prometheusOperator.serviceAccount` | string | `prometheus-k8s` | The service account used by the Prometheus Operator. This is used to give Prometheus the permission to list resource in the SR-IOV operator namespace |
 | `operator.metricsExporter.prometheusOperator.namespace` | string | `monitoring` | The namespace where the Prometheus Operator is installed. Setting this variable makes the operator deploy `monitoring.coreos.com` resources. |
+| `operator.metricsExporter.prometheusOperator.deployRules` | bool | false | Whether the operator should deploy `PrometheusRules` to scrape namespace version of metrics. |
 
 #### Admission Controllers parameters
 
@@ -133,6 +134,11 @@ This section contains general parameters that apply to both the operator and dae
 | `sriovOperatorConfig.disableDrain` | bool | `false` | disable node draining when configuring SR-IOV, set to true in case of a single node cluster or any other justifiable reason |
 | `sriovOperatorConfig.configurationMode` | string | `daemon` | sriov-network-config-daemon configuration mode. either `daemon` or `systemd` |
 | `sriovOperatorConfig.featureGates` | map[string]bool | `{}` | feature gates to enable/disable |
+
+**Note** 
+
+When `sriovOperatorConfig.configurationMode` is configured as `systemd`, configurations files and `systemd` service files are created on the node.
+Upon chart deletion, those files are not cleaned up. For cases where this is not acceptable, users should rather configured the `daemon` mode.
 
 ### Images parameters
 

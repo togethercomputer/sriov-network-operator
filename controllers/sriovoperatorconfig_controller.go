@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sort"
@@ -28,6 +29,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	kscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,15 +40,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/go-logr/logr"
 	machinev1 "github.com/openshift/machine-config-operator/pkg/apis/machineconfiguration.openshift.io/v1"
 
 	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	apply "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/apply"
-	consts "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
+	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/apply"
+	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
 	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	render "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/render"
+	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/render"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 )
 
@@ -81,7 +84,7 @@ func (r *SriovOperatorConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			logger.Info("default SriovOperatorConfig object not found. waiting for creation.")
-			return reconcile.Result{}, nil
+			return reconcile.Result{}, err
 		}
 		// Error reading the object - requeue the request.
 		logger.Error(err, "Failed to get default SriovOperatorConfig object")
@@ -89,6 +92,19 @@ func (r *SriovOperatorConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	snolog.SetLogLevel(defaultConfig.Spec.LogLevel)
+
+	// examine DeletionTimestamp to determine if object is under deletion
+	if !defaultConfig.ObjectMeta.DeletionTimestamp.IsZero() {
+		// The object is being deleted
+		return r.handleSriovOperatorConfigDeletion(ctx, defaultConfig, logger)
+	}
+	// add finalizer if needed
+	if !sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers) {
+		defaultConfig.ObjectMeta.Finalizers = append(defaultConfig.ObjectMeta.Finalizers, sriovnetworkv1.OPERATORCONFIGFINALIZERNAME)
+		if err := r.Update(ctx, defaultConfig); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
 
 	r.FeatureGate.Init(defaultConfig.Spec.FeatureGates)
 	logger.Info("enabled featureGates", "featureGates", r.FeatureGate.String())
@@ -124,7 +140,7 @@ func (r *SriovOperatorConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 		return reconcile.Result{}, err
 	}
 
-	if err = syncPluginDaemonObjs(ctx, r.Client, r.Scheme, defaultConfig, policyList); err != nil {
+	if err = syncPluginDaemonObjs(ctx, r.Client, r.Scheme, defaultConfig); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -241,6 +257,7 @@ func (r *SriovOperatorConfigReconciler) syncMetricsExporter(ctx context.Context,
 	data.Data["IsOpenshift"] = r.PlatformHelper.IsOpenshiftCluster()
 
 	data.Data["IsPrometheusOperatorInstalled"] = strings.ToLower(os.Getenv("METRICS_EXPORTER_PROMETHEUS_OPERATOR_ENABLED")) == trueString
+	data.Data["PrometheusOperatorDeployRules"] = strings.ToLower(os.Getenv("METRICS_EXPORTER_PROMETHEUS_DEPLOY_RULES")) == trueString
 	data.Data["PrometheusOperatorServiceAccount"] = os.Getenv("METRICS_EXPORTER_PROMETHEUS_OPERATOR_SERVICE_ACCOUNT")
 	data.Data["PrometheusOperatorNamespace"] = os.Getenv("METRICS_EXPORTER_PROMETHEUS_OPERATOR_NAMESPACE")
 
@@ -429,6 +446,27 @@ func (r *SriovOperatorConfigReconciler) syncOpenShiftSystemdService(ctx context.
 	return r.setLabelInsideObject(ctx, cr, objs)
 }
 
+func (r *SriovOperatorConfigReconciler) handleSriovOperatorConfigDeletion(ctx context.Context,
+	defaultConfig *sriovnetworkv1.SriovOperatorConfig, logger logr.Logger) (ctrl.Result, error) {
+	var err error
+	if sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers) {
+		// our finalizer is present, so lets handle any external dependency
+		logger.Info("delete SriovOperatorConfig CR", "Namespace", defaultConfig.Namespace, "Name", defaultConfig.Name)
+		// make sure webhooks objects are deleted prior of removing finalizer
+		err = r.deleteAllWebhooks(ctx)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		// remove our finalizer from the list and update it.
+		defaultConfig.ObjectMeta.Finalizers, _ = sriovnetworkv1.RemoveString(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers)
+		if err := r.Update(ctx, defaultConfig); err != nil {
+			return reconcile.Result{}, err
+		}
+	}
+
+	return reconcile.Result{}, err
+}
+
 func (r SriovOperatorConfigReconciler) setLabelInsideObject(ctx context.Context, cr *sriovnetworkv1.SriovOperatorConfig, objs []*uns.Unstructured) error {
 	logger := log.Log.WithName("setLabelInsideObject")
 	for _, obj := range objs {
@@ -455,4 +493,30 @@ func (r SriovOperatorConfigReconciler) setLabelInsideObject(ctx context.Context,
 	}
 
 	return nil
+}
+
+func (r SriovOperatorConfigReconciler) deleteAllWebhooks(ctx context.Context) error {
+	var err error
+	obj := &uns.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "admissionregistration.k8s.io", Kind: "MutatingWebhookConfiguration", Version: "v1"})
+	obj.SetName(consts.OperatorWebHookName)
+	err = errors.Join(
+		err, r.deleteWebhookObject(ctx, obj),
+	)
+
+	obj = &uns.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "admissionregistration.k8s.io", Kind: "ValidatingWebhookConfiguration", Version: "v1"})
+	obj.SetName(consts.OperatorWebHookName)
+	err = errors.Join(
+		err, r.deleteWebhookObject(ctx, obj),
+	)
+
+	obj = &uns.Unstructured{}
+	obj.SetGroupVersionKind(schema.GroupVersionKind{Group: "admissionregistration.k8s.io", Kind: "MutatingWebhookConfiguration", Version: "v1"})
+	obj.SetName(consts.InjectorWebHookName)
+	err = errors.Join(
+		err, r.deleteWebhookObject(ctx, obj),
+	)
+
+	return err
 }

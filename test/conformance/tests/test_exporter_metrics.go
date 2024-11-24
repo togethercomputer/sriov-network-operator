@@ -2,9 +2,12 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 
+	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
@@ -13,21 +16,21 @@ import (
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("[sriov] Metrics Exporter", Ordered, func() {
+var _ = Describe("[sriov] Metrics Exporter", Ordered, ContinueOnFailure, func() {
+	var node string
+	var nic *sriovv1.InterfaceExt
 
 	BeforeAll(func() {
-		if cluster.VirtualCluster() {
-			Skip("IGB driver does not support VF statistics")
-		}
-
 		err := namespaces.Create(namespaces.Test, clients)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -48,13 +51,11 @@ var _ = Describe("[sriov] Metrics Exporter", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		WaitForSRIOVStable()
-	})
 
-	It("collects metrics regarding receiving traffic via VF", func() {
 		sriovInfos, err := cluster.DiscoverSriov(clients, operatorNamespace)
 		Expect(err).ToNot(HaveOccurred())
 
-		node, nic, err := sriovInfos.FindOneSriovNodeAndDevice()
+		node, nic, err = sriovInfos.FindOneSriovNodeAndDevice()
 		Expect(err).ToNot(HaveOccurred())
 		By("Using device " + nic.Name + " on node " + node)
 
@@ -65,7 +66,18 @@ var _ = Describe("[sriov] Metrics Exporter", Ordered, func() {
 		Expect(err).ToNot(HaveOccurred())
 		waitForNetAttachDef("test-me-network", namespaces.Test)
 
+		WaitForSRIOVStable()
+
+		DeferCleanup(namespaces.Clean, operatorNamespace, namespaces.Test, clients, discovery.Enabled())
+	})
+
+	It("collects metrics regarding receiving traffic via VF", func() {
+		if cluster.VirtualCluster() {
+			Skip("IGB driver does not support VF statistics")
+		}
+
 		pod := createTestPod(node, []string{"test-me-network"})
+		DeferCleanup(namespaces.CleanPods, namespaces.Test, clients)
 
 		ips, err := network.GetSriovNicIPs(pod, "net1")
 		Expect(err).ToNot(HaveOccurred())
@@ -88,6 +100,79 @@ var _ = Describe("[sriov] Metrics Exporter", Ordered, func() {
 		Expect(finalRxPackets).Should(BeNumerically(">", initialRxPackets))
 	})
 
+	Context("When Prometheus operator is available", func() {
+		BeforeEach(func() {
+			_, err := clients.ServiceMonitors(operatorNamespace).List(context.Background(), metav1.ListOptions{})
+			if k8serrors.IsNotFound(err) {
+				Skip("Prometheus operator not available in the cluster")
+			}
+		})
+
+		It("PrometheusRule should provide namespaced metrics", func() {
+			pod := createTestPod(node, []string{"test-me-network"})
+			DeferCleanup(namespaces.CleanPods, namespaces.Test, clients)
+
+			namespacedMetricNames := []string{
+				"network:sriov_vf_rx_bytes",
+				"network:sriov_vf_tx_bytes",
+				"network:sriov_vf_rx_packets",
+				"network:sriov_vf_tx_packets",
+				"network:sriov_vf_rx_dropped",
+				"network:sriov_vf_tx_dropped",
+				"network:sriov_vf_rx_broadcast",
+				"network:sriov_vf_rx_multicast",
+			}
+
+			Eventually(func(g Gomega) {
+				for _, metricName := range namespacedMetricNames {
+					values := runPromQLQuery(fmt.Sprintf(`%s{namespace="%s",pod="%s"}`, metricName, pod.Namespace, pod.Name))
+					g.Expect(values).ToNot(BeEmpty(), "no value for metric %s", metricName)
+				}
+			}, "90s", "1s").Should(Succeed())
+		})
+
+		It("Metrics should have the correct labels", func() {
+			pod := createTestPod(node, []string{"test-me-network"})
+			DeferCleanup(namespaces.CleanPods, namespaces.Test, clients)
+
+			metricsName := []string{
+				"sriov_vf_rx_bytes",
+				"sriov_vf_tx_bytes",
+				"sriov_vf_rx_packets",
+				"sriov_vf_tx_packets",
+				"sriov_vf_rx_dropped",
+				"sriov_vf_tx_dropped",
+				"sriov_vf_rx_broadcast",
+				"sriov_vf_rx_multicast",
+			}
+
+			Eventually(func(g Gomega) {
+				for _, metricName := range metricsName {
+					samples := runPromQLQuery(metricName)
+					g.Expect(samples).ToNot(BeEmpty(), "no value for metric %s", metricName)
+					g.Expect(samples[0].Metric).To(And(
+						HaveKey(model.LabelName("pciAddr")),
+						HaveKey(model.LabelName("node")),
+						HaveKey(model.LabelName("pf")),
+						HaveKey(model.LabelName("vf")),
+					))
+				}
+			}, "90s", "1s").Should(Succeed())
+
+			// sriov_kubepoddevice has a different sets of label than statistics metrics
+			Eventually(func(g Gomega) {
+				samples := runPromQLQuery(fmt.Sprintf(`sriov_kubepoddevice{namespace="%s",pod="%s"}`, pod.Namespace, pod.Name))
+				g.Expect(samples).ToNot(BeEmpty(), "no value for metric sriov_kubepoddevice")
+				g.Expect(samples[0].Metric).To(And(
+					HaveKey(model.LabelName("pciAddr")),
+					HaveKeyWithValue(model.LabelName("node"), model.LabelValue(pod.Spec.NodeName)),
+					HaveKeyWithValue(model.LabelName("dev_type"), model.LabelValue("openshift.io/metricsResource")),
+					HaveKeyWithValue(model.LabelName("namespace"), model.LabelValue(pod.Namespace)),
+					HaveKeyWithValue(model.LabelName("pod"), model.LabelValue(pod.Name)),
+				))
+			}, "60s", "1s").Should(Succeed())
+		})
+	})
 })
 
 func getMetricsForNode(nodeName string) map[string]*dto.MetricFamily {
@@ -184,4 +269,34 @@ func areLabelsMatching(labels []*dto.LabelPair, labelsToMatch map[string]string)
 	}
 
 	return true
+}
+
+func runPromQLQuery(query string) model.Vector {
+	prometheusPods, err := clients.Pods("").List(context.Background(), metav1.ListOptions{
+		LabelSelector: "app.kubernetes.io/component=prometheus",
+	})
+	ExpectWithOffset(1, err).ToNot(HaveOccurred())
+	ExpectWithOffset(1, prometheusPods.Items).ToNot(HaveLen(0), "At least one Prometheus operator pod expected")
+
+	prometheusPod := prometheusPods.Items[0]
+
+	url := fmt.Sprintf("localhost:9090/api/v1/query?%s", (url.Values{"query": []string{query}}).Encode())
+	command := []string{"curl", url}
+	stdout, stderr, err := pod.ExecCommand(clients, &prometheusPod, command...)
+	ExpectWithOffset(1, err).ToNot(HaveOccurred(),
+		"promQL query failed: [%s/%s] command: [%v]\nstdout: %s\nstderr: %s", prometheusPod.Namespace, prometheusPod.Name, command, stdout, stderr)
+
+	result := struct {
+		Status string `json:"status"`
+		Data   struct {
+			ResultType string       `json:"resultType"`
+			Result     model.Vector `json:"result"`
+		} `json:"data"`
+	}{}
+
+	json.Unmarshal([]byte(stdout), &result)
+	ExpectWithOffset(1, err).ToNot(HaveOccurred())
+	ExpectWithOffset(1, result.Status).To(Equal("success"), "cURL for [%s] failed: %s", url, stdout)
+
+	return result.Data.Result
 }
