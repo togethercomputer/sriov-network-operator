@@ -65,13 +65,13 @@ spec:
               resourceName:
                 description: SRIOV Network device plugin endpoint resource name
                 type: string
-              pkey:
+              pKey:
                 description: pKey for the Infiniband network.
                 type: string
               scanGUIDs:
                 description: Whether to scan for GUIDs.
                 type: boolean
-              InterfaceName:
+              interfaceName:
                 description: Name of the IB interface
                 type: string
             required:

@@ -44,7 +44,7 @@ type SriovIBNetworkSpec struct {
 	// by the operator.
 	MetaPluginsConfig string `json:"metaPlugins,omitempty"`
 	InterfaceName     string `json:"interfaceName,omitempty"`
-	Pkey              string `json:"pkey,omitempty"`
+	PKey              string `json:"pKey,omitempty"`
 	ScanGUIDs         bool   `json:"scanGuids,omitempty"`
 }
 
