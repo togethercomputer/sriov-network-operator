@@ -14,13 +14,13 @@ import (
 	"github.com/vishvananda/netlink/nl"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	dputilsPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils"
-	ethtoolPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ethtool"
-	netlinkPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	dputilsPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/dputils"
+	ethtoolPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ethtool"
+	netlinkPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 type network struct {

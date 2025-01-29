@@ -15,9 +15,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	// Test files in this package must not end with `_test.go` suffix, as they are imported as go package
-	_ "github.com/k8snetworkplumbingwg/sriov-network-operator/test/conformance/tests"
+	_ "github.com/togethercomputer/sriov-network-operator/test/conformance/tests"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/k8sreporter"
+	"github.com/togethercomputer/sriov-network-operator/test/util/k8sreporter"
 )
 
 var (

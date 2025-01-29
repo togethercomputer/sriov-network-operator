@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/network"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/pod"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/discovery"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/network"
+	"github.com/togethercomputer/sriov-network-operator/test/util/pod"
 
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"

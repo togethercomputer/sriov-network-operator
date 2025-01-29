@@ -10,17 +10,17 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	helperMock "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	platformsMock "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/mock"
-	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins/generic"
-	pluginsMock "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/systemd"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	testHelpers "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	helperMock "github.com/togethercomputer/sriov-network-operator/pkg/helper/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	platformsMock "github.com/togethercomputer/sriov-network-operator/pkg/platforms/mock"
+	plugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
+	"github.com/togethercomputer/sriov-network-operator/pkg/plugins/generic"
+	pluginsMock "github.com/togethercomputer/sriov-network-operator/pkg/plugins/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/systemd"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	testHelpers "github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 func restoreOrigFuncs() {

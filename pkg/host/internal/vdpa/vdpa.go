@@ -8,9 +8,9 @@ import (
 	"github.com/vishvananda/netlink"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	constants "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	netlinkLibPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	constants "github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	netlinkLibPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 const (

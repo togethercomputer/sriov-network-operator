@@ -19,11 +19,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	ovsStoreMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/bridge/ovs/store/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	ovsStoreMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/bridge/ovs/store/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 func getManagedBridges() map[string]*sriovnetworkv1.OVSConfigExt {

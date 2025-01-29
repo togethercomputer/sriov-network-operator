@@ -10,9 +10,9 @@ import (
 	"github.com/google/renameio/v2"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
 )
 
 // Store interface provides methods to store and query information

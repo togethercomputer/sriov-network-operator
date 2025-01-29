@@ -14,12 +14,12 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	snclientset "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 const (

@@ -14,16 +14,16 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	dputilsMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils/mock"
-	ghwMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ghw/mock"
-	netlinkMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
-	sriovnetMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/sriovnet/mock"
-	hostMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/mock"
-	hostStoreMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/store/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	dputilsMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/dputils/mock"
+	ghwMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ghw/mock"
+	netlinkMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
+	sriovnetMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/sriovnet/mock"
+	hostMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/mock"
+	hostStoreMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/store/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 var _ = Describe("SRIOV", func() {

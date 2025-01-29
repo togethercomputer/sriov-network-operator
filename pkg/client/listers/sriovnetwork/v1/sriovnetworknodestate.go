@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/tools/cache"
 
-	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	v1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 // SriovNetworkNodeStateLister helps list SriovNetworkNodeStates.

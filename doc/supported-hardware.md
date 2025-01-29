@@ -32,7 +32,7 @@ The following SR-IOV capable hardware is supported with sriov-network-operator:
 | Marvell OCTEON Fusion CNF105XX | 177d | ba00 |
 
 > **Note:** sriov-network-operator maintains a list of supported NICs which it supports.
-> These are stored in supported-nic-ids [configMap](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/deployment/sriov-network-operator/templates/configmap.yaml).
+> These are stored in supported-nic-ids [configMap](https://github.com/togethercomputer/sriov-network-operator/blob/master/deployment/sriov-network-operator/templates/configmap.yaml).
 > The operator uses this list to enforce it only operates on NICs that are supported. For unsupported SR-IOV NICs, that is not guaranteed, but might work as well.
 > To have sriov-network-operator operate on an unsupported NIC, after installing the operator, you have to add the unsupported SR-IOV NICs information to the ConfigMap
 > in following format: `<nic_name>: <vender_id> <pf_device_id> <vf_device_id>`.
@@ -89,8 +89,8 @@ should follow the following procedure:
       expose them as a kubernetes node resource, and you are able to run workloads consuming
       those resources.
 * Add information of what was tested to the issue opened
-* Add contact point information to [vendor-support.md](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/doc/vendor-support.md), so we know who to reach out if issues arise when running sriov-network-operator against the specified hardware.
-* Submit PR to add your device to this file as well as to supported-nic-ids configMap [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/deployment/sriov-network-operator/templates/configmap.yaml) and [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/deploy/configmap.yaml).
+* Add contact point information to [vendor-support.md](https://github.com/togethercomputer/sriov-network-operator/blob/master/doc/vendor-support.md), so we know who to reach out if issues arise when running sriov-network-operator against the specified hardware.
+* Submit PR to add your device to this file as well as to supported-nic-ids configMap [here](https://github.com/togethercomputer/sriov-network-operator/blob/master/deployment/sriov-network-operator/templates/configmap.yaml) and [here](https://github.com/togethercomputer/sriov-network-operator/blob/master/deploy/configmap.yaml).
   * The tables above should be updated according to what was tested
 
 ## Continuous support
@@ -98,12 +98,12 @@ To ensure sriov-network-operator continues to operate as expected on supported h
 adds CI which runs against PRs in the project. Without it we cannot commit for sriov-network-operator to continue to work properly on the specified
 hardware.
 
-Additional information on how to add Vendor/3rd-party CI can be found [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/tree/master/ci).
+Additional information on how to add Vendor/3rd-party CI can be found [here](https://github.com/togethercomputer/sriov-network-operator/tree/master/ci).
 
 ### E2E tests
 
 sriov-network-operator offers a set of e2e tests vendors can run on their hardware. These tests utilize [Kind](https://kind.sigs.k8s.io/) to spin up
-a Kubernetes cluster and run tests. Information on how to run e2e tests can be found [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/doc/testing-kind.md).
+a Kubernetes cluster and run tests. Information on how to run e2e tests can be found [here](https://github.com/togethercomputer/sriov-network-operator/blob/master/doc/testing-kind.md).
 These tests may be used as part of vendor CIs added to the project to validate sriov-network-operator is able to operate
 on the relevant hardware.
 

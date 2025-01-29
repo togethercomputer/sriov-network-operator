@@ -44,9 +44,9 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 
 	//+kubebuilder:scaffold:imports
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/test/util"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

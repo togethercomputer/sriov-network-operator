@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 var namespace = os.Getenv("NAMESPACE")

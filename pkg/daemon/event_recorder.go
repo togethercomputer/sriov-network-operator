@@ -11,8 +11,8 @@ import (
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	snclientset "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 type EventRecorder struct {

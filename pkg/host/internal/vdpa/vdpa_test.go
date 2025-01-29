@@ -10,11 +10,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	constants "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	netlinkMock "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
-	hostMock "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	constants "github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	netlinkMock "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
+	hostMock "github.com/togethercomputer/sriov-network-operator/pkg/host/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 var _ = Describe("VDPA", func() {

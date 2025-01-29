@@ -4,10 +4,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/clean"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/clean"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/discovery"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
 )
 
 var sriovInfos *cluster.EnabledNodes

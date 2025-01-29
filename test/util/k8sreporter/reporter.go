@@ -8,8 +8,8 @@ import (
 	kniK8sReporter "github.com/openshift-kni/k8sreporter"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
 )
 
 func New(reportPath string) (*kniK8sReporter.KubernetesReporter, error) {

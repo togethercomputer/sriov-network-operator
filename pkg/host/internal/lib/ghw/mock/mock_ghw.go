@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	ghw "github.com/jaypipes/ghw"
-	ghw0 "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ghw"
+	ghw0 "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ghw"
 )
 
 // MockGHWLib is a mock of GHWLib interface.

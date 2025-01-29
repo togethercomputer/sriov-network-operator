@@ -3,9 +3,9 @@ package intel
 import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	plugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
 )
 
 var PluginName = "intel"

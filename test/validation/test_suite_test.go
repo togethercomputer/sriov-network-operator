@@ -13,9 +13,9 @@ import (
 	kniK8sReporter "github.com/openshift-kni/k8sreporter"
 
 	// Test files in this package must not end with `_test.go` suffix, as they are imported as go package
-	_ "github.com/k8snetworkplumbingwg/sriov-network-operator/test/validation/tests"
+	_ "github.com/togethercomputer/sriov-network-operator/test/validation/tests"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/k8sreporter"
+	"github.com/togethercomputer/sriov-network-operator/test/util/k8sreporter"
 )
 
 var (

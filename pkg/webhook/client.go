@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
+	snclientset "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
 )
 
 var snclient snclientset.Interface

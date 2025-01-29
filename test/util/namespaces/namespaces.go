@@ -14,8 +14,8 @@ import (
 	"k8s.io/utils/pointer"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	testclient "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/client"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	testclient "github.com/togethercomputer/sriov-network-operator/test/util/client"
 )
 
 // Test is the namespace to be use for testing

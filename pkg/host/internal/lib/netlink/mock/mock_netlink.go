@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	netlink "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
+	netlink "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
 	netlink0 "github.com/vishvananda/netlink"
 )
 

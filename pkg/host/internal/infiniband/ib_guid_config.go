@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
 )
 
 type ibPfGUIDJSONConfig struct {

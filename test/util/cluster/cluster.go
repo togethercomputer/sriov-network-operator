@@ -17,11 +17,11 @@ import (
 	"k8s.io/utils/pointer"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	testclient "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/client"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/nodes"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/pod"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	testclient "github.com/togethercomputer/sriov-network-operator/test/util/client"
+	"github.com/togethercomputer/sriov-network-operator/test/util/nodes"
+	"github.com/togethercomputer/sriov-network-operator/test/util/pod"
 )
 
 // EnabledNodes provides info on sriov enabled nodes of the cluster.

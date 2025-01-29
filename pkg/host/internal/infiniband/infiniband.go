@@ -9,9 +9,9 @@ import (
 	"github.com/vishvananda/netlink"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	netlinkLibPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	netlinkLibPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 // New creates and returns an InfinibandInterface object, that handles IB VF GUID configuration

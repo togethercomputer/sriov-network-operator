@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. A supported SRIOV hardware on the cluster nodes. Supported models can be found [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/doc/supported-hardware.md).
+1. A supported SRIOV hardware on the cluster nodes. Supported models can be found [here](https://github.com/togethercomputer/sriov-network-operator/blob/master/doc/supported-hardware.md).
 2. Kubernetes or Openshift cluster running on bare metal nodes.
 3. Multus-cni is deployed as default CNI plugin, and there is a default CNI plugin (flannel, openshift-sdn etc.) available for Multus-cni.
 4. On RedHat Enterprise Linux and Ubuntu operating systems, the `rdma-core` package must be installed to support RDMA resource provisioning. On RedHat CoreOS the package installation is not required.
@@ -14,7 +14,7 @@ Make sure to have installed the Operator-SDK, as shown in its [install documenta
 Clone this GitHub repository.
 
 ```bash
-go get github.com/k8snetworkplumbingwg/sriov-network-operator
+go get github.com/togethercomputer/sriov-network-operator
 ```
 
 Deploy the operator.

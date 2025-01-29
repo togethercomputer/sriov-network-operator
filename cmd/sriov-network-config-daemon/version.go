@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/version"
+	"github.com/togethercomputer/sriov-network-operator/pkg/version"
 )
 
 var (

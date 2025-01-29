@@ -5,12 +5,12 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	hostTypes "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	plugins "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	hostTypes "github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	plugins "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 var PluginName = "k8s"
@@ -154,7 +154,7 @@ func (p *K8sPlugin) OnNodeStateChange(new *sriovnetworkv1.SriovNetworkNodeState)
 	return
 }
 
-// TODO: implement - https://github.com/k8snetworkplumbingwg/sriov-network-operator/issues/630
+// TODO: implement - https://github.com/togethercomputer/sriov-network-operator/issues/630
 // OnNodeStatusChange verify whether SriovNetworkNodeState CR status present changes on configured VFs.
 func (p *K8sPlugin) CheckStatusChanges(*sriovnetworkv1.SriovNetworkNodeState) (bool, error) {
 	return false, nil

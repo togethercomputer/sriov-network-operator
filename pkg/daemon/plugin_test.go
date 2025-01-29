@@ -5,13 +5,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	helperMocks "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper/mock"
-	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
-	fakePlugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins/fake"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	v1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	helperMocks "github.com/togethercomputer/sriov-network-operator/pkg/helper/mock"
+	plugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
+	fakePlugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins/fake"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 func validateVendorPlugins(loadedPlugins map[string]plugin.VendorPlugin, expectedPlugins []string) {

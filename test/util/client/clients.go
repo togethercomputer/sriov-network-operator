@@ -20,9 +20,9 @@ import (
 
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	clientsriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned/typed/sriovnetwork/v1"
-	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	clientsriovv1 "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned/typed/sriovnetwork/v1"
+	snolog "github.com/togethercomputer/sriov-network-operator/pkg/log"
 )
 
 func init() {

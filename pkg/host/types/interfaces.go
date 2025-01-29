@@ -3,8 +3,8 @@ package types
 import (
 	"github.com/vishvananda/netlink"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/store"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/store"
 )
 
 type KernelInterface interface {

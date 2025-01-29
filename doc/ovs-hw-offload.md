@@ -63,7 +63,7 @@ spec:
 ```
 
 _Note: `spec.bridge.ovs: {}` - means use default settings (suitable for HW-offloading with OVS-kernel dataplane)
-The fields defined in the [Bridge type](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/api/v1/sriovnetworknodepolicy_types.go#L84) can be used to configure advanced bridge and interface level options._
+The fields defined in the [Bridge type](https://github.com/togethercomputer/sriov-network-operator/blob/master/api/v1/sriovnetworknodepolicy_types.go#L84) can be used to configure advanced bridge and interface level options._
 
 The spec above will render to the similar SriovNetworkNodeState for matching nodes.
 

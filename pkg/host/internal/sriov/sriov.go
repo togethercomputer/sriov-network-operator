@@ -15,16 +15,16 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	dputilsPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils"
-	ghwPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ghw"
-	netlinkPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	sriovnetPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/sriovnet"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/store"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	dputilsPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/dputils"
+	ghwPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ghw"
+	netlinkPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	sriovnetPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/sriovnet"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/store"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 type interfaceToConfigure struct {

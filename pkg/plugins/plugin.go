@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 //go:generate ../../bin/mockgen -destination mock/mock_plugin.go -source plugin.go

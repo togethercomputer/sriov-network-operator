@@ -5,10 +5,10 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/bridge/ovs"
-	ovsStorePkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/bridge/ovs/store"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/bridge/ovs"
+	ovsStorePkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/bridge/ovs/store"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 type bridge struct {

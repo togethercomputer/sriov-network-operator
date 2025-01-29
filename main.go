@@ -45,16 +45,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/controllers"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/leaderelection"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/controllers"
+	"github.com/togethercomputer/sriov-network-operator/pkg/featuregate"
+	"github.com/togethercomputer/sriov-network-operator/pkg/leaderelection"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	snolog "github.com/togethercomputer/sriov-network-operator/pkg/log"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 	//+kubebuilder:scaffold:imports
 )
 

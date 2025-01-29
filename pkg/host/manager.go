@@ -1,21 +1,21 @@
 package host
 
 import (
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/bridge"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/infiniband"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/kernel"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ethtool"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ghw"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/sriovnet"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/network"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/service"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/sriov"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/udev"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/vdpa"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/bridge"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/infiniband"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/kernel"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/dputils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ethtool"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ghw"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/sriovnet"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/network"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/service"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/sriov"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/udev"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/vdpa"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
 )
 
 // Contains all the host manipulation functions

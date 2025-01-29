@@ -5,11 +5,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	netlinkLibPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	netlinkMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/network"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	netlinkLibPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	netlinkMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/network"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 var _ = Describe("ibGUIDPool", Ordered, func() {

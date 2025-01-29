@@ -8,11 +8,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/network"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/discovery"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/network"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

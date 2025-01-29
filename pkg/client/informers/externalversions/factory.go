@@ -12,9 +12,9 @@ import (
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 
-	versioned "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/informers/externalversions/internalinterfaces"
-	sriovnetwork "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/informers/externalversions/sriovnetwork"
+	versioned "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/togethercomputer/sriov-network-operator/pkg/client/informers/externalversions/internalinterfaces"
+	sriovnetwork "github.com/togethercomputer/sriov-network-operator/pkg/client/informers/externalversions/sriovnetwork"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.

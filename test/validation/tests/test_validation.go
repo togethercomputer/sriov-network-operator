@@ -14,9 +14,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	goclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	testclient "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/client"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	testclient "github.com/togethercomputer/sriov-network-operator/test/util/client"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
 )
 
 var (

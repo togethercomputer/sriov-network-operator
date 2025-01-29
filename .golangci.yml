@@ -46,7 +46,7 @@ linters-settings:
   gocyclo:
     min-complexity: 15
   goimports:
-    local-prefixes: github.com/k8snetworkplumbingwg/sriov-network-operator
+    local-prefixes: github.com/togethercomputer/sriov-network-operator
   gomnd:
     settings:
       mnd:

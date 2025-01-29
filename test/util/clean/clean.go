@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/client"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/client"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
 )
 
 var RestoreNodeDrainState bool

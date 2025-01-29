@@ -23,7 +23,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 // SriovIBNetworkReconciler reconciles a SriovIBNetwork object

@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	mlxutils "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vendors/mellanox"
+	mlxutils "github.com/togethercomputer/sriov-network-operator/pkg/vendors/mellanox"
 )
 
 // MockMellanoxInterface is a mock of MellanoxInterface interface.

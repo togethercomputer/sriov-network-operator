@@ -8,10 +8,10 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	store "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/store"
-	types "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	mlxutils "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vendors/mellanox"
+	v1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	store "github.com/togethercomputer/sriov-network-operator/pkg/host/store"
+	types "github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	mlxutils "github.com/togethercomputer/sriov-network-operator/pkg/vendors/mellanox"
 	netlink "github.com/vishvananda/netlink"
 )
 

@@ -12,12 +12,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	mock_helper "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host"
-	hostTypes "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	mock_helper "github.com/togethercomputer/sriov-network-operator/pkg/helper/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host"
+	hostTypes "github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	plugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 func TestK8sPlugin(t *testing.T) {

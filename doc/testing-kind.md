@@ -21,7 +21,7 @@ Note: Test device will remain in KinD worker node until cluster is terminated.
 
 #### Device netns switcher mode `test-suite`
 ```
-$ git clone https://github.com/k8snetworkplumbingwg/sriov-network-operator.git
+$ git clone https://github.com/togethercomputer/sriov-network-operator.git
 $ cd sriov-network-operator/
 $ source hack/get-e2e-kind-tools.sh
 $ export TEST_PCI_DEVICE=0000:02:00.0
@@ -39,7 +39,7 @@ For the service to work properly the `jq` tool is needed.
 
 To run the E2E tests do:
 ```
-$ git clone https://github.com/k8snetworkplumbingwg/sriov-network-operator.git
+$ git clone https://github.com/togethercomputer/sriov-network-operator.git
 $ cd sriov-network-operator/
 $ source hack/get-e2e-kind-tools.sh
 $ KUBECONFIG=/etc/kubernetes/admin.conf

@@ -19,10 +19,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 	// +kubebuilder:scaffold:imports
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/netns"
+	"github.com/togethercomputer/sriov-network-operator/test/util/netns"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to

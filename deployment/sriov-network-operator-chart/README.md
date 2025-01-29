@@ -48,7 +48,7 @@ $ helm install -n sriov-network-operator --create-namespace --version 1.3.0 --se
 
 ```
 # Clone project
-$ git clone https://github.com/k8snetworkplumbingwg/sriov-network-operator.git ; cd sriov-network-operator
+$ git clone https://github.com/togethercomputer/sriov-network-operator.git ; cd sriov-network-operator
 
 # Install Operator
 $ helm install -n sriov-network-operator --create-namespace --wait --set sriovOperatorConfig.deploy=true sriov-network-operator ./deployment/sriov-network-operator-chart

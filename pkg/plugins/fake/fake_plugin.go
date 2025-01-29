@@ -1,7 +1,7 @@
 package fake
 
 import (
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 // This plugin is used in Daemon unit tests

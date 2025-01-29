@@ -7,7 +7,7 @@ import (
 
 	uns "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	constants "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
+	constants "github.com/togethercomputer/sriov-network-operator/pkg/consts"
 )
 
 // MergeMetadataForUpdate merges the read-only fields of metadata.

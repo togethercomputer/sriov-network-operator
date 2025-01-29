@@ -38,15 +38,15 @@ import (
 	configv1 "github.com/openshift/api/config/v1"
 	mcfgv1 "github.com/openshift/machine-config-operator/pkg/apis/machineconfiguration.openshift.io/v1"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/daemon"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	snclientset "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/daemon"
+	"github.com/togethercomputer/sriov-network-operator/pkg/featuregate"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	snolog "github.com/togethercomputer/sriov-network-operator/pkg/log"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 // stringList is a list of strings, implements pflag.Value interface

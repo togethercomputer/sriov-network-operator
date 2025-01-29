@@ -4,11 +4,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 var _ = Describe("Kernel", func() {

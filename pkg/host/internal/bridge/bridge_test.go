@@ -8,9 +8,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	ovsMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/bridge/ovs/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	ovsMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/bridge/ovs/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 var _ = Describe("Bridge", func() {

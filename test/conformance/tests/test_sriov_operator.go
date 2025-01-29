@@ -27,15 +27,15 @@ import (
 	"k8s.io/utils/pointer"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/execute"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/network"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/nodes"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/pod"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/discovery"
+	"github.com/togethercomputer/sriov-network-operator/test/util/execute"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/network"
+	"github.com/togethercomputer/sriov-network-operator/test/util/nodes"
+	"github.com/togethercomputer/sriov-network-operator/test/util/pod"
 )
 
 var waitingTime = 20 * time.Minute

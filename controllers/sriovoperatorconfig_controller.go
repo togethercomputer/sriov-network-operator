@@ -40,14 +40,14 @@ import (
 
 	machinev1 "github.com/openshift/machine-config-operator/pkg/apis/machineconfiguration.openshift.io/v1"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	apply "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/apply"
-	consts "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
-	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	render "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/render"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	apply "github.com/togethercomputer/sriov-network-operator/pkg/apply"
+	consts "github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/featuregate"
+	snolog "github.com/togethercomputer/sriov-network-operator/pkg/log"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	render "github.com/togethercomputer/sriov-network-operator/pkg/render"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 // SriovOperatorConfigReconciler reconciles a SriovOperatorConfig object

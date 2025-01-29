@@ -3,10 +3,10 @@ package helper
 import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/store"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	mlx "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vendors/mellanox"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/store"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	mlx "github.com/togethercomputer/sriov-network-operator/pkg/vendors/mellanox"
 )
 
 //go:generate ../../bin/mockgen -destination mock/mock_helper.go -source host.go

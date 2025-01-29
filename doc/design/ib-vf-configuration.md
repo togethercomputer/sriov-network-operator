@@ -43,7 +43,7 @@ Mount a configuration file as a part of `/host` hostPath in the config daemon an
 
 ### Workflow Description
 
-In the [`pkg/host/internal/sriov/sriov.go:configSriovVFDevices`](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/82a6d6fdce71bd88a0d9368fb1750488e9a8e4e2/pkg/host/internal/sriov/sriov.go#L458) read from the static IB config file
+In the [`pkg/host/internal/sriov/sriov.go:configSriovVFDevices`](https://github.com/togethercomputer/sriov-network-operator/blob/82a6d6fdce71bd88a0d9368fb1750488e9a8e4e2/pkg/host/internal/sriov/sriov.go#L458) read from the static IB config file
 and assign the GUIDs according to the configuration. Each PF is described by either PCI address
 or the PF GUID and has either a list or a range of VF GUIDs.
 

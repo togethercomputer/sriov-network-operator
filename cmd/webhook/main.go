@@ -8,7 +8,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	snolog "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/log"
+	snolog "github.com/togethercomputer/sriov-network-operator/pkg/log"
 )
 
 const (

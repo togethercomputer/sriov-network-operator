@@ -10,12 +10,12 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
-	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/helper"
+	plugin "github.com/togethercomputer/sriov-network-operator/pkg/plugins"
+	"github.com/togethercomputer/sriov-network-operator/pkg/utils"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 var PluginName = "generic"
@@ -156,7 +156,7 @@ func (p *GenericPlugin) CheckStatusChanges(current *sriovnetworkv1.SriovNetworkN
 	for _, iface := range current.Spec.Interfaces {
 		found := false
 		for _, ifaceStatus := range current.Status.Interfaces {
-			// TODO: remove the check for ExternallyManaged - https://github.com/k8snetworkplumbingwg/sriov-network-operator/issues/632
+			// TODO: remove the check for ExternallyManaged - https://github.com/togethercomputer/sriov-network-operator/issues/632
 			if iface.PciAddress == ifaceStatus.PciAddress && !iface.ExternallyManaged {
 				found = true
 				if sriovnetworkv1.NeedToUpdateSriov(&iface, &ifaceStatus) {

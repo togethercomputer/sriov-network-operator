@@ -13,9 +13,9 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/utils/pointer"
 
-	testclient "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/client"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/images"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
+	testclient "github.com/togethercomputer/sriov-network-operator/test/util/client"
+	"github.com/togethercomputer/sriov-network-operator/test/util/images"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
 )
 
 const hostnameLabel = "kubernetes.io/hostname"

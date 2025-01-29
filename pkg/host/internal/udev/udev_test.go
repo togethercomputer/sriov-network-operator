@@ -10,11 +10,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	utilsMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	utilsMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/utils/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 const (

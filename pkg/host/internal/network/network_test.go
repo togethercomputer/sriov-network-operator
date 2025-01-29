@@ -10,13 +10,13 @@ import (
 
 	"github.com/golang/mock/gomock"
 
-	hostMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper/mock"
-	dputilsMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/dputils/mock"
-	ethtoolMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/ethtool/mock"
-	netlinkMockPkg "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
+	hostMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/helper/mock"
+	dputilsMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/dputils/mock"
+	ethtoolMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/ethtool/mock"
+	netlinkMockPkg "github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/test/util/fakefilesystem"
+	"github.com/togethercomputer/sriov-network-operator/test/util/helpers"
 )
 
 func getDevlinkParam(t uint8, value interface{}) *netlink.DevlinkParam {

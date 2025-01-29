@@ -11,10 +11,10 @@ import (
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	versioned "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/informers/externalversions/internalinterfaces"
-	v1 "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/listers/sriovnetwork/v1"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	versioned "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/togethercomputer/sriov-network-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1 "github.com/togethercomputer/sriov-network-operator/pkg/client/listers/sriovnetwork/v1"
 )
 
 // SriovNetworkNodePolicyInformer provides access to a shared informer and lister for

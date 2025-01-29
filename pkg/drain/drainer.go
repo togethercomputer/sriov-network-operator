@@ -12,9 +12,9 @@ import (
 	"k8s.io/kubectl/pkg/drain"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	constants "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	constants "github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 // writer implements io.Writer interface as a pass-through for log.Log.

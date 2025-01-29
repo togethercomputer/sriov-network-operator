@@ -20,9 +20,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/render"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/render"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 const (
@@ -715,7 +715,7 @@ func (cr *SriovIBNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateSt
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
 	data.Data["CniType"] = "ib-sriov"
-	data.Data["pKey"] = cr.Spec.Pkey
+	data.Data["pKey"] = cr.Spec.PKey
 	data.Data["interfaceName"] = cr.Spec.InterfaceName
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {

@@ -23,13 +23,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
-	mock_platforms "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/mock"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/openshift"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
-	util "github.com/k8snetworkplumbingwg/sriov-network-operator/test/util"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
+	"github.com/togethercomputer/sriov-network-operator/pkg/featuregate"
+	mock_platforms "github.com/togethercomputer/sriov-network-operator/pkg/platforms/mock"
+	"github.com/togethercomputer/sriov-network-operator/pkg/platforms/openshift"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
+	util "github.com/togethercomputer/sriov-network-operator/test/util"
 )
 
 var _ = Describe("SriovOperatorConfig controller", Ordered, func() {

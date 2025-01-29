@@ -9,8 +9,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	openshift "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/openshift"
 	v1 "github.com/openshift/machine-config-operator/pkg/apis/machineconfiguration.openshift.io/v1"
+	openshift "github.com/togethercomputer/sriov-network-operator/pkg/platforms/openshift"
 	v10 "k8s.io/api/core/v1"
 )
 

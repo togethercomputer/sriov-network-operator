@@ -14,12 +14,12 @@ import (
 
 	netattdefv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/cluster"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/discovery"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/namespaces"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/network"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/pod"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	"github.com/togethercomputer/sriov-network-operator/test/util/cluster"
+	"github.com/togethercomputer/sriov-network-operator/test/util/discovery"
+	"github.com/togethercomputer/sriov-network-operator/test/util/namespaces"
+	"github.com/togethercomputer/sriov-network-operator/test/util/network"
+	"github.com/togethercomputer/sriov-network-operator/test/util/pod"
 )
 
 var _ = Describe("[sriov] operator", Ordered, func() {

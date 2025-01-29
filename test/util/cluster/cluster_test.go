@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
+	sriovv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
 )
 
 func init() {

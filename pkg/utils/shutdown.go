@@ -9,9 +9,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	conf "sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	sriovnetworkv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
-	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
+	sriovnetworkv1 "github.com/togethercomputer/sriov-network-operator/api/v1"
+	snclientset "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
+	"github.com/togethercomputer/sriov-network-operator/pkg/consts"
 )
 
 var shutdownLog = ctrl.Log.WithName("shutdown")

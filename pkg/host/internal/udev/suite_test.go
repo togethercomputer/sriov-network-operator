@@ -10,7 +10,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
+	"github.com/togethercomputer/sriov-network-operator/pkg/vars"
 )
 
 func TestUdev(t *testing.T) {

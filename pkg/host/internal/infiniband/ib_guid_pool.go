@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/internal/lib/netlink"
-	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/host/types"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/internal/lib/netlink"
+	"github.com/togethercomputer/sriov-network-operator/pkg/host/types"
 )
 
 // ibGUIDPool is an interface that returns the GUID, allocated for a specific VF id of the specific PF

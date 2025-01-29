@@ -9,7 +9,7 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	cache "k8s.io/client-go/tools/cache"
 
-	versioned "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned"
+	versioned "github.com/togethercomputer/sriov-network-operator/pkg/client/clientset/versioned"
 )
 
 // NewInformerFunc takes versioned.Interface and time.Duration to return a SharedIndexInformer.
