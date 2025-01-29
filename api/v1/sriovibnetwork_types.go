@@ -43,7 +43,6 @@ type SriovIBNetworkSpec struct {
 	// MetaPluginsConfig configuration to be used in order to chain metaplugins to the sriov interface returned
 	// by the operator.
 	MetaPluginsConfig string `json:"metaPlugins,omitempty"`
-	InterfaceName     string `json:"interfaceName,omitempty"`
 	PKey              string `json:"pKey,omitempty"`
 	ScanGUIDs         bool   `json:"scanGuids,omitempty"`
 }

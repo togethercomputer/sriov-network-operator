@@ -219,22 +219,29 @@ func IsSwitchdevModeSpec(spec SriovNetworkNodeStateSpec) bool {
 	return ContainsSwitchdevInterface(spec.Interfaces)
 }
 
-func GetGUIDFromSriovNetworkNodeStateStatus(status SriovNetworkNodeStateStatus, interfaceName string) string {
-	// Loop through all interfaces
-	for _, iface := range status.Interfaces {
-		// Only process InfiniBand interfaces with matching name
-		if strings.EqualFold(iface.LinkType, consts.LinkTypeIB) && iface.Name == interfaceName {
-			// If interface has VFs and at least one VF has a GUID
-			if len(iface.VFs) > 0 {
-				for _, vf := range iface.VFs {
-					// Return first valid GUID found
-					// Skip uninitialized GUIDs
-					if vf.GUID != "" && vf.GUID != consts.UninitializedNodeGUID {
-						return vf.GUID
-					}
+func GetGUIDFromSriovNetworkNodeStateStatus(status SriovNetworkNodeStateStatus, interfaceIndex int) string {
+	// Check if we have enough interfaces
+	if interfaceIndex < 0 || interfaceIndex >= len(status.Interfaces) {
+		log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): invalid interface index",
+			"index", interfaceIndex,
+			"total interfaces", len(status.Interfaces))
+		return ""
+	}
+
+	// Get the specific interface by index
+	iface := status.Interfaces[interfaceIndex]
+
+	// Only process InfiniBand interfaces
+	if strings.EqualFold(iface.LinkType, consts.LinkTypeIB) {
+		// If interface has VFs and at least one VF has a GUID
+		if len(iface.VFs) > 0 {
+			for _, vf := range iface.VFs {
+				// Return first valid GUID found
+				// Skip uninitialized GUIDs
+				if vf.GUID != "" && vf.GUID != consts.UninitializedNodeGUID {
+					return vf.GUID
 				}
 			}
-			break // Found the interface but no valid GUID
 		}
 	}
 	return ""
@@ -712,11 +719,21 @@ func (cr *SriovIBNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateSt
 	logger := log.WithName("RenderNetAttDef")
 	logger.Info("Start to render IB SRIOV CNI NetworkAttachmentDefinition")
 
+	// Extract index from network name, tt usually comes with a digit at the end
+	// We're using this digit to distinguish between them and map a proper VF GUID in the NetAttachDef
+	re := regexp.MustCompile(`(\d+)$`)
+	matches := re.FindStringSubmatch(cr.Name)
+	interfaceIndex := 0 // default to first interface if no number found
+	if len(matches) > 1 {
+		if idx, err := strconv.Atoi(matches[1]); err == nil {
+			interfaceIndex = idx
+		}
+	}
+
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
 	data.Data["CniType"] = "ib-sriov"
 	data.Data["pKey"] = cr.Spec.PKey
-	data.Data["interfaceName"] = cr.Spec.InterfaceName
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["SriovNetworkNamespace"] = cr.Namespace
@@ -726,7 +743,7 @@ func (cr *SriovIBNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateSt
 
 	data.Data["SriovCniResourceName"] = os.Getenv("RESOURCE_PREFIX") + "/" + cr.Spec.ResourceName
 	if cr.Spec.ScanGUIDs {
-		if guid := GetGUIDFromSriovNetworkNodeStateStatus(status, cr.Spec.InterfaceName); guid != "" {
+		if guid := GetGUIDFromSriovNetworkNodeStateStatus(status, interfaceIndex); guid != "" {
 			data.Data["GUID"] = guid
 		}
 	}
