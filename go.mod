@@ -1,4 +1,4 @@
-module github.com/k8snetworkplumbingwg/sriov-network-operator
+module github.com/togethercomputer/sriov-network-operator
 
 go 1.22.4
 
