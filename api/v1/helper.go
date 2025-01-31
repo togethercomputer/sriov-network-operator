@@ -755,7 +755,9 @@ func (cr *SriovIBNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateSt
 	}
 
 	data.Data["SriovCniResourceName"] = os.Getenv("RESOURCE_PREFIX") + "/" + cr.Spec.ResourceName
+	data.Data["GUIDConfigured"] = false
 	if cr.Spec.ScanGUIDs {
+		data.Data["GUIDConfigured"] = true
 		logger.Info("Getting GUID from SriovNetworkNodeState")
 		if guid := GetGUIDFromSriovNetworkNodeStateStatus(status, interfaceIndex-1); guid != "" {
 			data.Data["GUID"] = guid

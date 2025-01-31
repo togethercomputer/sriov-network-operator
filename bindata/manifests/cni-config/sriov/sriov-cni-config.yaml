@@ -38,6 +38,9 @@ spec:
 {{- if .pKeyConfigured -}}
   "pkey":"{{.pKey}}",
 {{- end -}}
+{{- if .GUIDConfigured -}}
+  "guid":"{{.GUID}}",
+{{- end -}}
 {{- if .CapabilitiesConfigured -}}
   "capabilities":{{.SriovCniCapabilities}},
 {{- end -}}
