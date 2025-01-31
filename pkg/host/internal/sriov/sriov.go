@@ -163,7 +163,6 @@ func (s *sriov) getVfInfo(vfAddr string, pfAddr string, pfName string, eswitchMo
 			vf.Mac = link.Attrs().HardwareAddr.String()
 		}
 	}
-	vf.GUID = s.networkHelper.GetNetDevNodeGUID(vfAddr)
 
 	for _, device := range devices {
 		if vfAddr == device.Address {
