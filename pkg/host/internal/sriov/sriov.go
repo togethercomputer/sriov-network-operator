@@ -217,7 +217,7 @@ func (s *sriov) DiscoverSriovDevices(storeManager store.ManagerInterface) ([]sri
 		return nil, fmt.Errorf("DiscoverSriovDevices(): error getting PCI info: %v", err)
 	}
 
-	devices := pci.ListDevices()
+	devices := pci.Devices
 	if len(devices) == 0 {
 		return nil, fmt.Errorf("DiscoverSriovDevices(): could not retrieve PCI devices")
 	}
@@ -376,6 +376,11 @@ func (s *sriov) configureHWOptionsForSwitchdev(iface *sriovnetworkv1.Interface) 
 		log.Log.Error(err, "configureHWOptionsForSwitchdev(): fail to read current flow steering mode for the device", "device", iface.PciAddress)
 		return err
 	}
+	if currentFlowSteeringMode == "" {
+		log.Log.V(2).Info("configureHWOptionsForSwitchdev(): can't detect current flow_steering_mode mode for the device, skip",
+			"device", iface.PciAddress)
+		return nil
+	}
 	if currentFlowSteeringMode == desiredFlowSteeringMode {
 		return nil
 	}
@@ -479,7 +484,7 @@ func (s *sriov) configSriovVFDevices(iface *sriovnetworkv1.Interface) error {
 					if err := s.infinibandHelper.ConfigureVfGUID(addr, iface.PciAddress, vfID, pfLink); err != nil {
 						return err
 					}
-					if err := s.kernelHelper.Unbind(iface.PciAddress); err != nil {
+					if err := s.kernelHelper.Unbind(addr); err != nil {
 						return err
 					}
 				} else {

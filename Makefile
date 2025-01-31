@@ -11,7 +11,7 @@ export OPERATOR_EXEC?=oc
 
 BUILD_GOPATH=$(TARGET_DIR):$(TARGET_DIR)/vendor:$(CURPATH)/cmd
 IMAGE_BUILDER?=docker
-IMAGE_BUILD_OPTS?=
+IMAGE_BUILD_OPTS?=--platform linux/amd64
 DOCKERFILE?=Dockerfile
 DOCKERFILE_CONFIG_DAEMON?=Dockerfile.sriov-network-config-daemon
 DOCKERFILE_WEBHOOK?=Dockerfile.webhook
@@ -53,14 +53,14 @@ GOLANGCI_LINT = $(BIN_DIR)/golangci-lint
 # golangci-lint version should be updated periodically
 # we keep it fixed to avoid it from unexpectedly failing on the project
 # in case of a version bump
-GOLANGCI_LINT_VER = v1.55.2
+GOLANGCI_LINT_VER = v1.61.0
 
 
 .PHONY: all build clean gendeepcopy test test-e2e test-e2e-k8s run image fmt sync-manifests test-e2e-conformance manifests update-codegen
 
 all: generate lint build
 
-build: manager _build-sriov-network-config-daemon _build-webhook
+build: manager _build-sriov-network-config-daemon _build-webhook _build-sriov-network-operator-config-cleanup
 
 _build-%:
 	WHAT=$* hack/build-go.sh
@@ -226,7 +226,7 @@ test-e2e-k8s: export NAMESPACE=sriov-network-operator
 test-e2e-k8s: test-e2e
 
 test-bindata-scripts: fakechroot
-	fakechroot ./test/scripts/enable-kargs_test.sh
+	fakechroot ./test/scripts/kargs_test.sh
 
 test-%: generate manifests envtest
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir=/tmp -p path)" HOME="$(shell pwd)" go test ./$*/... -coverprofile cover-$*.out -coverpkg ./... -v
