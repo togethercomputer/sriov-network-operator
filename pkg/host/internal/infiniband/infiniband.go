@@ -59,10 +59,9 @@ func (i *infiniband) ConfigureVfGUID(vfAddr string, pfAddr string, vfID int, pfL
 	return i.applyVfGUIDToInterface(guid, vfAddr, vfID, pfLink)
 }
 
-// GetVfGUID gets a GUID from the pool for an IB VF device
+// GetVfGUID gets a GUID from sysfs for an IB VF device
 func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
-	// If pool is not available or failed to get GUID, try to read from sysfs
-	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "node")
+	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "port")
 	data, err := os.ReadFile(guidPath)
 	if err != nil {
 		if os.IsNotExist(err) {
