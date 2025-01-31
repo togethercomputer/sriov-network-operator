@@ -722,7 +722,12 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 		data.Data["CapabilitiesConfigured"] = true
 		data.Data["SriovCniCapabilities"] = cr.Spec.Capabilities
 	}
-
+	if cr.Spec.PKey == "" {
+		data.Data["pKeyConfigured"] = false
+	} else {
+		data.Data["pKeyConfigured"] = true
+		data.Data["pKey"] = cr.Spec.PKey
+	}
 	if cr.Spec.IPAM != "" {
 		data.Data["SriovCniIpam"] = SriovCniIpam + ":" + strings.Join(strings.Fields(cr.Spec.IPAM), "")
 	} else {
@@ -765,6 +770,7 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 	data := render.MakeRenderData()
 	data.Data["CniType"] = "sriov"
 	data.Data["SriovNetworkName"] = cr.Name
+	data.Data["pKeyConfigured"] = false
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["SriovNetworkNamespace"] = cr.Namespace
 	} else {
@@ -785,7 +791,6 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 		data.Data["VlanProtoConfigured"] = true
 		data.Data["SriovCniVlanProto"] = cr.Spec.VlanProto
 	}
-
 	if cr.Spec.Capabilities == "" {
 		data.Data["CapabilitiesConfigured"] = false
 	} else {
@@ -883,6 +888,7 @@ func (cr *OVSNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 	data := render.MakeRenderData()
 	data.Data["CniType"] = "ovs"
 	data.Data["NetworkName"] = cr.Name
+	data.Data["pKeyConfigured"] = false
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["NetworkNamespace"] = cr.Namespace
 	} else {

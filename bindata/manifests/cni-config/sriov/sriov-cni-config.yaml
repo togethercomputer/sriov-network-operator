@@ -34,6 +34,9 @@ spec:
 {{- if .MaxTxRateConfigured -}}
   "max_tx_rate":{{.SriovCniMaxTxRate}},
 {{- end -}}
+{{- if .pKeyConfigured -}}
+  "pkey":{{.pKey}},
+{{- end -}}
 {{- end -}}
 {{- if .CapabilitiesConfigured -}}
   "capabilities":{{.SriovCniCapabilities}},
