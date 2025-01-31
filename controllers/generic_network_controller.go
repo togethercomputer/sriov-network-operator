@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"reflect"
-	"time"
 
 	netattdefv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -124,19 +123,6 @@ func (r *genericNetworkReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			}
 		}
 		return reconcile.Result{}, err
-	}
-
-	// Get list of all SriovNetworkNodeStates
-	nodeStateList := &sriovnetworkv1.SriovNetworkNodeStateList{}
-	if err := r.List(ctx, nodeStateList, &client.ListOptions{
-		Namespace: vars.Namespace,
-	}); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	// If no node states exist yet, requeue
-	if len(nodeStateList.Items) == 0 {
-		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 
 	raw, err := instance.RenderNetAttDef()

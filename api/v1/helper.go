@@ -222,41 +222,6 @@ func IsSwitchdevModeSpec(spec SriovNetworkNodeStateSpec) bool {
 	return ContainsSwitchdevInterface(spec.Interfaces)
 }
 
-func GetGUIDFromSriovNetworkNodeStateStatus(status SriovNetworkNodeStateStatus, interfaceIndex int) string {
-	// Check if we have enough interfaces
-	if interfaceIndex < 0 || interfaceIndex >= len(status.Interfaces) {
-		log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): invalid interface index",
-			"index", interfaceIndex,
-			"total interfaces", len(status.Interfaces))
-		return ""
-	}
-	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface index:", "index", interfaceIndex)
-
-	// Get the specific interface by index
-	iface := status.Interfaces[interfaceIndex]
-	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface name:", "iface.Name", iface.Name)
-	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VFs len():", "len(iface.VFs)", len(iface.VFs))
-	// Only process InfiniBand interfaces
-	if strings.EqualFold(iface.LinkType, consts.LinkTypeIB) {
-		// If interface has VFs and at least one VF has a GUID
-		if len(iface.VFs) > 0 {
-			for _, vf := range iface.VFs {
-				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VF Name:", "vf.Name", vf.Name)
-				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VF GUID:", "vf.GUID", vf.GUID)
-				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface MAC:", "vf.Mac", vf.Mac)
-				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface MAC:", "vf.PciAddress", vf.PciAddress)
-
-				// Return first valid GUID found
-				// Skip uninitialized GUIDs
-				if vf.GUID != "" && vf.GUID != consts.UninitializedNodeGUID {
-					return vf.GUID
-				}
-			}
-		}
-	}
-	return ""
-}
-
 // ContainsSwitchdevInterface returns true if provided interface list contains interface
 // with switchdev configuration
 func ContainsSwitchdevInterface(interfaces []Interface) bool {
@@ -799,7 +764,6 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
-	data.Data["pKeyConfigured"] = false
 
 	data.Data["CniType"] = "sriov"
 	data.Data["SriovNetworkName"] = cr.Name
