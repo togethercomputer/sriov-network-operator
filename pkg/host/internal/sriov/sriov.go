@@ -306,7 +306,7 @@ func (s *sriov) DiscoverSriovDevices(storeManager store.ManagerInterface) ([]sri
 					continue
 				}
 				for _, vf := range vfs {
-					instance := s.getVfInfo(vf, pfNetName, iface.PciAddress, iface.EswitchMode, devices)
+					instance := s.getVfInfo(vf, iface.PciAddress, pfNetName, iface.EswitchMode, devices)
 					iface.VFs = append(iface.VFs, instance)
 				}
 			}
