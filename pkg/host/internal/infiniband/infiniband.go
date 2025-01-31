@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"io/fs"
 	"net"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/vishvananda/netlink"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -57,17 +61,25 @@ func (i *infiniband) ConfigureVfGUID(vfAddr string, pfAddr string, vfID int, pfL
 
 // GetVfGUID gets a GUID from the pool for an IB VF device
 func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
-	log.Log.Info("GetVfGUID(): get vf guid", "vfAddr", vfAddr, "pfAddr", pfAddr, "vfID", vfID)
-	if i.guidPool == nil {
-		return nil, fmt.Errorf("no GUID pool available for VF %s", vfAddr)
-	}
-	guidFromPool, err := i.guidPool.GetVFGUID(pfAddr, vfID)
+	// If pool is not available or failed to get GUID, try to read from sysfs
+	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "node")
+	data, err := os.ReadFile(guidPath)
 	if err != nil {
-		log.Log.Info("GetVfGUID(): failed to get GUID from IB GUID pool", "address", vfAddr, "error", err)
-		return nil, err
+		if os.IsNotExist(err) {
+			log.Log.Info("GetVfGUID(): GUID file doesn't exist", "path", guidPath)
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to read GUID file %s: %v", guidPath, err)
 	}
-	log.Log.Info("GetVfGUID(): get vf guid", "address", vfAddr, "guid", guidFromPool)
-	return guidFromPool, nil
+	guidStr := strings.TrimSpace(string(data))
+	if guidStr == "" {
+		return nil, nil
+	}
+	guid, err := net.ParseMAC(guidStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse GUID %s: %v", guidStr, err)
+	}
+	return guid, nil
 }
 
 func (i *infiniband) applyVfGUIDToInterface(guid net.HardwareAddr, vfAddr string, vfID int, pfLink netlink.Link) error {
