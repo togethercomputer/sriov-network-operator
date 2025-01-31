@@ -61,7 +61,7 @@ func (i *infiniband) ConfigureVfGUID(vfAddr string, pfAddr string, vfID int, pfL
 
 // GetVfGUID gets a GUID from sysfs for an IB VF device
 func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
-	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "port")
+	guidPath := filepath.Join(consts.SysBusPciDevices, pfAddr, "sriov", strconv.Itoa(vfID), "node")
 	data, err := os.ReadFile(guidPath)
 	if err != nil {
 		if os.IsNotExist(err) {
