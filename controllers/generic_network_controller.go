@@ -45,8 +45,6 @@ type networkCRInstance interface {
 	client.Object
 	// renders NetAttDef from the network instance
 	RenderNetAttDef() (*uns.Unstructured, error)
-	// RenderNetAttDefWithGUID renders NetAttDef with GUID (if available)
-	RenderNetAttDefWithGUID(status sriovnetworkv1.SriovNetworkNodeStateStatus) (*uns.Unstructured, error)
 	// return name of the target namespace for the network
 	NetworkNamespace() string
 }
@@ -141,9 +139,7 @@ func (r *genericNetworkReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{RequeueAfter: time.Second * 5}, nil
 	}
 
-	nodeState := nodeStateList.Items[0]
-	reqLogger.Info("Starting RenderNetAttDefWithGUID")
-	raw, err := instance.RenderNetAttDefWithGUID(nodeState.Status)
+	raw, err := instance.RenderNetAttDef()
 
 	if err != nil {
 		reqLogger.Error(err, "Failed to render NetworkAttachmentDefinition")

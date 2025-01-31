@@ -44,7 +44,6 @@ type SriovIBNetworkSpec struct {
 	// by the operator.
 	MetaPluginsConfig string `json:"metaPlugins,omitempty"`
 	PKey              string `json:"pKey,omitempty"`
-	ScanGUIDs         bool   `json:"scanGuids,omitempty"`
 }
 
 // SriovIBNetworkStatus defines the observed state of SriovIBNetwork

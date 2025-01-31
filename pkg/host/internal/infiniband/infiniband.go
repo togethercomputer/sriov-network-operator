@@ -78,6 +78,7 @@ func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.Hard
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse GUID %s: %v", guidStr, err)
 	}
+	log.Log.Info("GetVfGUID(): found guid", "guid", guid)
 	return guid, nil
 }
 

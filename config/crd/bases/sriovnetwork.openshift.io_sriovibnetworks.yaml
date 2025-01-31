@@ -67,8 +67,6 @@ spec:
               resourceName:
                 description: SRIOV Network device plugin endpoint resource name
                 type: string
-              scanGuids:
-                type: boolean
             required:
             - resourceName
             type: object
