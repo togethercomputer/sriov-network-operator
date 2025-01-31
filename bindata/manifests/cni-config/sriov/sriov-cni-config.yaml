@@ -39,7 +39,7 @@ spec:
   "capabilities":{{.SriovCniCapabilities}},
 {{- end -}}
 {{- if .pKeyConfigured -}}
-  "pkey":{{.pKey}},
+  "pkey":"{{.pKey}}",
 {{- end -}}
 {{- if .StateConfigured -}}
   "link_state":"{{.SriovCniState}}",
