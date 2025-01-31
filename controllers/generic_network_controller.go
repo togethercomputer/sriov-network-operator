@@ -124,11 +124,8 @@ func (r *genericNetworkReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		}
 		return reconcile.Result{}, err
 	}
-
 	raw, err := instance.RenderNetAttDef()
-
 	if err != nil {
-		reqLogger.Error(err, "Failed to render NetworkAttachmentDefinition")
 		return reconcile.Result{}, err
 	}
 	netAttDef := &netattdefv1.NetworkAttachmentDefinition{}

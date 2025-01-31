@@ -40,8 +40,6 @@ const (
 	SriovCniStateOn      = "on"
 	SriovCniIpam         = "\"ipam\""
 	SriovCniIpamEmpty    = SriovCniIpam + ":{}"
-
-	CniType = "ib-sriov"
 )
 
 const invalidVfIndex = -1
@@ -52,6 +50,7 @@ var log = logf.Log.WithName("sriovnetwork")
 // NicIDMap contains supported mapping of IDs with each in the format of:
 // Vendor ID, Physical Function Device ID, Virtual Function Device ID
 var NicIDMap = []string{}
+
 var InitialState SriovNetworkNodeState
 
 // NetFilterType Represents the NetFilter tags to be used
@@ -696,7 +695,7 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
-	data.Data["CniType"] = CniType
+	data.Data["CniType"] = "ib-sriov"
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["SriovNetworkNamespace"] = cr.Namespace
@@ -764,7 +763,6 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
-
 	data.Data["CniType"] = "sriov"
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {
