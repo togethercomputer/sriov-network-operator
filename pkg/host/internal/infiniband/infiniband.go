@@ -55,6 +55,21 @@ func (i *infiniband) ConfigureVfGUID(vfAddr string, pfAddr string, vfID int, pfL
 	return i.applyVfGUIDToInterface(guid, vfAddr, vfID, pfLink)
 }
 
+// GetVfGUID gets a GUID from the pool for an IB VF device
+func (i *infiniband) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
+	log.Log.Info("GetVfGUID(): configure vf guid", "vfAddr", vfAddr, "pfAddr", pfAddr, "vfID", vfID)
+	if i.guidPool == nil {
+		return nil, fmt.Errorf("no GUID pool available for VF %s", vfAddr)
+	}
+	guidFromPool, err := i.guidPool.GetVFGUID(pfAddr, vfID)
+	if err != nil {
+		log.Log.Info("GetVfGUID(): failed to get GUID from IB GUID pool", "address", vfAddr, "error", err)
+		return nil, err
+	}
+	log.Log.Info("GetVfGUID(): get vf guid", "address", vfAddr, "guid", guidFromPool)
+	return guidFromPool, nil
+}
+
 func (i *infiniband) applyVfGUIDToInterface(guid net.HardwareAddr, vfAddr string, vfID int, pfLink netlink.Link) error {
 	if err := i.netlinkLib.LinkSetVfNodeGUID(pfLink, vfID, guid); err != nil {
 		return err

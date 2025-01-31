@@ -62,9 +62,13 @@ spec:
               networkNamespace:
                 description: Namespace of the NetworkAttachmentDefinition custom resource
                 type: string
+              pKey:
+                type: string
               resourceName:
                 description: SRIOV Network device plugin endpoint resource name
                 type: string
+              scanGuids:
+                type: boolean
             required:
             - resourceName
             type: object

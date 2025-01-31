@@ -40,6 +40,8 @@ const (
 	SriovCniStateOn      = "on"
 	SriovCniIpam         = "\"ipam\""
 	SriovCniIpamEmpty    = SriovCniIpam + ":{}"
+
+	CniType = "ib-sriov"
 )
 
 const invalidVfIndex = -1
@@ -50,7 +52,6 @@ var log = logf.Log.WithName("sriovnetwork")
 // NicIDMap contains supported mapping of IDs with each in the format of:
 // Vendor ID, Physical Function Device ID, Virtual Function Device ID
 var NicIDMap = []string{}
-
 var InitialState SriovNetworkNodeState
 
 // NetFilterType Represents the NetFilter tags to be used
@@ -219,6 +220,41 @@ func GetVfDeviceID(deviceID string) string {
 
 func IsSwitchdevModeSpec(spec SriovNetworkNodeStateSpec) bool {
 	return ContainsSwitchdevInterface(spec.Interfaces)
+}
+
+func GetGUIDFromSriovNetworkNodeStateStatus(status SriovNetworkNodeStateStatus, interfaceIndex int) string {
+	// Check if we have enough interfaces
+	if interfaceIndex < 0 || interfaceIndex >= len(status.Interfaces) {
+		log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): invalid interface index",
+			"index", interfaceIndex,
+			"total interfaces", len(status.Interfaces))
+		return ""
+	}
+	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface index:", "index", interfaceIndex)
+
+	// Get the specific interface by index
+	iface := status.Interfaces[interfaceIndex]
+	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface name:", "iface.Name", iface.Name)
+	log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VFs len():", "len(iface.VFs)", len(iface.VFs))
+	// Only process InfiniBand interfaces
+	if strings.EqualFold(iface.LinkType, consts.LinkTypeIB) {
+		// If interface has VFs and at least one VF has a GUID
+		if len(iface.VFs) > 0 {
+			for _, vf := range iface.VFs {
+				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VF Name:", "vf.Name", vf.Name)
+				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface VF GUID:", "vf.GUID", vf.GUID)
+				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface MAC:", "vf.Mac", vf.Mac)
+				log.Info("GetGUIDFromSriovNetworkNodeStateStatus(): interface MAC:", "vf.PciAddress", vf.PciAddress)
+
+				// Return first valid GUID found
+				// Skip uninitialized GUIDs
+				if vf.GUID != "" && vf.GUID != consts.UninitializedNodeGUID {
+					return vf.GUID
+				}
+			}
+		}
+	}
+	return ""
 }
 
 // ContainsSwitchdevInterface returns true if provided interface list contains interface
@@ -688,6 +724,102 @@ func (s *SriovNetworkNodeState) GetDriverByPciAddress(addr string) string {
 	return ""
 }
 
+// RenderNetAttDefWithGUID renders a net-att-def with GUID for ib-sriov CNI
+func (cr *SriovIBNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateStatus) (*uns.Unstructured, error) {
+	logger := log.WithName("RenderNetAttDefWithGUID")
+	logger.Info("Start to render IB SRIOV CNI NetworkAttachmentDefinition")
+
+	// Extract index from network name, tt usually comes with a digit at the end
+	// We're using this digit to distinguish between them and map a proper VF GUID in the NetAttachDef
+	re := regexp.MustCompile(`(\d+)$`)
+	matches := re.FindStringSubmatch(cr.Name)
+	interfaceIndex := 0 // default to first interface if no number found
+	if len(matches) > 1 {
+		if idx, err := strconv.Atoi(matches[1]); err == nil {
+			interfaceIndex = idx
+		}
+	}
+
+	// render RawCNIConfig manifests
+
+	data := render.MakeRenderData()
+	data.Data["CniType"] = CniType
+
+	data.Data["pKeyConfigured"] = true
+	data.Data["pKey"] = cr.Spec.PKey
+	data.Data["SriovNetworkName"] = cr.Name
+	if cr.Spec.NetworkNamespace == "" {
+		data.Data["SriovNetworkNamespace"] = cr.Namespace
+	} else {
+		data.Data["SriovNetworkNamespace"] = cr.Spec.NetworkNamespace
+	}
+
+	data.Data["SriovCniResourceName"] = os.Getenv("RESOURCE_PREFIX") + "/" + cr.Spec.ResourceName
+	if cr.Spec.ScanGUIDs {
+		logger.Info("Getting GUID from SriovNetworkNodeState")
+		if guid := GetGUIDFromSriovNetworkNodeStateStatus(status, interfaceIndex-1); guid != "" {
+			data.Data["GUID"] = guid
+			logger.Info(fmt.Sprintf("Found GUID in SriovNetworkNodeState: %s", guid))
+		}
+	}
+
+	data.Data["StateConfigured"] = true
+	switch cr.Spec.LinkState {
+	case SriovCniStateEnable:
+		data.Data["SriovCniState"] = SriovCniStateEnable
+	case SriovCniStateDisable:
+		data.Data["SriovCniState"] = SriovCniStateDisable
+	case SriovCniStateAuto:
+		data.Data["SriovCniState"] = SriovCniStateAuto
+	default:
+		data.Data["StateConfigured"] = false
+	}
+
+	if cr.Spec.Capabilities == "" {
+		data.Data["CapabilitiesConfigured"] = false
+	} else {
+		data.Data["CapabilitiesConfigured"] = true
+		data.Data["SriovCniCapabilities"] = cr.Spec.Capabilities
+	}
+
+	if cr.Spec.IPAM != "" {
+		data.Data["SriovCniIpam"] = SriovCniIpam + ":" + strings.Join(strings.Fields(cr.Spec.IPAM), "")
+	} else {
+		data.Data["SriovCniIpam"] = SriovCniIpamEmpty
+	}
+
+	// metaplugins for the infiniband cni
+	data.Data["MetaPluginsConfigured"] = false
+	if cr.Spec.MetaPluginsConfig != "" {
+		data.Data["MetaPluginsConfigured"] = true
+		data.Data["MetaPlugins"] = cr.Spec.MetaPluginsConfig
+	}
+
+	// logLevel and logFile are currently not supported by the ib-sriov-cni
+	data.Data["LogLevelConfigured"] = false
+	data.Data["LogFileConfigured"] = false
+
+	objs, err := render.RenderDir(filepath.Join(ManifestsPath, "sriov"), &data)
+	if err != nil {
+		return nil, err
+	}
+	for _, obj := range objs {
+		raw, _ := json.Marshal(obj)
+		logger.Info("render NetworkAttachmentDefinition output", "raw", string(raw))
+	}
+	return objs[0], nil
+}
+
+func (cr *SriovNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateStatus) (*uns.Unstructured, error) {
+	// Not implemented
+	return cr.RenderNetAttDef()
+}
+
+func (cr *OVSNetwork) RenderNetAttDefWithGUID(status SriovNetworkNodeStateStatus) (*uns.Unstructured, error) {
+	// Not implemented
+	return cr.RenderNetAttDef()
+}
+
 // RenderNetAttDef renders a net-att-def for ib-sriov CNI
 func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 	logger := log.WithName("RenderNetAttDef")
@@ -695,7 +827,7 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
-	data.Data["CniType"] = "ib-sriov"
+	data.Data["CniType"] = CniType
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["SriovNetworkNamespace"] = cr.Namespace
@@ -763,6 +895,8 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 
 	// render RawCNIConfig manifests
 	data := render.MakeRenderData()
+	data.Data["pKeyConfigured"] = false
+
 	data.Data["CniType"] = "sriov"
 	data.Data["SriovNetworkName"] = cr.Name
 	if cr.Spec.NetworkNamespace == "" {

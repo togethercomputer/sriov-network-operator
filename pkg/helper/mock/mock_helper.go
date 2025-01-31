@@ -5,6 +5,7 @@
 package mock_helper
 
 import (
+	"net"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -1236,4 +1237,19 @@ func (m *MockHostHelpersInterface) WriteCheckpointFile(arg0 *v1.SriovNetworkNode
 func (mr *MockHostHelpersInterfaceMockRecorder) WriteCheckpointFile(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteCheckpointFile", reflect.TypeOf((*MockHostHelpersInterface)(nil).WriteCheckpointFile), arg0)
+}
+
+// GetVfGUID mocks base method
+func (m *MockHostHelpersInterface) GetVfGUID(vfAddr string, pfAddr string, vfID int) (net.HardwareAddr, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetVfGUID", vfAddr, pfAddr, vfID)
+	ret0, _ := ret[0].(net.HardwareAddr)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetVfGUID indicates an expected call of GetVfGUID
+func (mr *MockHostHelpersInterfaceMockRecorder) GetVfGUID(vfAddr, pfAddr string, vfID int) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetVfGUID", reflect.TypeOf((*MockHostHelpersInterface)(nil).GetVfGUID), vfAddr, pfAddr, vfID)
 }
