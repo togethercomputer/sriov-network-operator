@@ -722,13 +722,11 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 		data.Data["CapabilitiesConfigured"] = true
 		data.Data["SriovCniCapabilities"] = cr.Spec.Capabilities
 	}
-	logger.Info("Pkey: ", "pkey", cr.Spec.PKey)
 	if cr.Spec.PKey == "" {
 		data.Data["pKeyConfigured"] = false
 	} else {
 		data.Data["pKeyConfigured"] = true
 		data.Data["pKey"] = cr.Spec.PKey
-		logger.Info("Pkey set!")
 	}
 	if cr.Spec.IPAM != "" {
 		data.Data["SriovCniIpam"] = SriovCniIpam + ":" + strings.Join(strings.Fields(cr.Spec.IPAM), "")
