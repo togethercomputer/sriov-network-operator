@@ -87,6 +87,7 @@ var _ = Describe("SRIOV", func() {
 			hostMock.EXPECT().GetNetDevLinkSpeed("enp216s0f0np0").Return("100000 Mb/s")
 			hostMock.EXPECT().GetNetDevLinkAdminState("enp216s0f0np0").Return("up")
 			hostMock.EXPECT().GetNetDevNodeGUID("0000:d8:00.2").Return("guid1")
+			hostMock.EXPECT().GetVfGUID("enp216s0f0np0", "0000:d8:00.0", 0).Return(net.HardwareAddr{}, nil)
 			storeManagerMode.EXPECT().LoadPfsStatus("0000:d8:00.0").Return(nil, false, nil)
 
 			dputilsLibMock.EXPECT().IsSriovPF("0000:d8:00.0").Return(true)

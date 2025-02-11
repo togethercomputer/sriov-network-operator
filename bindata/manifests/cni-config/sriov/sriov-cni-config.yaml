@@ -38,6 +38,9 @@ spec:
 {{- if .CapabilitiesConfigured -}}
   "capabilities":{{.SriovCniCapabilities}},
 {{- end -}}
+{{- if .pKeyConfigured -}}
+  "pkey":"{{.pKey}}",
+{{- end -}}
 {{- if .StateConfigured -}}
   "link_state":"{{.SriovCniState}}",
 {{- end -}}

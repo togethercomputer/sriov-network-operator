@@ -122,24 +122,30 @@ func (s *sriov) ResetSriovDevice(ifaceStatus sriovnetworkv1.InterfaceExt) error 
 	return nil
 }
 
-func (s *sriov) getVfInfo(vfAddr string, pfName string, eswitchMode string, devices []*ghw.PCIDevice) sriovnetworkv1.VirtualFunction {
+func (s *sriov) getVfInfo(vfAddr string, pfAddr string, pfName string, eswitchMode string, devices []*ghw.PCIDevice) sriovnetworkv1.VirtualFunction {
 	driver, err := s.dputilsLib.GetDriverName(vfAddr)
 	if err != nil {
 		log.Log.Error(err, "getVfInfo(): unable to parse device driver", "device", vfAddr)
 	}
-	id, err := s.dputilsLib.GetVFID(vfAddr)
+	vfid, err := s.dputilsLib.GetVFID(vfAddr)
 	if err != nil {
 		log.Log.Error(err, "getVfInfo(): unable to get VF index", "device", vfAddr)
 	}
+	guid, err := s.infinibandHelper.GetVfGUID(vfAddr, pfAddr, vfid)
+	if err != nil {
+		log.Log.Error(err, "GetVfGUID(): unable to get VF GUID", "device", vfAddr)
+	}
+
 	vf := sriovnetworkv1.VirtualFunction{
 		PciAddress: vfAddr,
 		Driver:     driver,
-		VfID:       id,
+		VfID:       vfid,
 		VdpaType:   s.vdpaHelper.DiscoverVDPAType(vfAddr),
+		GUID:       guid.String(),
 	}
 
 	if eswitchMode == sriovnetworkv1.ESwithModeSwitchDev {
-		repName, err := s.sriovnetLib.GetVfRepresentor(pfName, id)
+		repName, err := s.sriovnetLib.GetVfRepresentor(pfName, vfid)
 		if err != nil {
 			log.Log.Error(err, "getVfInfo(): failed to get VF representor name", "device", vfAddr)
 		} else {
@@ -157,7 +163,6 @@ func (s *sriov) getVfInfo(vfAddr string, pfName string, eswitchMode string, devi
 			vf.Mac = link.Attrs().HardwareAddr.String()
 		}
 	}
-	vf.GUID = s.networkHelper.GetNetDevNodeGUID(vfAddr)
 
 	for _, device := range devices {
 		if vfAddr == device.Address {
@@ -300,7 +305,7 @@ func (s *sriov) DiscoverSriovDevices(storeManager store.ManagerInterface) ([]sri
 					continue
 				}
 				for _, vf := range vfs {
-					instance := s.getVfInfo(vf, pfNetName, iface.EswitchMode, devices)
+					instance := s.getVfInfo(vf, iface.PciAddress, pfNetName, iface.EswitchMode, devices)
 					iface.VFs = append(iface.VFs, instance)
 				}
 			}
@@ -484,6 +489,7 @@ func (s *sriov) configSriovVFDevices(iface *sriovnetworkv1.Interface) error {
 					if err := s.infinibandHelper.ConfigureVfGUID(addr, iface.PciAddress, vfID, pfLink); err != nil {
 						return err
 					}
+
 					if err := s.kernelHelper.Unbind(addr); err != nil {
 						return err
 					}
