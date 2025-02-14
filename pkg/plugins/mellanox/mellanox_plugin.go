@@ -104,17 +104,15 @@ func (p *MellanoxPlugin) OnNodeStateChange(new *sriovnetworkv1.SriovNetworkNodeS
 			return false, false, err
 		}
 
-		// isDualPort := mlx.IsDualPort(ifaceSpec.PciAddress, mellanoxNicsStatus)
+		isDualPort := mlx.IsDualPort(ifaceSpec.PciAddress, mellanoxNicsStatus)
 		// Attributes to change
 		attrs := &mlx.MlxNic{TotalVfs: -1}
 		var changeWithoutReboot bool
 
-		// totalVfs, totalVfsNeedReboot, totalVfsChangeWithoutReboot := mlx.HandleTotalVfs(fwCurrent, fwNext, attrs, ifaceSpec, isDualPort, mellanoxNicsSpec)
-		// sriovEnNeedReboot, sriovEnChangeWithoutReboot := mlx.HandleEnableSriov(totalVfs, fwCurrent, fwNext, attrs)
-		// needReboot = totalVfsNeedReboot || sriovEnNeedReboot
-		// changeWithoutReboot = totalVfsChangeWithoutReboot || sriovEnChangeWithoutReboot
-		needReboot = false
-		changeWithoutReboot = false
+		totalVfs, totalVfsNeedReboot, totalVfsChangeWithoutReboot := mlx.HandleTotalVfs(fwCurrent, fwNext, attrs, ifaceSpec, isDualPort, mellanoxNicsSpec)
+		sriovEnNeedReboot, sriovEnChangeWithoutReboot := mlx.HandleEnableSriov(totalVfs, fwCurrent, fwNext, attrs)
+		needReboot = totalVfsNeedReboot || sriovEnNeedReboot
+		changeWithoutReboot = totalVfsChangeWithoutReboot || sriovEnChangeWithoutReboot
 
 		needLinkChange, err := mlx.HandleLinkType(pciPrefix, fwCurrent, attrs, mellanoxNicsSpec, mellanoxNicsStatus)
 		if err != nil {
@@ -124,11 +122,11 @@ func (p *MellanoxPlugin) OnNodeStateChange(new *sriovnetworkv1.SriovNetworkNodeS
 
 		// no FW changes allowed when NIC is externally managed
 		if ifaceSpec.ExternallyManaged {
-			// if totalVfsNeedReboot || totalVfsChangeWithoutReboot {
-			// 	return false, false, fmt.Errorf(
-			// 		"interface %s required a change in the TotalVfs but the policy is externally managed failing: firmware TotalVf %d requested TotalVf %d",
-			// 		ifaceSpec.PciAddress, fwCurrent.TotalVfs, totalVfs)
-			// }
+			if totalVfsNeedReboot || totalVfsChangeWithoutReboot {
+				return false, false, fmt.Errorf(
+					"interface %s required a change in the TotalVfs but the policy is externally managed failing: firmware TotalVf %d requested TotalVf %d",
+					ifaceSpec.PciAddress, fwCurrent.TotalVfs, totalVfs)
+			}
 			if needLinkChange {
 				return false, false, fmt.Errorf("change required for link type but the policy is externally managed, failing")
 			}
