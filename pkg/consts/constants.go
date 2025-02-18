@@ -131,6 +131,7 @@ const (
 	KernelArgPciRealloc       = "pci=realloc"
 	KernelArgIntelIommu       = "intel_iommu=on"
 	KernelArgIommuPt          = "iommu=pt"
+	KernelArgIommuOn          = "iommu=on"
 	KernelArgIommuPassthrough = "iommu.passthrough=1"
 	KernelArgRdmaShared       = "ib_core.netns_mode=1"
 	KernelArgRdmaExclusive    = "ib_core.netns_mode=0"
