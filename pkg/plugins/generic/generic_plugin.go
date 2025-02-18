@@ -121,7 +121,7 @@ func NewGenericPlugin(helpers helper.HostHelpersInterface, options ...Option) (p
 	desiredKernelArgs := KargStateMapType{
 		consts.KernelArgPciRealloc:       helpers.IsKernelArgsSet(kargs, consts.KernelArgPciRealloc),
 		consts.KernelArgIntelIommu:       helpers.IsKernelArgsSet(kargs, consts.KernelArgIntelIommu),
-		consts.KernelArgIommuPt:          helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuPt),
+		consts.KernelArgIommuOn:          helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuOn),
 		consts.KernelArgIommuPassthrough: helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuPassthrough),
 		consts.KernelArgRdmaShared:       false,
 		consts.KernelArgRdmaExclusive:    false,
@@ -433,10 +433,10 @@ func (p *GenericPlugin) addVfioDesiredKernelArg(state *sriovnetworkv1.SriovNetwo
 	kernelArgFnByCPUVendor := map[hostTypes.CPUVendor]func(){
 		hostTypes.CPUVendorIntel: func() {
 			p.enableDesiredKernelArgs(consts.KernelArgIntelIommu)
-			p.enableDesiredKernelArgs(consts.KernelArgIommuPt)
+			p.enableDesiredKernelArgs(consts.KernelArgIommuOn)
 		},
 		hostTypes.CPUVendorAMD: func() {
-			p.enableDesiredKernelArgs(consts.KernelArgIommuPt)
+			p.enableDesiredKernelArgs(consts.KernelArgIommuOn)
 		},
 		hostTypes.CPUVendorARM: func() {
 			p.enableDesiredKernelArgs(consts.KernelArgIommuPassthrough)
