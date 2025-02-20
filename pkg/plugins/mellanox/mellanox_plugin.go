@@ -92,56 +92,54 @@ func (p *MellanoxPlugin) OnNodeStateChange(new *sriovnetworkv1.SriovNetworkNodeS
 		return
 	}
 
-	// for _, ifaceSpec := range mellanoxNicsSpec {
-	// 	pciPrefix := mlx.GetPciAddressPrefix(ifaceSpec.PciAddress)
-	// 	// skip processed nics, help not running the same logic 2 times for dual port NICs
-	// 	if _, ok := processedNics[pciPrefix]; ok {
-	// 		continue
-	// 	}
-	// 	processedNics[pciPrefix] = true
-	// 	fwCurrent, fwNext, err := p.helpers.GetMlxNicFwData(ifaceSpec.PciAddress)
-	// 	if err != nil {
-	// 		return false, false, err
-	// 	}
+	for _, ifaceSpec := range mellanoxNicsSpec {
+		pciPrefix := mlx.GetPciAddressPrefix(ifaceSpec.PciAddress)
+		// skip processed nics, help not running the same logic 2 times for dual port NICs
+		if _, ok := processedNics[pciPrefix]; ok {
+			continue
+		}
+		processedNics[pciPrefix] = true
+		fwCurrent, fwNext, err := p.helpers.GetMlxNicFwData(ifaceSpec.PciAddress)
+		if err != nil {
+			return false, false, err
+		}
 
-	// 	// isDualPort := mlx.IsDualPort(ifaceSpec.PciAddress, mellanoxNicsStatus)
-	// 	// Attributes to change
-	// 	attrs := &mlx.MlxNic{TotalVfs: -1}
-	// 	var changeWithoutReboot bool
+		isDualPort := mlx.IsDualPort(ifaceSpec.PciAddress, mellanoxNicsStatus)
+		// Attributes to change
+		attrs := &mlx.MlxNic{TotalVfs: -1}
+		var changeWithoutReboot bool
 
-	// 	// totalVfs, totalVfsNeedReboot, totalVfsChangeWithoutReboot := mlx.HandleTotalVfs(fwCurrent, fwNext, attrs, ifaceSpec, isDualPort, mellanoxNicsSpec)
-	// 	// sriovEnNeedReboot, sriovEnChangeWithoutReboot := mlx.HandleEnableSriov(totalVfs, fwCurrent, fwNext, attrs)
-	// 	// needReboot = totalVfsNeedReboot || sriovEnNeedReboot
-	// 	// changeWithoutReboot = totalVfsChangeWithoutReboot || sriovEnChangeWithoutReboot
-	// 	needReboot = false
-	// 	changeWithoutReboot = false
+		totalVfs, totalVfsNeedReboot, totalVfsChangeWithoutReboot := mlx.HandleTotalVfs(fwCurrent, fwNext, attrs, ifaceSpec, isDualPort, mellanoxNicsSpec)
+		sriovEnNeedReboot, sriovEnChangeWithoutReboot := mlx.HandleEnableSriov(totalVfs, fwCurrent, fwNext, attrs)
+		needReboot = totalVfsNeedReboot || sriovEnNeedReboot
+		changeWithoutReboot = totalVfsChangeWithoutReboot || sriovEnChangeWithoutReboot
 
-	// 	needLinkChange, err := mlx.HandleLinkType(pciPrefix, fwCurrent, attrs, mellanoxNicsSpec, mellanoxNicsStatus)
-	// 	if err != nil {
-	// 		return false, false, err
-	// 	}
-	// 	needReboot = needReboot || needLinkChange
+		needLinkChange, err := mlx.HandleLinkType(pciPrefix, fwCurrent, attrs, mellanoxNicsSpec, mellanoxNicsStatus)
+		if err != nil {
+			return false, false, err
+		}
+		needReboot = needReboot || needLinkChange
 
-	// 	// no FW changes allowed when NIC is externally managed
-	// 	if ifaceSpec.ExternallyManaged {
-	// 		// if totalVfsNeedReboot || totalVfsChangeWithoutReboot {
-	// 		// 	return false, false, fmt.Errorf(
-	// 		// 		"interface %s required a change in the TotalVfs but the policy is externally managed failing: firmware TotalVf %d requested TotalVf %d",
-	// 		// 		ifaceSpec.PciAddress, fwCurrent.TotalVfs, totalVfs)
-	// 		// }
-	// 		if needLinkChange {
-	// 			return false, false, fmt.Errorf("change required for link type but the policy is externally managed, failing")
-	// 		}
-	// 	}
+		// no FW changes allowed when NIC is externally managed
+		if ifaceSpec.ExternallyManaged {
+			if totalVfsNeedReboot || totalVfsChangeWithoutReboot {
+				return false, false, fmt.Errorf(
+					"interface %s required a change in the TotalVfs but the policy is externally managed failing: firmware TotalVf %d requested TotalVf %d",
+					ifaceSpec.PciAddress, fwCurrent.TotalVfs, totalVfs)
+			}
+			if needLinkChange {
+				return false, false, fmt.Errorf("change required for link type but the policy is externally managed, failing")
+			}
+		}
 
-	// 	if needReboot || changeWithoutReboot {
-	// 		attributesToChange[ifaceSpec.PciAddress] = *attrs
-	// 	}
+		if needReboot || changeWithoutReboot {
+			attributesToChange[ifaceSpec.PciAddress] = *attrs
+		}
 
-	// 	if needReboot {
-	// 		pciAddressesToReset = append(pciAddressesToReset, ifaceSpec.PciAddress)
-	// 	}
-	// }
+		if needReboot {
+			pciAddressesToReset = append(pciAddressesToReset, ifaceSpec.PciAddress)
+		}
+	}
 
 	// Set total VFs to 0 for mellanox interfaces with no spec
 	for pciPrefix, portsMap := range mellanoxNicsStatus {
