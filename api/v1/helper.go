@@ -727,6 +727,7 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 	} else {
 		data.Data["pKeyConfigured"] = true
 		data.Data["pKey"] = cr.Spec.PKey
+		data.Data["GUIDSavedInUFM"] = false
 	}
 	if cr.Spec.IPAM != "" {
 		data.Data["SriovCniIpam"] = SriovCniIpam + ":" + strings.Join(strings.Fields(cr.Spec.IPAM), "")
