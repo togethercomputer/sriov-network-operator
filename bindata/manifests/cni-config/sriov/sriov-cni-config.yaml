@@ -40,7 +40,7 @@ spec:
 {{- end -}}
 {{- if .pKeyConfigured -}}
   "pkey":"{{.pKey}}",
-  "GUIDSavedInUFM": "{{.GUIDSavedInUFM}}",
+  "guid_saved_in_ufm": "{{.GUIDSavedInUFM}}",
 {{- end -}}
 {{- if .StateConfigured -}}
   "link_state":"{{.SriovCniState}}",
