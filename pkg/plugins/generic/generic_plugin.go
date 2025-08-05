@@ -312,14 +312,7 @@ func (p *GenericPlugin) shouldUpdateKernelArgs() (bool, error) {
 
 	for karg, kargState := range p.DesiredKernelArgs {
 		if kargState && !p.helpers.IsKernelArgsSet(kargs, karg) {
-			if karg == consts.KernelArgIommuOn {
-				// iommu=on is not set, look for iommu=pt
-				if !p.helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuPt) {
-					return true, nil
-				} else {
-					log.Log.Info("requiring iommu=on, allowing iommu=pt")
-				}
-			}
+			return true, nil
 		}
 
 		if !kargState && p.helpers.IsKernelArgsSet(kargs, karg) {
@@ -346,7 +339,14 @@ func (p *GenericPlugin) syncDesiredKernelArgs() (bool, error) {
 			}
 
 			if !p.helpers.IsKernelArgsSet(kargs, karg) {
-				needReboot = true
+				if karg == consts.KernelArgIommuOn {
+					// iommu=on is not set, look for iommu=pt
+					if !p.helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuPt) {
+						needReboot = true
+					} else {
+						log.Log.Info("requiring iommu=on, allowing iommu=pt")
+					}
+				}
 			}
 		} else {
 			err = editKernelArg(p.helpers, "remove", karg)
