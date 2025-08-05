@@ -312,7 +312,14 @@ func (p *GenericPlugin) shouldUpdateKernelArgs() (bool, error) {
 
 	for karg, kargState := range p.DesiredKernelArgs {
 		if kargState && !p.helpers.IsKernelArgsSet(kargs, karg) {
-			return true, nil
+			if karg == consts.KernelArgIommuOn {
+				// iommu=on is not set, look for iommu=pt
+				if !p.helpers.IsKernelArgsSet(kargs, consts.KernelArgIommuPt) {
+					return true, nil
+				} else {
+					log.Log.Info("requiring iommu=on, allowing iommu=pt")
+				}
+			}
 		}
 
 		if !kargState && p.helpers.IsKernelArgsSet(kargs, karg) {
