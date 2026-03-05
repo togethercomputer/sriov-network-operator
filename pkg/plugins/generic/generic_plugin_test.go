@@ -968,7 +968,6 @@ var _ = Describe("Generic plugin", func() {
 				Expect(changed).To(BeTrue())
 			})
 			It("should not configure RDMA kernel args", func() {
-				hostHelper.EXPECT().SetRDMASubsystem("").Return(nil)
 				rdmaState.Spec.System = sriovnetworkv1.System{}
 				err := genericPlugin.(*GenericPlugin).configRdmaKernelArg(rdmaState)
 				Expect(err).ToNot(HaveOccurred())
