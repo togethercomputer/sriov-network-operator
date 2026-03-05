@@ -219,6 +219,40 @@ var _ = Describe("Kind E2E", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(mwc.Webhooks).NotTo(BeEmpty())
 	})
+
+	It("should deploy the network-resources-injector DaemonSet", func() {
+		config := &sriovnetworkv1.SriovOperatorConfig{}
+		err := k8sClient.Get(ctx, types.NamespacedName{
+			Name: "default", Namespace: namespace,
+		}, config)
+		Expect(err).NotTo(HaveOccurred())
+
+		ds := &appsv1.DaemonSet{}
+		if config.Spec.EnableInjector {
+			err = k8sClient.Get(ctx, types.NamespacedName{
+				Name: "network-resources-injector", Namespace: namespace,
+			}, ds)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ds.Status.DesiredNumberScheduled).To(Equal(ds.Status.NumberReady))
+		}
+	})
+
+	It("should deploy the operator-webhook DaemonSet", func() {
+		config := &sriovnetworkv1.SriovOperatorConfig{}
+		err := k8sClient.Get(ctx, types.NamespacedName{
+			Name: "default", Namespace: namespace,
+		}, config)
+		Expect(err).NotTo(HaveOccurred())
+
+		ds := &appsv1.DaemonSet{}
+		if config.Spec.EnableOperatorWebhook {
+			err = k8sClient.Get(ctx, types.NamespacedName{
+				Name: "operator-webhook", Namespace: namespace,
+			}, ds)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(ds.Status.DesiredNumberScheduled).To(Equal(ds.Status.NumberReady))
+		}
+	})
 })
 
 // buildImage builds a Docker image from the given Dockerfile and context.
