@@ -68,9 +68,6 @@ var _ = BeforeSuite(func() {
 		Nodes: []v1alpha4.Node{
 			{
 				Role: v1alpha4.ControlPlaneRole,
-				Labels: map[string]string{
-					"node-role.kubernetes.io/worker": "",
-				},
 			},
 		},
 	}
@@ -81,20 +78,7 @@ var _ = BeforeSuite(func() {
 		cluster.CreateWithWaitForReady(5*time.Minute),
 		cluster.CreateWithDisplayUsage(true),
 		cluster.CreateWithDisplaySalutation(true),
-		cluster.CreateWithRetain(true),
 	)
-	if err != nil {
-		GinkgoWriter.Printf("Kind cluster creation failed: %v\n", err)
-		// Dump docker logs for debugging
-		out, _ := exec.Command("docker", "logs", clusterName+"-control-plane").CombinedOutput()
-		GinkgoWriter.Printf("Docker container logs (last 100 lines):\n%s\n", string(out))
-		// Dump kubelet logs
-		kubeletOut, _ := exec.Command("docker", "exec", clusterName+"-control-plane", "journalctl", "-u", "kubelet", "--no-pager", "-n", "50").CombinedOutput()
-		GinkgoWriter.Printf("Kubelet logs:\n%s\n", string(kubeletOut))
-		// Check kubeadm directly
-		kubeadmOut, _ := exec.Command("docker", "exec", clusterName+"-control-plane", "kubeadm", "init", "--config=/kind/kubeadm.conf", "--skip-token-print", "--dry-run").CombinedOutput()
-		GinkgoWriter.Printf("Kubeadm dry-run output:\n%s\n", string(kubeadmOut))
-	}
 	Expect(err).NotTo(HaveOccurred())
 
 	By("getting kubeconfig")
@@ -117,6 +101,15 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	k8sClient, err = client.New(restCfg, client.Options{Scheme: scheme.Scheme})
+	Expect(err).NotTo(HaveOccurred())
+
+	By("labeling control-plane node as worker")
+	labelOut, err := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+		"label", "node", clusterName+"-control-plane",
+		"node-role.kubernetes.io/worker=").CombinedOutput()
+	if err != nil {
+		GinkgoWriter.Printf("Failed to label node: %s\n%s\n", err, string(labelOut))
+	}
 	Expect(err).NotTo(HaveOccurred())
 
 	By("building Docker images")
