@@ -8,6 +8,7 @@ import (
 
 // TestRenderSimple tests rendering a single object with no templates
 func TestRenderSimple(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	d := MakeRenderData()
@@ -42,6 +43,7 @@ func TestRenderSimple(t *testing.T) {
 }
 
 func TestRenderMultiple(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	p := "testdata/manifests/multiple.yaml"
@@ -58,6 +60,7 @@ func TestRenderMultiple(t *testing.T) {
 }
 
 func TestTemplate(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	p := "testdata/manifests/template.yaml"
@@ -89,6 +92,7 @@ func TestTemplate(t *testing.T) {
 // object can also occur in the particular case shown in the testfile below when minus is missing at the end of the
 // first expression (i.e. {{- if .Enable }}).
 func TestTemplateWithEmptyObject(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	p := "testdata/manifests/template_with_empty_object.yaml"
@@ -106,6 +110,7 @@ func TestTemplateWithEmptyObject(t *testing.T) {
 }
 
 func TestRenderDir(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	d := MakeRenderData()

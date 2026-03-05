@@ -11,6 +11,7 @@ import (
 )
 
 func TestGetSriovNicIPs(t *testing.T) {
+	t.Parallel()
 	networkStatus := `[{
 		"name": "network1",
 		    "interface": "eth0",
@@ -59,6 +60,7 @@ func TestGetSriovNicIPs(t *testing.T) {
 }
 
 func TestGetSriovNicIPsErrors(t *testing.T) {
+	t.Parallel()
 	p := &k8sv1.Pod{}
 	_, err := GetSriovNicIPs(p, "eth0")
 	assert.Error(t, err)

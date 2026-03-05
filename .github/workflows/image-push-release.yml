@@ -10,7 +10,7 @@ on:
       - v*
 jobs:
   build-and-push-image-operator:
-    runs-on: ubuntu-24.04-4core
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
           file: ./Dockerfile
 
   build-and-push-image-config-daemon:
-    runs-on: ubuntu-24.04-4core
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
           file: ./Dockerfile.sriov-network-config-daemon
 
   build-and-push-image-webhook:
-    runs-on: ubuntu-24.04-4core
+    runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
