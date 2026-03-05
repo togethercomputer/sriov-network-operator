@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -409,11 +410,8 @@ func validatePfNames(current *sriovnetworkv1.SriovNetworkNodePolicy, previous *s
 
 func validateRootDevices(current *sriovnetworkv1.SriovNetworkNodePolicy, previous *sriovnetworkv1.SriovNetworkNodePolicy) error {
 	for _, curRootDevice := range current.Spec.NicSelector.RootDevices {
-		for _, preRootDevice := range previous.Spec.NicSelector.RootDevices {
-			// TODO: (SchSeba) implement range for root devices
-			if curRootDevice == preRootDevice {
-				return fmt.Errorf("root device %s is overlapped with existing policy %s", curRootDevice, previous.GetName())
-			}
+		if slices.Contains(previous.Spec.NicSelector.RootDevices, curRootDevice) {
+			return fmt.Errorf("root device %s is overlapped with existing policy %s", curRootDevice, previous.GetName())
 		}
 	}
 	return nil

@@ -23,7 +23,7 @@ func RetriveSupportedNics() error {
 func MutateCustomResource(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	log.Log.V(2).Info("mutating custom resource")
 
-	cr := map[string]interface{}{}
+	cr := map[string]any{}
 
 	raw := ar.Request.Object.Raw
 	err := json.Unmarshal(raw, &cr)

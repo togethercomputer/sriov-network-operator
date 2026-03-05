@@ -240,7 +240,7 @@ func WriteSriovSupportedNics() error {
 
 	rawNicList := []byte{}
 	for _, line := range sriovnetworkv1.NicIDMap {
-		rawNicList = append(rawNicList, []byte(fmt.Sprintf("%s\n", line))...)
+		rawNicList = append(rawNicList, fmt.Appendf(nil, "%s\n", line)...)
 	}
 
 	err = os.WriteFile(utils.GetHostExtensionPath(sriovSystemdSupportedNicPath), rawNicList, 0644)

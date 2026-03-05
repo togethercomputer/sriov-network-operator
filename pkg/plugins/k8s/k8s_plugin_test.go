@@ -30,11 +30,11 @@ func TestK8sPlugin(t *testing.T) {
 }
 
 // changes current working dir before calling the real function
-func registerCall(m *gomock.Call, realF interface{}) *gomock.Call {
+func registerCall(m *gomock.Call, realF any) *gomock.Call {
 	cur, _ := os.Getwd()
-	return m.Do(func(_ ...interface{}) {
+	return m.Do(func(_ ...any) {
 		os.Chdir("../../..")
-	}).DoAndReturn(realF).Do(func(_ ...interface{}) {
+	}).DoAndReturn(realF).Do(func(_ ...any) {
 		os.Chdir(cur)
 	})
 }
@@ -55,7 +55,7 @@ type serviceNameMatcher struct {
 	name string
 }
 
-func (snm *serviceNameMatcher) Matches(x interface{}) bool {
+func (snm *serviceNameMatcher) Matches(x any) bool {
 	s, ok := x.(*hostTypes.Service)
 	if !ok {
 		return false

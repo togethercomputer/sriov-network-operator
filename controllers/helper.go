@@ -330,7 +330,7 @@ func findNodePoolConfig(ctx context.Context, node *corev1.Node, c k8sclient.Clie
 	}
 
 	selectedNpcl := []*sriovnetworkv1.SriovNetworkPoolConfig{}
-	nodesInPools := map[string]interface{}{}
+	nodesInPools := map[string]any{}
 
 	for _, npc := range npcl.Items {
 		// we skip hw offload objects

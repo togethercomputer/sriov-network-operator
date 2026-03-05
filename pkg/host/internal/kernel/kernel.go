@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -102,12 +103,7 @@ func (k *kernel) GetCurrentKernelArgs() (string, error) {
 // several times in the kernel cmd line. We can only ensure that the kernel cmd line has the key/val kernel arg that we set.
 func (k *kernel) IsKernelArgsSet(cmdLine string, karg string) bool {
 	elements := strings.Fields(cmdLine)
-	for _, element := range elements {
-		if element == karg {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(elements, karg)
 }
 
 // Unbind unbind driver for one device

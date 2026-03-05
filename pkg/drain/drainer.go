@@ -19,7 +19,7 @@ import (
 
 // writer implements io.Writer interface as a pass-through for log.Log.
 type writer struct {
-	logFunc func(msg string, keysAndValues ...interface{})
+	logFunc func(msg string, keysAndValues ...any)
 }
 
 // Write passes string(p) into writer's logFunc and always returns len(p)
@@ -152,7 +152,7 @@ func createDrainHelper(kubeClient kubernetes.Interface, ctx context.Context, ful
 		},
 		Ctx:    ctx,
 		Out:    writer{logger.Info},
-		ErrOut: writer{func(msg string, kv ...interface{}) { logger.Error(nil, msg, kv...) }},
+		ErrOut: writer{func(msg string, kv ...any) { logger.Error(nil, msg, kv...) }},
 	}
 
 	// when we just want to drain and not reboot we can only remove the pods using sriov devices

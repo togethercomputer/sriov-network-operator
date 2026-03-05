@@ -321,7 +321,7 @@ func (n *network) SetDevlinkDeviceParam(pciAddr, paramName, value string) error 
 		return err
 	}
 	targetCMOD := param.Values[0].CMODE
-	var typedValue interface{}
+	var typedValue any
 	var v uint64
 	switch param.Type {
 	case nl.DEVLINK_PARAM_TYPE_U8:

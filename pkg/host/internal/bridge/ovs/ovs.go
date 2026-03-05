@@ -426,7 +426,7 @@ func (o *ovs) addInterface(ctx context.Context, dbClient client.Client, br *Brid
 		return fmt.Errorf("bridge deletion failed: %v", err)
 	}
 	// check that interface has no error right after creation
-	for i := 0; i < interfaceErrorCheckCount; i++ {
+	for range interfaceErrorCheckCount {
 		select {
 		case <-time.After(interfaceErrorCheckInterval):
 		case <-ctx.Done():

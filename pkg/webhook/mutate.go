@@ -11,17 +11,17 @@ import (
 )
 
 var (
-	defaultPriorityPatch  = map[string]interface{}{"op": "add", "path": "/spec/priority", "value": 99}
-	defaultIsRdmaPatch    = map[string]interface{}{"op": "add", "path": "/spec/isRdma", "value": false}
-	InfiniBandIsRdmaPatch = map[string]interface{}{"op": "add", "path": "/spec/isRdma", "value": true}
+	defaultPriorityPatch  = map[string]any{"op": "add", "path": "/spec/priority", "value": 99}
+	defaultIsRdmaPatch    = map[string]any{"op": "add", "path": "/spec/isRdma", "value": false}
+	InfiniBandIsRdmaPatch = map[string]any{"op": "add", "path": "/spec/isRdma", "value": true}
 )
 
-func mutateSriovNetworkNodePolicy(cr map[string]interface{}) (*v1.AdmissionResponse, error) {
+func mutateSriovNetworkNodePolicy(cr map[string]any) (*v1.AdmissionResponse, error) {
 	log.Log.V(2).Info("mutateSriovNetworkNodePolicy(): set default value")
 	reviewResponse := v1.AdmissionResponse{}
 	reviewResponse.Allowed = true
 
-	name := cr["metadata"].(map[string]interface{})["name"]
+	name := cr["metadata"].(map[string]any)["name"]
 	// Note(adrianc): the "default" policy is deprecated, we keep this skip below
 	// in case we encounter it in the cluster.
 	if name == constants.DefaultPolicyName {
@@ -29,18 +29,18 @@ func mutateSriovNetworkNodePolicy(cr map[string]interface{}) (*v1.AdmissionRespo
 		return &reviewResponse, nil
 	}
 
-	patchs := []map[string]interface{}{}
+	patchs := []map[string]any{}
 	spec := cr["spec"]
-	if _, ok := spec.(map[string]interface{})["priority"]; !ok {
+	if _, ok := spec.(map[string]any)["priority"]; !ok {
 		log.Log.V(2).Info("mutateSriovNetworkNodePolicy(): set default priority to lowest for", "policy-name", name)
 		patchs = append(patchs, defaultPriorityPatch)
 	}
-	if _, ok := spec.(map[string]interface{})["isRdma"]; !ok {
+	if _, ok := spec.(map[string]any)["isRdma"]; !ok {
 		log.Log.V(2).Info("mutateSriovNetworkNodePolicy(): set default isRdma to false for policy", "policy-name", name)
 		patchs = append(patchs, defaultIsRdmaPatch)
 	}
 	// Device with InfiniBand link type requires isRdma to be true
-	if str, ok := spec.(map[string]interface{})["linkType"].(string); ok && strings.EqualFold(str, constants.LinkTypeIB) {
+	if str, ok := spec.(map[string]any)["linkType"].(string); ok && strings.EqualFold(str, constants.LinkTypeIB) {
 		log.Log.V(2).Info("mutateSriovNetworkNodePolicy(): set isRdma to true for policy since ib link type is detected", "policy-name", name)
 		patchs = append(patchs, InfiniBandIsRdmaPatch)
 	}
