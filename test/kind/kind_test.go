@@ -80,7 +80,12 @@ var _ = BeforeSuite(func() {
 		cluster.CreateWithV1Alpha4Config(kindConfig),
 		cluster.CreateWithNodeImage("kindest/node:v1.28.15"),
 		cluster.CreateWithWaitForReady(5*time.Minute),
+		cluster.CreateWithDisplayUsage(true),
+		cluster.CreateWithDisplaySalutation(true),
 	)
+	if err != nil {
+		GinkgoWriter.Printf("Kind cluster creation failed: %+v\n", err)
+	}
 	Expect(err).NotTo(HaveOccurred())
 
 	By("getting kubeconfig")
