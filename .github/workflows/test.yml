@@ -10,7 +10,7 @@ jobs:
 
   build:
     name: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-4core
     steps:
 
     - name: Set up Go 1.22
@@ -29,7 +29,7 @@ jobs:
 
   test:
     name: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-4core
     steps:
 
     - name: Set up Go 1.22
@@ -111,7 +111,7 @@ jobs:
 
   test-coverage:
     name: test-coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-4core
     steps:
 
     - name: Set up Go 1.22
