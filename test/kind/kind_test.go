@@ -84,10 +84,16 @@ var _ = BeforeSuite(func() {
 		cluster.CreateWithRetain(true),
 	)
 	if err != nil {
-		GinkgoWriter.Printf("Kind cluster creation failed: %+v\n", err)
+		GinkgoWriter.Printf("Kind cluster creation failed: %v\n", err)
 		// Dump docker logs for debugging
 		out, _ := exec.Command("docker", "logs", clusterName+"-control-plane").CombinedOutput()
-		GinkgoWriter.Printf("Docker container logs:\n%s\n", string(out))
+		GinkgoWriter.Printf("Docker container logs (last 100 lines):\n%s\n", string(out))
+		// Dump kubelet logs
+		kubeletOut, _ := exec.Command("docker", "exec", clusterName+"-control-plane", "journalctl", "-u", "kubelet", "--no-pager", "-n", "50").CombinedOutput()
+		GinkgoWriter.Printf("Kubelet logs:\n%s\n", string(kubeletOut))
+		// Check kubeadm directly
+		kubeadmOut, _ := exec.Command("docker", "exec", clusterName+"-control-plane", "kubeadm", "init", "--config=/kind/kubeadm.conf", "--skip-token-print", "--dry-run").CombinedOutput()
+		GinkgoWriter.Printf("Kubeadm dry-run output:\n%s\n", string(kubeadmOut))
 	}
 	Expect(err).NotTo(HaveOccurred())
 
