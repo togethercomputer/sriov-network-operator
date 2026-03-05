@@ -78,13 +78,16 @@ var _ = BeforeSuite(func() {
 	err = provider.Create(
 		clusterName,
 		cluster.CreateWithV1Alpha4Config(kindConfig),
-		cluster.CreateWithNodeImage("kindest/node:v1.31.4"),
 		cluster.CreateWithWaitForReady(5*time.Minute),
 		cluster.CreateWithDisplayUsage(true),
 		cluster.CreateWithDisplaySalutation(true),
+		cluster.CreateWithRetain(true),
 	)
 	if err != nil {
 		GinkgoWriter.Printf("Kind cluster creation failed: %+v\n", err)
+		// Dump docker logs for debugging
+		out, _ := exec.Command("docker", "logs", clusterName+"-control-plane").CombinedOutput()
+		GinkgoWriter.Printf("Docker container logs:\n%s\n", string(out))
 	}
 	Expect(err).NotTo(HaveOccurred())
 
