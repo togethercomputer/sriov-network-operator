@@ -146,7 +146,7 @@ jobs:
   kind-e2e:
     name: kind-e2e
     needs: [build, test, golangci]
-    runs-on: ubuntu-24.04-4core
+    runs-on: ubuntu-22.04-4core
     env:
       TEST_REPORT_PATH: kind-e2e-artifacts
     steps:
@@ -171,7 +171,7 @@ jobs:
     if: ${{ vars.ENABLE_VIRTUAL_E2E == 'true' }}
     name: virtual-k8s-conformance
     needs: [build, test, golangci]
-    runs-on: ubuntu-24.04-4core
+    runs-on: ubuntu-22.04-4core
     env:
       TEST_REPORT_PATH: virtual-k8s-conformance-artifacts
     steps:
