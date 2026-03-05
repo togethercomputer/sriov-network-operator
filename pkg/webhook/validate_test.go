@@ -811,7 +811,6 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendor(t *testing.T) {
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendorDevMode(t *testing.T) {
-	t.Parallel()
 	t.Setenv("DEV_MODE", "TRUE")
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
