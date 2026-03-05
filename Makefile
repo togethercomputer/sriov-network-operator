@@ -28,6 +28,7 @@ MAIN_PKG=cmd/manager/main.go
 export NAMESPACE?=openshift-sriov-network-operator
 export WATCH_NAMESPACE?=openshift-sriov-network-operator
 export HOME?=$(PWD)
+ENVTEST_K8S_VERSION?=1.29.0
 export GOPATH?=$(shell go env GOPATH)
 export GO111MODULE=on
 PKGS=$(shell go list ./... | grep -v -E '/vendor/|/test|/examples')
