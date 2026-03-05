@@ -458,16 +458,17 @@ func (p *GenericPlugin) addVfioDesiredKernelArg(state *sriovnetworkv1.SriovNetwo
 }
 
 func (p *GenericPlugin) configRdmaKernelArg(state *sriovnetworkv1.SriovNetworkNodeState) error {
-	if state.Spec.System.RdmaMode == "" {
+	switch state.Spec.System.RdmaMode {
+	case "":
 		p.disableDesiredKernelArgs(consts.KernelArgRdmaExclusive)
 		p.disableDesiredKernelArgs(consts.KernelArgRdmaShared)
-	} else if state.Spec.System.RdmaMode == "shared" {
+	case "shared":
 		p.enableDesiredKernelArgs(consts.KernelArgRdmaShared)
 		p.disableDesiredKernelArgs(consts.KernelArgRdmaExclusive)
-	} else if state.Spec.System.RdmaMode == "exclusive" {
+	case "exclusive":
 		p.enableDesiredKernelArgs(consts.KernelArgRdmaExclusive)
 		p.disableDesiredKernelArgs(consts.KernelArgRdmaShared)
-	} else {
+	default:
 		err := fmt.Errorf("unexpected rdma mode: %s", state.Spec.System.RdmaMode)
 		log.Log.Error(err, "generic-plugin configRdmaKernelArg(): failed to configure kernel arguments for rdma")
 		return err

@@ -97,8 +97,7 @@ jobs:
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v6
       with:
-        # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-        version: v1.55.2
+        version: v2.10.1
 
   shellcheck:
     name: Shellcheck

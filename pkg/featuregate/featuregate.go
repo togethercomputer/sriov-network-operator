@@ -57,7 +57,7 @@ func (fg *featureGate) String() string {
 	var result strings.Builder
 	var sep string
 	for k, v := range fg.state {
-		result.WriteString(fmt.Sprintf("%s%s:%t", sep, k, v))
+		fmt.Fprintf(&result, "%s%s:%t", sep, k, v)
 		sep = ", "
 	}
 	return result.String()

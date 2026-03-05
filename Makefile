@@ -54,7 +54,7 @@ GOLANGCI_LINT = $(BIN_DIR)/golangci-lint
 # golangci-lint version should be updated periodically
 # we keep it fixed to avoid it from unexpectedly failing on the project
 # in case of a version bump
-GOLANGCI_LINT_VER = v1.55.2
+GOLANGCI_LINT_VER = v2.10.1
 
 
 .PHONY: all build clean gendeepcopy test test-e2e test-e2e-k8s run image fmt sync-manifests test-e2e-conformance manifests update-codegen
@@ -264,11 +264,15 @@ check-deps: deps-update
 	exit 1; fi
 
 $(GOLANGCI_LINT): ; $(info installing golangci-lint...)
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VER))
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VER))
 
 .PHONY: lint
 lint: | $(GOLANGCI_LINT) ; $(info  running golangci-lint...) @ ## Run golangci-lint
-	$(GOLANGCI_LINT) run --timeout=10m
+	GOOS=linux $(GOLANGCI_LINT) run
+
+.PHONY: lint-fix
+lint-fix: | $(GOLANGCI_LINT) ; $(info  running golangci-lint --fix...) @ ## Run golangci-lint with auto-fix
+	GOOS=linux $(GOLANGCI_LINT) run --fix
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)

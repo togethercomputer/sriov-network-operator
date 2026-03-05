@@ -38,11 +38,11 @@ func DiscoveredResources(clients *client.ClientSet, sriovInfos *cluster.EnabledN
 		}
 		resourceName := policy.Spec.ResourceName
 		for _, node := range nodes {
-			sriovDeviceList, err := sriovInfos.FindSriovDevices(node.ObjectMeta.Name)
+			sriovDeviceList, err := sriovInfos.FindSriovDevices(node.Name)
 			if err != nil {
 				continue
 			}
-			device, ok := filterDevices(node.ObjectMeta.Name, sriovDeviceList)
+			device, ok := filterDevices(node.Name, sriovDeviceList)
 			if !ok {
 				continue
 			}
@@ -52,7 +52,7 @@ func DiscoveredResources(clients *client.ClientSet, sriovInfos *cluster.EnabledN
 			if resourceCount > preferredResourceCount {
 				preferredResourceCount = resourceCount
 				preferredResourceName = resourceName
-				preferredNode = node.ObjectMeta.Name
+				preferredNode = node.Name
 				preferredDevice = device
 			}
 		}

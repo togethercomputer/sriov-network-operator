@@ -1,6 +1,7 @@
 package sriov
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -93,7 +94,8 @@ func (s *sriov) SetSriovNumVfs(pciAddr string, numVfs int) error {
 
 func (s *sriov) ResetSriovDevice(ifaceStatus sriovnetworkv1.InterfaceExt) error {
 	log.Log.V(2).Info("ResetSriovDevice(): reset SRIOV device", "address", ifaceStatus.PciAddress)
-	if ifaceStatus.LinkType == consts.LinkTypeETH {
+	switch ifaceStatus.LinkType {
+	case consts.LinkTypeETH:
 		var mtu int
 		eswitchMode := sriovnetworkv1.ESwithModeLegacy
 		is := sriovnetworkv1.InitialState.GetInterfaceStateByPciAddress(ifaceStatus.PciAddress)
@@ -111,7 +113,7 @@ func (s *sriov) ResetSriovDevice(ifaceStatus sriovnetworkv1.InterfaceExt) error 
 		if err := s.setEswitchModeAndNumVFs(ifaceStatus.PciAddress, eswitchMode, 0); err != nil {
 			return err
 		}
-	} else if ifaceStatus.LinkType == consts.LinkTypeIB {
+	case consts.LinkTypeIB:
 		if err := s.SetSriovNumVfs(ifaceStatus.PciAddress, 0); err != nil {
 			return err
 		}
@@ -173,7 +175,9 @@ func (s *sriov) VFIsReady(pciAddr string) (netlink.Link, error) {
 	log.Log.Info("VFIsReady()", "device", pciAddr)
 	var err error
 	var vfLink netlink.Link
-	err = wait.PollImmediate(time.Second, 10*time.Second, func() (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
 		vfIndex, err := s.networkHelper.GetInterfaceIndex(pciAddr)
 		if err != nil {
 			log.Log.Error(err, "VFIsReady(): invalid index number")
@@ -408,7 +412,7 @@ func (s *sriov) checkExternallyManagedPF(iface *sriovnetworkv1.Interface) error 
 			"functions %d but the policy is configured as ExternallyManaged for device %s",
 			iface.NumVfs, currentNumVfs, iface.PciAddress)
 		log.Log.Error(nil, errMsg)
-		return fmt.Errorf(errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 	currentEswitchMode := s.GetNicSriovMode(iface.PciAddress)
 	expectedEswitchMode := sriovnetworkv1.GetEswitchModeFromSpec(iface)
@@ -416,7 +420,7 @@ func (s *sriov) checkExternallyManagedPF(iface *sriovnetworkv1.Interface) error 
 		errMsg := fmt.Sprintf("checkExternallyManagedPF(): requested ESwitchMode mode \"%s\" is not equal to configured \"%s\" "+
 			"but the policy is configured as ExternallyManaged for device %s", expectedEswitchMode, currentEswitchMode, iface.PciAddress)
 		log.Log.Error(nil, errMsg)
-		return fmt.Errorf(errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 	currentMtu := s.networkHelper.GetNetdevMTU(iface.PciAddress)
 	if iface.Mtu > 0 && iface.Mtu > currentMtu {
@@ -924,12 +928,14 @@ func (s *sriov) GetLinkType(name string) string {
 }
 
 func (s *sriov) encapTypeToLinkType(encapType string) string {
-	if encapType == "ether" {
+	switch encapType {
+	case "ether":
 		return consts.LinkTypeETH
-	} else if encapType == "infiniband" {
+	case "infiniband":
 		return consts.LinkTypeIB
+	default:
+		return ""
 	}
-	return ""
 }
 
 // create required udev rules for PF:

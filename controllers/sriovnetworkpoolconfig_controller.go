@@ -79,12 +79,12 @@ func (r *SriovNetworkPoolConfigReconciler) Reconcile(ctx context.Context, req ct
 	}
 
 	// examine DeletionTimestamp to determine if object is under deletion
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+	if instance.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object. This is equivalent
 		// registering our finalizer.
-		if !sriovnetworkv1.StringInArray(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.ObjectMeta.Finalizers) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, sriovnetworkv1.POOLCONFIGFINALIZERNAME)
+		if !sriovnetworkv1.StringInArray(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.Finalizers) {
+			instance.Finalizers = append(instance.Finalizers, sriovnetworkv1.POOLCONFIGFINALIZERNAME)
 			if err := r.Update(ctx, instance); err != nil {
 				return reconcile.Result{}, err
 			}
@@ -100,7 +100,7 @@ func (r *SriovNetworkPoolConfigReconciler) Reconcile(ctx context.Context, req ct
 		}
 	} else {
 		// The object is being deleted
-		if sriovnetworkv1.StringInArray(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.ObjectMeta.Finalizers) {
+		if sriovnetworkv1.StringInArray(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.Finalizers) {
 			// our finalizer is present, so lets handle any external dependency
 			logger.Info("delete SriovNetworkPoolConfig CR", "Namespace", instance.Namespace, "Name", instance.Name)
 			if vars.ClusterType == constants.ClusterTypeOpenshift && !isHypershift {
@@ -112,7 +112,7 @@ func (r *SriovNetworkPoolConfigReconciler) Reconcile(ctx context.Context, req ct
 			}
 			// remove our finalizer from the list and update it.
 			var found bool
-			instance.ObjectMeta.Finalizers, found = sriovnetworkv1.RemoveString(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.ObjectMeta.Finalizers)
+			instance.Finalizers, found = sriovnetworkv1.RemoveString(sriovnetworkv1.POOLCONFIGFINALIZERNAME, instance.Finalizers)
 			if found {
 				if err := r.Update(ctx, instance); err != nil {
 					return reconcile.Result{}, err

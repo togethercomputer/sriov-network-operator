@@ -227,8 +227,10 @@ func (w *NodeStateStatusWriter) recordStatusChangeEvent(oldStatus, newStatus, la
 func (w *NodeStateStatusWriter) getNodeState() (*sriovnetworkv1.SriovNetworkNodeState, error) {
 	var lastErr error
 	var n *sriovnetworkv1.SriovNetworkNodeState
-	err := wait.PollImmediate(10*time.Second, 5*time.Minute, func() (bool, error) {
-		n, lastErr = w.client.SriovnetworkV1().SriovNetworkNodeStates(vars.Namespace).Get(context.Background(), vars.NodeName, metav1.GetOptions{})
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	err := wait.PollUntilContextCancel(ctx, 10*time.Second, true, func(ctx context.Context) (bool, error) {
+		n, lastErr = w.client.SriovnetworkV1().SriovNetworkNodeStates(vars.Namespace).Get(ctx, vars.NodeName, metav1.GetOptions{})
 		if lastErr == nil {
 			return true, nil
 		}
@@ -238,7 +240,7 @@ func (w *NodeStateStatusWriter) getNodeState() (*sriovnetworkv1.SriovNetworkNode
 		return false, nil
 	})
 	if err != nil {
-		if err == wait.ErrWaitTimeout {
+		if wait.Interrupted(err) {
 			return nil, errors.Wrapf(lastErr, "Timed out trying to fetch node %s", vars.NodeName)
 		}
 		return nil, err

@@ -93,7 +93,7 @@ func CreateSriovPolicy(clientSet *testclient.ClientSet, generatedName string, op
 func GetNicsByPrefix(pod *k8sv1.Pod, ifcPrefix string) ([]string, error) {
 	var nets []Network
 	nics := []string{}
-	err := json.Unmarshal([]byte(pod.ObjectMeta.Annotations[netattdefv1.NetworkStatusAnnot]), &nets)
+	err := json.Unmarshal([]byte(pod.Annotations[netattdefv1.NetworkStatusAnnot]), &nets)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func GetNicsByPrefix(pod *k8sv1.Pod, ifcPrefix string) ([]string, error) {
 // GetSriovNicIPs returns the list of ip addresses related to the given
 // interface name for the given pod.
 func GetSriovNicIPs(pod *k8sv1.Pod, ifcName string) ([]string, error) {
-	networksStatus, ok := pod.ObjectMeta.Annotations[netattdefv1.NetworkStatusAnnot]
+	networksStatus, ok := pod.Annotations[netattdefv1.NetworkStatusAnnot]
 	if !ok {
 		return nil, fmt.Errorf("pod [%s] has no annotation `%s`", netattdefv1.NetworkStatusAnnot, pod.Name)
 	}

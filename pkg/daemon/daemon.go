@@ -3,7 +3,6 @@ package daemon
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"reflect"
 	"sync"
 	"time"
@@ -190,7 +189,6 @@ func (dn *Daemon) Run(stopCh <-chan struct{}, exitCh <-chan error) error {
 		UpdateFunc: dn.operatorConfigChangeHandler,
 	})
 
-	rand.Seed(time.Now().UnixNano())
 	go cfgInformer.Run(dn.stopCh)
 	time.Sleep(5 * time.Second)
 	go informer.Run(dn.stopCh)
@@ -353,7 +351,7 @@ func (dn *Daemon) nodeStateSyncHandler() error {
 			// if the service doesn't exist we should continue to let the k8s plugin to create the service files
 			// this is only for k8s base environments, for openshift the sriov-operator creates a machine config to will apply
 			// the system service and reboot the node the config-daemon doesn't need to do anything.
-			if !(serviceEnabled && postNetworkServiceEnabled) {
+			if !serviceEnabled || !postNetworkServiceEnabled {
 				sriovResult = &systemd.SriovResult{SyncStatus: consts.SyncStatusFailed,
 					LastSyncError: fmt.Sprintf("some sriov systemd services are not available on node: "+
 						"sriov-config available:%t, sriov-config-post-network available:%t", serviceEnabled, postNetworkServiceEnabled)}
@@ -714,8 +712,13 @@ func (dn *Daemon) restartDevicePluginPod() error {
 			return err
 		}
 
-		if err := wait.PollImmediateUntil(3*time.Second, func() (bool, error) {
-			_, err := dn.kubeClient.CoreV1().Pods(vars.Namespace).Get(context.Background(), podToDelete, metav1.GetOptions{})
+		ctx, cancel := context.WithCancel(context.Background())
+		go func() {
+			<-dn.stopCh
+			cancel()
+		}()
+		if err := wait.PollUntilContextCancel(ctx, 3*time.Second, true, func(ctx context.Context) (bool, error) {
+			_, err := dn.kubeClient.CoreV1().Pods(vars.Namespace).Get(ctx, podToDelete, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
 				log.Log.Info("restartDevicePluginPod(): device plugin pod exited")
 				return true, nil
@@ -727,7 +730,7 @@ func (dn *Daemon) restartDevicePluginPod() error {
 				log.Log.Info("restartDevicePluginPod(): waiting for device plugin pod to exit", "pod-name", podToDelete)
 			}
 			return false, nil
-		}, dn.stopCh); err != nil {
+		}); err != nil {
 			log.Log.Error(err, "restartDevicePluginPod(): failed to wait for checking pod deletion")
 			return err
 		}
