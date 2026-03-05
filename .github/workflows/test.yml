@@ -143,6 +143,30 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: lcov.out
 
+  kind-e2e:
+    name: kind-e2e
+    needs: [build, test, golangci]
+    runs-on: ubuntu-24.04-4core
+    env:
+      TEST_REPORT_PATH: kind-e2e-artifacts
+    steps:
+    - name: Set up Go 1.22
+      uses: actions/setup-go@v5
+      with:
+        go-version: 1.22.x
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v4
+
+    - name: run kind e2e
+      run: make test-e2e-kind-virtual
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ${{ env.TEST_REPORT_PATH }}
+        path: ./${{ env.TEST_REPORT_PATH }}
+
   virtual-k8s-cluster:
     if: ${{ vars.ENABLE_E2E == 'true' }}  # requires self-hosted [sriov] runner
     name: k8s

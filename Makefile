@@ -57,7 +57,7 @@ GOLANGCI_LINT = $(BIN_DIR)/golangci-lint
 GOLANGCI_LINT_VER = v2.10.1
 
 
-.PHONY: all build clean gendeepcopy test test-e2e test-e2e-k8s run image fmt sync-manifests test-e2e-conformance manifests update-codegen
+.PHONY: all build clean gendeepcopy test test-e2e test-e2e-k8s test-e2e-kind-virtual run image fmt sync-manifests test-e2e-conformance manifests update-codegen
 
 all: generate lint build
 
@@ -225,6 +225,9 @@ test-e2e: generate manifests skopeo envtest
 
 test-e2e-k8s: export NAMESPACE=sriov-network-operator
 test-e2e-k8s: test-e2e
+
+test-e2e-kind-virtual:
+	go test -tags kind -count=1 -timeout=30m -v ./test/kind/...
 
 test-bindata-scripts: fakechroot
 	fakechroot ./test/scripts/kargs_test.sh
