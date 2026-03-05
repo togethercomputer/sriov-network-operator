@@ -205,8 +205,8 @@ var _ = Describe("UDEV", func() {
 			Expect(s.LoadUdevRules()).To(MatchError(testError))
 		})
 		It("Failed to trigger rules", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "control", "--reload-rules").Return("", "", nil)
-			utilsMock.EXPECT().RunCommand("udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", testError)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "control", "--reload-rules").Return("", "", nil)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", testError)
 			Expect(s.LoadUdevRules()).To(MatchError(testError))
 		})
 	})
