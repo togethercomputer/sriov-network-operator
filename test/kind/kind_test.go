@@ -78,7 +78,8 @@ var _ = BeforeSuite(func() {
 	err = provider.Create(
 		clusterName,
 		cluster.CreateWithV1Alpha4Config(kindConfig),
-		cluster.CreateWithWaitForReady(2*time.Minute),
+		cluster.CreateWithNodeImage("kindest/node:v1.28.15"),
+		cluster.CreateWithWaitForReady(5*time.Minute),
 	)
 	Expect(err).NotTo(HaveOccurred())
 
