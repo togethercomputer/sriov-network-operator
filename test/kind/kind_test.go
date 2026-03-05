@@ -78,7 +78,7 @@ var _ = BeforeSuite(func() {
 	err = provider.Create(
 		clusterName,
 		cluster.CreateWithV1Alpha4Config(kindConfig),
-		cluster.CreateWithNodeImage("kindest/node:v1.28.15"),
+		cluster.CreateWithNodeImage("kindest/node:v1.31.4"),
 		cluster.CreateWithWaitForReady(5*time.Minute),
 		cluster.CreateWithDisplayUsage(true),
 		cluster.CreateWithDisplaySalutation(true),
