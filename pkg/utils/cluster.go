@@ -27,9 +27,10 @@ const (
 
 func getNodeRole(node corev1.Node) string {
 	for k := range node.Labels {
-		if k == workerNodeLabelKey {
+		switch k {
+		case workerNodeLabelKey:
 			return workerRoleName
-		} else if k == masterNodeLabelKey || k == controlPlaneNodeLabelKey {
+		case masterNodeLabelKey, controlPlaneNodeLabelKey:
 			return masterRoleName
 		}
 	}

@@ -36,10 +36,12 @@ var (
 
 func WaitForSriovNetworkNodeStateReady(nodeState *sriovnetworkv1.SriovNetworkNodeState, client client.Client, namespace, name string, retryInterval, timeout time.Duration) error {
 	time.Sleep(30 * time.Second)
-	err := wait.PollImmediate(retryInterval, timeout, func() (done bool, err error) {
-		ctx, cancel := goctx.WithTimeout(goctx.Background(), APITimeout)
-		defer cancel()
-		err = client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, nodeState)
+	ctx, cancel := goctx.WithTimeout(goctx.Background(), timeout)
+	defer cancel()
+	err := wait.PollUntilContextCancel(ctx, retryInterval, true, func(ctx goctx.Context) (done bool, err error) {
+		reqCtx, reqCancel := goctx.WithTimeout(ctx, APITimeout)
+		defer reqCancel()
+		err = client.Get(reqCtx, types.NamespacedName{Name: name, Namespace: namespace}, nodeState)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return false, nil
@@ -60,10 +62,12 @@ func WaitForSriovNetworkNodeStateReady(nodeState *sriovnetworkv1.SriovNetworkNod
 }
 
 func WaitForDaemonSetReady(ds *appsv1.DaemonSet, client client.Client, namespace, name string, retryInterval, timeout time.Duration) error {
-	err := wait.PollImmediate(retryInterval, timeout, func() (done bool, err error) {
-		ctx, cancel := goctx.WithTimeout(goctx.Background(), APITimeout)
-		defer cancel()
-		err = client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, ds)
+	ctx, cancel := goctx.WithTimeout(goctx.Background(), timeout)
+	defer cancel()
+	err := wait.PollUntilContextCancel(ctx, retryInterval, true, func(ctx goctx.Context) (done bool, err error) {
+		reqCtx, reqCancel := goctx.WithTimeout(ctx, APITimeout)
+		defer reqCancel()
+		err = client.Get(reqCtx, types.NamespacedName{Name: name, Namespace: namespace}, ds)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return false, nil
@@ -85,10 +89,12 @@ func WaitForDaemonSetReady(ds *appsv1.DaemonSet, client client.Client, namespace
 }
 
 func WaitForNamespacedObject(obj client.Object, client client.Client, namespace, name string, retryInterval, timeout time.Duration) error {
-	err := wait.PollImmediate(retryInterval, timeout, func() (done bool, err error) {
-		ctx, cancel := goctx.WithTimeout(goctx.Background(), APITimeout)
-		defer cancel()
-		err = client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, obj)
+	ctx, cancel := goctx.WithTimeout(goctx.Background(), timeout)
+	defer cancel()
+	err := wait.PollUntilContextCancel(ctx, retryInterval, true, func(ctx goctx.Context) (done bool, err error) {
+		reqCtx, reqCancel := goctx.WithTimeout(ctx, APITimeout)
+		defer reqCancel()
+		err = client.Get(reqCtx, types.NamespacedName{Name: name, Namespace: namespace}, obj)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return false, nil
@@ -106,10 +112,12 @@ func WaitForNamespacedObject(obj client.Object, client client.Client, namespace,
 }
 
 func WaitForNamespacedObjectDeleted(obj client.Object, client client.Client, namespace, name string, retryInterval, timeout time.Duration) error {
-	err := wait.PollImmediate(retryInterval, timeout, func() (done bool, err error) {
-		ctx, cancel := goctx.WithTimeout(goctx.Background(), APITimeout)
-		defer cancel()
-		err = client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, obj)
+	ctx, cancel := goctx.WithTimeout(goctx.Background(), timeout)
+	defer cancel()
+	err := wait.PollUntilContextCancel(ctx, retryInterval, true, func(ctx goctx.Context) (done bool, err error) {
+		reqCtx, reqCancel := goctx.WithTimeout(ctx, APITimeout)
+		defer reqCancel()
+		err = client.Get(reqCtx, types.NamespacedName{Name: name, Namespace: namespace}, obj)
 		if err != nil {
 			if errors.IsNotFound(err) {
 				return true, nil
@@ -209,11 +217,11 @@ func TriggerSriovOperatorConfigReconcile(client client.Client, operatorNamespace
 		return err
 	}
 
-	if config.ObjectMeta.Labels == nil {
-		config.ObjectMeta.Labels = make(map[string]string)
+	if config.Labels == nil {
+		config.Labels = make(map[string]string)
 	}
 
-	config.ObjectMeta.Labels["trigger-test"] = uuid.NewString()
+	config.Labels["trigger-test"] = uuid.NewString()
 	return client.Update(goctx.Background(), config)
 }
 

@@ -1,4 +1,4 @@
-name: "Prow github actions"
+name: Prow github actions
 on:
   issue_comment:
     types: [created]
@@ -9,7 +9,8 @@ jobs:
     steps:
       - uses: jpmcb/prow-github-actions@v1.1.2
         with:
-          prow-commands: '/assign
+          prow-commands: >-
+            /assign
             /unassign
             /approve
             /retitle
@@ -24,5 +25,5 @@ jobs:
             /milestone
             /hold
             /cc
-            /uncc'
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+            /uncc
+          github-token: ${{ secrets.GITHUB_TOKEN }}

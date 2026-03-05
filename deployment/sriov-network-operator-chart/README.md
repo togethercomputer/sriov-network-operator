@@ -4,10 +4,12 @@ SR-IOV Network Operator Helm Chart provides an easy way to install, configure an
 the lifecycle of SR-IOV network operator.
 
 ## SR-IOV Network Operator
+
 SR-IOV Network Operator leverages [Kubernetes CRDs](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 and [Operator SDK](https://github.com/operator-framework/operator-sdk) to configure and manage SR-IOV networks in a Kubernetes cluster.
 
 SR-IOV Network Operator features:
+
 - Initialize the supported SR-IOV NIC types on selected nodes.
 - Provision/upgrade SR-IOV device plugin executable on selected node.
 - Provision/upgrade SR-IOV CNI plugin executable on selected nodes.
@@ -28,10 +30,11 @@ SR-IOV Network Operator features:
 ### Install Helm
 
 Helm provides an install script to copy helm binary to your system:
-```
-$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
-$ chmod 500 get_helm.sh
-$ ./get_helm.sh
+
+```bash
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+chmod 500 get_helm.sh
+./get_helm.sh
 ```
 
 For additional information and methods for installing Helm, refer to the official [helm website](https://helm.sh/)
@@ -40,13 +43,13 @@ For additional information and methods for installing Helm, refer to the officia
 
 #### Deploy from OCI repo
 
-```
-$ helm install -n sriov-network-operator --create-namespace --version 1.3.0 --set sriovOperatorConfig.deploy=true sriov-network-operator oci://ghcr.io/k8snetworkplumbingwg/sriov-network-operator-chart
+```bash
+helm install -n sriov-network-operator --create-namespace --version 1.3.0 --set sriovOperatorConfig.deploy=true sriov-network-operator oci://ghcr.io/k8snetworkplumbingwg/sriov-network-operator-chart
 ```
 
 #### Deploy from project sources
 
-```
+```bash
 # Clone project
 $ git clone https://github.com/k8snetworkplumbingwg/sriov-network-operator.git ; cd sriov-network-operator
 
@@ -58,8 +61,9 @@ $ kubectl -n sriov-network-operator get pods
 ```
 
 In the case that [Pod Security Admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/) is enabled, the sriov network operator namespace will require a security level of 'privileged'
-```
-$ kubectl label ns sriov-network-operator pod-security.kubernetes.io/enforce=privileged
+
+```bash
+kubectl label ns sriov-network-operator pod-security.kubernetes.io/enforce=privileged
 ```
 
 ## Chart parameters
@@ -68,7 +72,7 @@ In order to tailor the deployment of the network operator to your cluster needs
 We have introduced the following Chart parameters.
 
 | Name | Type | Default | description |
-| ---- |------|---------|-------------|
+| ---- | ---- | ------- | ----------- |
 | `imagePullSecrets` | list | `[]` | An optional list of references to secrets to use for pulling any of the SR-IOV Network Operator image |
 | `supportedExtraNICs` | list | `[]` | An optional list of whitelisted NICs |
 
@@ -97,21 +101,23 @@ The admission controllers can be enabled by switching on a single parameter `ope
 default, the user needs to pre-create Kubernetes Secrets that match the names provided in
 `operator.admissionControllers.certificates.secretNames`. The secrets should have 3 fields populated with the relevant
 content:
-* `ca.crt` (value needs to be base64 encoded twice)
-* `tls.crt`
-* `tls.key`
+
+- `ca.crt` (value needs to be base64 encoded twice)
+- `tls.crt`
+- `tls.key`
 
 Aside from the aforementioned mode, the chart supports 3 more modes for certificate consumption by the admission
 controllers, which can be found in the table below. In a nutshell, the modes that are supported are:
-* Consume pre-created Certificates managed by cert-manager
-* Generate self signed Certificates managed by cert-manager
-* Specify the content of the certificates as Helm values
+
+- Consume pre-created Certificates managed by cert-manager
+- Generate self signed Certificates managed by cert-manager
+- Specify the content of the certificates as Helm values
 
 | Name | Type | Default | description |
 | ---- | ---- | ------- | ----------- |
 | `operator.admissionControllers.enabled` | bool | false | Flag that switches on the admission controllers |
 | `operator.admissionControllers.certificates.secretNames.operator` | string | `operator-webhook-cert` | Secret that stores the certificate for the Operator's admission controller |
-| `operator.admissionControllers.certificates.secretNames.injector` | string | `network-resources-injector-cert` | Secret that stores the certificate for the Network Resources Injector's admission controller  |
+| `operator.admissionControllers.certificates.secretNames.injector` | string | `network-resources-injector-cert` | Secret that stores the certificate for the Network Resources Injector's admission controller |
 | `operator.admissionControllers.certificates.certManager.enabled` | bool | false | Flag that switches on consumption of certificates managed by cert-manager |
 | `operator.admissionControllers.certificates.certManager.generateSelfSigned` | bool | false | Flag that switches on generation of self signed certificates managed by cert-manager. The secrets in which the certificates are stored will have the names provided in `operator.admissionControllers.certificates.secretNames` |
 | `operator.admissionControllers.certificates.custom.enabled` | bool | false | Flag that switches on consumption of user provided certificates that are part of `operator.admissionControllers.certificates.custom.operator` and `operator.admissionControllers.certificates.custom.injector` objects |
@@ -135,7 +141,7 @@ This section contains general parameters that apply to both the operator and dae
 | `sriovOperatorConfig.configurationMode` | string | `daemon` | sriov-network-config-daemon configuration mode. either `daemon` or `systemd` |
 | `sriovOperatorConfig.featureGates` | map[string]bool | `{}` | feature gates to enable/disable |
 
-**Note** 
+#### Note
 
 When `sriovOperatorConfig.configurationMode` is configured as `systemd`, configurations files and `systemd` service files are created on the node.
 Upon chart deletion, those files are not cleaned up. For cases where this is not acceptable, users should rather configured the `daemon` mode.
@@ -149,7 +155,7 @@ Upon chart deletion, those files are not cleaned up. For cases where this is not
 | `images.sriovCni` | SR-IOV CNI image |
 | `images.ibSriovCni` | InfiniBand SR-IOV CNI image |
 | `images.ovsCni` | OVS CNI image |
-| `images.rdmaCni` | RDMA CNI image              |
+| `images.rdmaCni` | RDMA CNI image |
 | `images.sriovDevicePlugin` | SR-IOV device plugin image |
 | `images.resourcesInjector` | Resources Injector image |
 | `images.webhook` | Operator Webhook image |
@@ -163,5 +169,5 @@ Upon chart deletion, those files are not cleaned up. For cases where this is not
 Please note that any resources deployed using the `extraDeploy` in this Helm chart are the sole responsibility of the user. It is important to review and understand the implications of these deployed resources. The maintainers of this Helm chart take no responsibility for any issues or damages caused by the deployment or operation of these resources.
 
 | Name | description |
-| ---- | ------------|
-|`extraDeploy`| Array of extra objects to deploy with the release |
+| ---- | ----------- |
+| `extraDeploy` | Array of extra objects to deploy with the release |

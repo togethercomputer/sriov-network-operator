@@ -28,6 +28,7 @@ MAIN_PKG=cmd/manager/main.go
 export NAMESPACE?=openshift-sriov-network-operator
 export WATCH_NAMESPACE?=openshift-sriov-network-operator
 export HOME?=$(PWD)
+ENVTEST_K8S_VERSION?=1.29.0
 export GOPATH?=$(shell go env GOPATH)
 export GO111MODULE=on
 PKGS=$(shell go list ./... | grep -v -E '/vendor/|/test|/examples')
@@ -53,7 +54,7 @@ GOLANGCI_LINT = $(BIN_DIR)/golangci-lint
 # golangci-lint version should be updated periodically
 # we keep it fixed to avoid it from unexpectedly failing on the project
 # in case of a version bump
-GOLANGCI_LINT_VER = v1.55.2
+GOLANGCI_LINT_VER = v2.10.1
 
 
 .PHONY: all build clean gendeepcopy test test-e2e test-e2e-k8s run image fmt sync-manifests test-e2e-conformance manifests update-codegen
@@ -79,7 +80,7 @@ image: ; $(info Building images...)
 
 # Run tests
 test: generate lint manifests envtest
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir=/tmp -p path)" HOME="$(shell pwd)" go test -coverprofile cover.out -v ${TESTPKGS}
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir=/tmp -p path)" HOME="$(shell pwd)" go test -coverprofile cover.out -count=1 -v ${TESTPKGS}
 
 # Build manager binary
 manager: generate _build-manager
@@ -157,7 +158,7 @@ kustomize: ## Download kustomize locally if necessary.
 
 ENVTEST = $(BIN_DIR)/setup-envtest
 envtest: ## Download envtest-setup locally if necessary.
-	$(call go-install-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.16)
+	$(call go-install-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
 GOMOCK = $(shell pwd)/bin/mockgen
 gomock:
@@ -229,7 +230,7 @@ test-bindata-scripts: fakechroot
 	fakechroot ./test/scripts/kargs_test.sh
 
 test-%: generate manifests envtest
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir=/tmp -p path)" HOME="$(shell pwd)" go test ./$*/... -coverprofile cover-$*-$(CLUSTER_TYPE).out -coverpkg ./... -v
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir=/tmp -p path)" HOME="$(shell pwd)" go test ./$*/... -coverprofile cover-$*-$(CLUSTER_TYPE).out -coverpkg ./... -count=1 -v
 
 GOCOVMERGE = $(BIN_DIR)/gocovmerge
 gocovmerge: ## Download gocovmerge locally if necessary.
@@ -263,11 +264,15 @@ check-deps: deps-update
 	exit 1; fi
 
 $(GOLANGCI_LINT): ; $(info installing golangci-lint...)
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VER))
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VER))
 
 .PHONY: lint
 lint: | $(GOLANGCI_LINT) ; $(info  running golangci-lint...) @ ## Run golangci-lint
-	$(GOLANGCI_LINT) run --timeout=10m
+	GOOS=linux $(GOLANGCI_LINT) run
+
+.PHONY: lint-fix
+lint-fix: | $(GOLANGCI_LINT) ; $(info  running golangci-lint --fix...) @ ## Run golangci-lint with auto-fix
+	GOOS=linux $(GOLANGCI_LINT) run --fix
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)

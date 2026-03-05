@@ -5,13 +5,15 @@ and preventing fully utilizing available bandwidth. OVS 2.8 and above support
 a feature called OVS Hardware Offload which improves performance significantly.
 This feature allows offloading the OVS data-plane to the NIC while maintaining
 OVS control-plane unmodified. It is using SR-IOV technology with VF representor
-host net-device. The VF representor plays the same role as TAP devices
-in Para-Virtual (PV) setup. A packet sent through the VF representor on the host
-arrives to the VF, and a packet sent through the VF is received by its representor.
+host net-device. The VF representor plays the same role as TAP devices in
+Para-Virtual (PV) setup. A packet sent through the VF representor on the host
+arrives to the VF, and a packet sent through the VF is received by its
+representor.
 
 OVS Hardware Offloading requires NIC to be configured in `switchdev` mode.
 
-The operator can automate the creation and configuration of OVS bridges when the "manageSoftwareBridges" featureGate is activated.
+The operator can automate the creation and configuration of OVS bridges when
+the "manageSoftwareBridges" featureGate is activated.
 
 ## Supported Ethernet controllers
 
@@ -25,22 +27,23 @@ The following manufacturers are known to work:
 
 ### Activate "manageSoftwareBridges" featureGate
 
-```
+```bash
 kubectl patch sriovoperatorconfigs.sriovnetwork.openshift.io -n network-operator default --patch '{ "spec": { "featureGates": { "manageSoftwareBridges": true  } } }' --type='merge'
 ```
 
-
 ### Deploy SriovNetworkNodePolicy
 
-The example policy below selects all NVIDIA ConnectX-6 Dx devices on all worker nodes.
+The example policy below selects all NVIDIA ConnectX-6 Dx devices on all
+worker nodes.
 
 The following actions will apply to selected NICs:
 
-* set NIC's eswitch mode to `switchdev`
+- set NIC's eswitch mode to `switchdev`
 
-* create 5 Virtual Functions on each Physical Function
+- create 5 Virtual Functions on each Physical Function
 
-* create a separate OVS bridge (with default configuration that is suitable for HW-offloading with OVS-kernel dataplane) for each Physical Function (PF)
+- create a separate OVS bridge (with default configuration that is suitable for
+  HW-offloading with OVS-kernel dataplane) for each Physical Function (PF)
 
 ```yaml
 apiVersion: sriovnetwork.openshift.io/v1
@@ -62,8 +65,10 @@ spec:
     ovs: {}
 ```
 
-_Note: `spec.bridge.ovs: {}` - means use default settings (suitable for HW-offloading with OVS-kernel dataplane)
-The fields defined in the [Bridge type](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/api/v1/sriovnetworknodepolicy_types.go#L84) can be used to configure advanced bridge and interface level options._
+_Note: `spec.bridge.ovs: {}` - means use default settings (suitable for
+HW-offloading with OVS-kernel dataplane). The fields defined in the
+[Bridge type](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/api/v1/sriovnetworknodepolicy_types.go#L84)
+can be used to configure advanced bridge and interface level options._
 
 The spec above will render to the similar SriovNetworkNodeState for matching nodes.
 
@@ -113,16 +118,17 @@ spec:
       vfRange: 0-4
 ```
 
-In this example node-a has single ConnectX-6 Dx card with two ports (two Physical Functions).
-For each Physical Function a separate OVS bridge will be created.
+In this example node-a has single ConnectX-6 Dx card with two ports (two
+Physical Functions). For each Physical Function a separate OVS bridge will be
+created.
 
 PF `0000:d8:00.0` -> OVS-bridge `br-0000_d8_00.0`
 PF `0000:d8:00.1` -> OVS-bridge `br-0000_d8_00.1`
 
-The PCI address of the PF is used to generate a predictable name for the bridge.
+The PCI address of the PF is used to generate a predictable name for the
+bridge.
 
 The PFs will be automatically attached to the bridges.
-
 
 ### Create kind: OVSNetwork CR
 
@@ -149,7 +155,9 @@ spec:
   vlan: 200
 ```
 
-_Note: There is no need to explicitly specify bridge name in the OVSNetwork. The `ovs-cni` will be able to automatically select the right OVS bridge based on the allocated VF for the Pod._
+_Note: There is no need to explicitly specify bridge name in the OVSNetwork.
+The `ovs-cni` will be able to automatically select the right OVS bridge based
+on the allocated VF for the Pod._
 
 ### Deploy POD with OVS hardware-offload
 
@@ -193,7 +201,8 @@ Run iperf3 client on POD 2
 kubectl exec -it ovs-offload-pod2 -- iperf3 -c 192.168.1.17 -t 100
 ```
 
-Check traffic on the VF representor port. Verify only TCP connection establishment appears
+Check traffic on the VF representor port. Verify only TCP connection
+establishment appears
 
 ```text
 tcpdump -i enp3s0f0_3 tcp

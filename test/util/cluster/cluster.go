@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
@@ -383,15 +383,17 @@ func GetNodeSecureBootState(clients *testclient.ClientSet, nodeName, namespace s
 	}
 
 	defer func() {
-		err = clients.Pods(namespace).Delete(context.Background(), created.Name, metav1.DeleteOptions{GracePeriodSeconds: pointer.Int64Ptr(0)})
+		err = clients.Pods(namespace).Delete(context.Background(), created.Name, metav1.DeleteOptions{GracePeriodSeconds: ptr.To[int64](0)})
 		if err != nil {
 			err = fmt.Errorf("failed to remove the check secure boot status pod for node %s: %v", nodeName, err)
 		}
 	}()
 
 	var runningPod *corev1.Pod
-	err = wait.PollImmediate(time.Second, 3*time.Minute, func() (bool, error) {
-		runningPod, err = clients.Pods(namespace).Get(context.Background(), created.Name, metav1.GetOptions{})
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	err = wait.PollUntilContextCancel(ctx, time.Second, true, func(ctx context.Context) (bool, error) {
+		runningPod, err = clients.Pods(namespace).Get(ctx, created.Name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}

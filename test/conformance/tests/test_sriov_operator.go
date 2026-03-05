@@ -24,7 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	sriovv1 "github.com/k8snetworkplumbingwg/sriov-network-operator/api/v1"
@@ -453,7 +453,7 @@ var _ = Describe("[sriov] operator", func() {
 				}, (10+snoTimeoutMultiplier*110)*time.Second, 1*time.Second).ShouldNot(HaveOccurred())
 
 				podDefinition := pod.DefineWithNetworks([]string{sriovNetwork.Name})
-				podDefinition.ObjectMeta.Labels = map[string]string{"anyname": "anyvalue"}
+				podDefinition.Labels = map[string]string{"anyname": "anyvalue"}
 				created, err := clients.Pods(namespaces.Test).Create(context.Background(), podDefinition, metav1.CreateOptions{})
 				Expect(err).ToNot(HaveOccurred())
 
@@ -522,7 +522,7 @@ var _ = Describe("[sriov] operator", func() {
 					}
 
 					err = clients.Pods(namespaces.Test).Delete(context.Background(), podObj.Name, metav1.DeleteOptions{
-						GracePeriodSeconds: pointer.Int64Ptr(0)})
+						GracePeriodSeconds: ptr.To[int64](0)})
 					Expect(err).ToNot(HaveOccurred())
 
 					return found
@@ -1006,7 +1006,7 @@ var _ = Describe("[sriov] operator", func() {
 				}, 2*time.Minute, 10*time.Second).Should(BeTrue(), "Error to detect Required Event")
 				By("Delete first pod and release all VFs")
 				err = clients.Pods(namespaces.Test).Delete(context.Background(), runningPodA.Name, metav1.DeleteOptions{
-					GracePeriodSeconds: pointer.Int64Ptr(0),
+					GracePeriodSeconds: ptr.To[int64](0),
 				})
 				Expect(err).ToNot(HaveOccurred(), fmt.Sprintf("Error to delete pod %s", runningPodA.Name))
 				By("Checking that second pod is able to use released VF")

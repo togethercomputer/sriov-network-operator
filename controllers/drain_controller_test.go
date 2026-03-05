@@ -135,32 +135,46 @@ var _ = Describe("Drain Controller", Ordered, func() {
 			node2, nodeState2 := createNode(ctx, "node2")
 			node3, nodeState3 := createNode(ctx, "node3")
 
+			nodes := []*corev1.Node{node1, node2}
+			nodeStates := []*sriovnetworkv1.SriovNetworkNodeState{nodeState1, nodeState2}
+
 			// Two nodes require to drain at the same time
 			simulateDaemonSetAnnotation(node1, constants.DrainRequired)
 			simulateDaemonSetAnnotation(node2, constants.DrainRequired)
 
-			// Only the first node drains
-			expectNodeStateAnnotation(nodeState1, constants.DrainComplete)
-			expectNodeStateAnnotation(nodeState2, constants.DrainIdle)
+			// Exactly one of the two nodes drains (order is non-deterministic)
+			expectNumberOfDrainingNodes(1, nodeState1, nodeState2, nodeState3)
 			expectNodeStateAnnotation(nodeState3, constants.DrainIdle)
-			expectNodeIsNotSchedulable(node1)
-			expectNodeIsSchedulable(node2)
 			expectNodeIsSchedulable(node3)
 
-			simulateDaemonSetAnnotation(node1, constants.DrainIdle)
+			// Find which node drained first and which is waiting
+			var firstNode, secondNode *corev1.Node
+			var firstState, secondState *sriovnetworkv1.SriovNetworkNodeState
+			for i, ns := range nodeStates {
+				if utils.ObjectHasAnnotation(ns, constants.NodeStateDrainAnnotationCurrent, constants.DrainComplete) {
+					firstNode, firstState = nodes[i], nodeStates[i]
+					secondNode, secondState = nodes[1-i], nodeStates[1-i]
+					break
+				}
+			}
+			Expect(firstNode).ToNot(BeNil(), "expected one node to have DrainComplete")
 
-			expectNodeStateAnnotation(nodeState1, constants.DrainIdle)
-			expectNodeIsSchedulable(node1)
+			expectNodeIsNotSchedulable(firstNode)
+			expectNodeStateAnnotation(secondState, constants.DrainIdle)
+			expectNodeIsSchedulable(secondNode)
+
+			// Complete drain on first node
+			simulateDaemonSetAnnotation(firstNode, constants.DrainIdle)
+
+			expectNodeStateAnnotation(firstState, constants.DrainIdle)
+			expectNodeIsSchedulable(firstNode)
 
 			// Second node starts draining
-			expectNodeStateAnnotation(nodeState1, constants.DrainIdle)
-			expectNodeStateAnnotation(nodeState2, constants.DrainComplete)
-			expectNodeStateAnnotation(nodeState3, constants.DrainIdle)
-			expectNodeIsSchedulable(node1)
-			expectNodeIsNotSchedulable(node2)
-			expectNodeIsSchedulable(node3)
+			expectNodeStateAnnotation(secondState, constants.DrainComplete)
+			expectNodeIsNotSchedulable(secondNode)
 
-			simulateDaemonSetAnnotation(node2, constants.DrainIdle)
+			// Complete drain on second node
+			simulateDaemonSetAnnotation(secondNode, constants.DrainIdle)
 
 			expectNodeStateAnnotation(nodeState1, constants.DrainIdle)
 			expectNodeStateAnnotation(nodeState2, constants.DrainIdle)

@@ -14,6 +14,7 @@ import (
 // Namespaces use the "generic" logic; deployments and services
 // have custom logic
 func TestMergeNamespace(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -58,6 +59,7 @@ metadata:
 }
 
 func TestMergeDeployment(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -108,6 +110,7 @@ metadata:
 }
 
 func TestMergeOne(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -140,6 +143,7 @@ metadata:
 }
 
 func TestMergeNilCur(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -176,6 +180,7 @@ metadata:
 }
 
 func TestMergeNilMeta(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -198,6 +203,7 @@ metadata:
 }
 
 func TestMergeNilUpd(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -234,6 +240,7 @@ metadata:
 }
 
 func TestMergeService(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -261,6 +268,7 @@ spec:
 }
 
 func TestMergeServiceAccount(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `
@@ -294,6 +302,7 @@ metadata:
 }
 
 func TestMergeWebHookCABundle(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	cur := UnstructuredFromYaml(t, `

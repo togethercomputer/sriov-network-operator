@@ -35,7 +35,7 @@ func updateFinalizers() {
 		shutdownLog.Error(err, "Failed to list SriovNetworks")
 	} else {
 		for _, instance := range networkList.Items {
-			if instance.ObjectMeta.Finalizers == nil || len(instance.ObjectMeta.Finalizers) == 0 {
+			if len(instance.Finalizers) == 0 {
 				continue
 			}
 			if err != nil {
@@ -43,7 +43,7 @@ func updateFinalizers() {
 			}
 			shutdownLog.Info("Clearing finalizers on SriovNetwork ", "namespace", instance.GetNamespace(), "name", instance.GetName())
 			var found bool
-			instance.ObjectMeta.Finalizers, found = sriovnetworkv1.RemoveString(sriovnetworkv1.NETATTDEFFINALIZERNAME, instance.ObjectMeta.Finalizers)
+			instance.Finalizers, found = sriovnetworkv1.RemoveString(sriovnetworkv1.NETATTDEFFINALIZERNAME, instance.Finalizers)
 			if found {
 				_, err = sriovNetworkClient.SriovNetworks(instance.GetNamespace()).Update(context.TODO(), &instance, metav1.UpdateOptions{})
 				if err != nil {

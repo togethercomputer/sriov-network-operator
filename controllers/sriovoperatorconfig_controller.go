@@ -94,13 +94,13 @@ func (r *SriovOperatorConfigReconciler) Reconcile(ctx context.Context, req ctrl.
 	snolog.SetLogLevel(defaultConfig.Spec.LogLevel)
 
 	// examine DeletionTimestamp to determine if object is under deletion
-	if !defaultConfig.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !defaultConfig.DeletionTimestamp.IsZero() {
 		// The object is being deleted
 		return r.handleSriovOperatorConfigDeletion(ctx, defaultConfig, logger)
 	}
 	// add finalizer if needed
-	if !sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers) {
-		defaultConfig.ObjectMeta.Finalizers = append(defaultConfig.ObjectMeta.Finalizers, sriovnetworkv1.OPERATORCONFIGFINALIZERNAME)
+	if !sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.Finalizers) {
+		defaultConfig.Finalizers = append(defaultConfig.Finalizers, sriovnetworkv1.OPERATORCONFIGFINALIZERNAME)
 		if err := r.Update(ctx, defaultConfig); err != nil {
 			return reconcile.Result{}, err
 		}
@@ -449,7 +449,7 @@ func (r *SriovOperatorConfigReconciler) syncOpenShiftSystemdService(ctx context.
 func (r *SriovOperatorConfigReconciler) handleSriovOperatorConfigDeletion(ctx context.Context,
 	defaultConfig *sriovnetworkv1.SriovOperatorConfig, logger logr.Logger) (ctrl.Result, error) {
 	var err error
-	if sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers) {
+	if sriovnetworkv1.StringInArray(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.Finalizers) {
 		// our finalizer is present, so lets handle any external dependency
 		logger.Info("delete SriovOperatorConfig CR", "Namespace", defaultConfig.Namespace, "Name", defaultConfig.Name)
 		// make sure webhooks objects are deleted prior of removing finalizer
@@ -458,7 +458,7 @@ func (r *SriovOperatorConfigReconciler) handleSriovOperatorConfigDeletion(ctx co
 			return reconcile.Result{}, err
 		}
 		// remove our finalizer from the list and update it.
-		defaultConfig.ObjectMeta.Finalizers, _ = sriovnetworkv1.RemoveString(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.ObjectMeta.Finalizers)
+		defaultConfig.Finalizers, _ = sriovnetworkv1.RemoveString(sriovnetworkv1.OPERATORCONFIGFINALIZERNAME, defaultConfig.Finalizers)
 		if err := r.Update(ctx, defaultConfig); err != nil {
 			return reconcile.Result{}, err
 		}

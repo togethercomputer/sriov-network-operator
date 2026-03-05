@@ -69,22 +69,22 @@ var _ = Describe("validation", func() {
 
 		It("Should have the sriov CRDs available in the cluster", func() {
 			crd := &apiext.CustomResourceDefinition{}
-			err := clients.Client.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworkNodePolicies}, crd)
+			err := clients.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworkNodePolicies}, crd)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = clients.Client.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworkNodeStates}, crd)
+			err = clients.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworkNodeStates}, crd)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = clients.Client.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworks}, crd)
+			err = clients.Get(context.TODO(), goclient.ObjectKey{Name: sriovNetworks}, crd)
 			Expect(err).ToNot(HaveOccurred())
 
-			err = clients.Client.Get(context.TODO(), goclient.ObjectKey{Name: sriovOperatorConfigs}, crd)
+			err = clients.Get(context.TODO(), goclient.ObjectKey{Name: sriovOperatorConfigs}, crd)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("should deploy the injector pod if requested", func() {
 			operatorConfig := &sriovv1.SriovOperatorConfig{}
-			err := clients.Client.Get(context.TODO(), goclient.ObjectKey{Name: "default", Namespace: operatorNamespace}, operatorConfig)
+			err := clients.Get(context.TODO(), goclient.ObjectKey{Name: "default", Namespace: operatorNamespace}, operatorConfig)
 			Expect(err).ToNot(HaveOccurred())
 
 			if operatorConfig.Spec.EnableInjector {

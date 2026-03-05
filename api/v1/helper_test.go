@@ -142,6 +142,7 @@ func newVhostVdpaNodePolicy() *v1.SriovNetworkNodePolicy {
 }
 
 func TestRendering(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname   string
 		network v1.SriovNetwork
@@ -203,6 +204,7 @@ func TestRendering(t *testing.T) {
 }
 
 func TestIBRendering(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname   string
 		network v1.SriovIBNetwork
@@ -250,6 +252,7 @@ func TestIBRendering(t *testing.T) {
 }
 
 func TestOVSRendering(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname   string
 		network v1.OVSNetwork
@@ -343,6 +346,7 @@ func TestOVSRendering(t *testing.T) {
 }
 
 func TestSriovNetworkNodePolicyApply(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname              string
 		currentState       *v1.SriovNetworkNodeState
@@ -804,6 +808,7 @@ func TestSriovNetworkNodePolicyApply(t *testing.T) {
 }
 
 func TestVirtioVdpaNodePolicyApply(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname              string
 		currentState       *v1.SriovNetworkNodeState
@@ -851,6 +856,7 @@ func TestVirtioVdpaNodePolicyApply(t *testing.T) {
 }
 
 func TestVhostVdpaNodePolicyApply(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname              string
 		currentState       *v1.SriovNetworkNodeState
@@ -898,6 +904,7 @@ func TestVhostVdpaNodePolicyApply(t *testing.T) {
 }
 
 func TestGetEswitchModeFromSpec(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname          string
 		spec           *v1.Interface
@@ -930,6 +937,7 @@ func TestGetEswitchModeFromSpec(t *testing.T) {
 }
 
 func TestGetEswitchModeFromStatus(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname          string
 		spec           *v1.InterfaceExt
@@ -962,6 +970,7 @@ func TestGetEswitchModeFromStatus(t *testing.T) {
 }
 
 func TestSriovNetworkPoolConfig_MaxUnavailable(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname       string
 		maxUn       intstrutil.IntOrString
@@ -1056,6 +1065,7 @@ func TestSriovNetworkPoolConfig_MaxUnavailable(t *testing.T) {
 }
 
 func TestNeedToUpdateSriov(t *testing.T) {
+	t.Parallel()
 	type args struct {
 		ifaceSpec   *v1.Interface
 		ifaceStatus *v1.InterfaceExt
@@ -1124,6 +1134,7 @@ func TestNeedToUpdateSriov(t *testing.T) {
 }
 
 func TestSriovNetworkNodePolicyApplyBridgeConfig(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname           string
 		currentState    *v1.SriovNetworkNodeState
@@ -1498,6 +1509,7 @@ func TestSriovNetworkNodePolicyApplyBridgeConfig(t *testing.T) {
 }
 
 func TestGenerateBridgeName(t *testing.T) {
+	t.Parallel()
 	result := v1.GenerateBridgeName(&v1.InterfaceExt{PciAddress: "0000:86:00.2"})
 	expected := "br-0000_86_00.2"
 	if result != expected {
@@ -1506,6 +1518,7 @@ func TestGenerateBridgeName(t *testing.T) {
 }
 
 func TestNeedToUpdateBridges(t *testing.T) {
+	t.Parallel()
 	testtable := []struct {
 		tname          string
 		specBridge     *v1.Bridges
