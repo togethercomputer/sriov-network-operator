@@ -144,6 +144,7 @@ jobs:
         path-to-lcov: lcov.out
 
   virtual-k8s-cluster:
+    if: false # disabled: no self-hosted [sriov] runner in this fork
     name: k8s
     needs: [
       build,
@@ -178,6 +179,7 @@ jobs:
           kcli delete network "$CLUSTER_NAME" -y
 
   virtual-ocp:
+    if: false # disabled: no self-hosted [ocp] runner in this fork
     name: ocp
     needs: [
       build,
