@@ -1,13 +1,15 @@
 # VDPA
 
-Virtual data path acceleration (vDPA) in essence is an approach to standardize 
-the NIC SRIOV data plane using the virtio ring layout and placing a single standard 
-virtio driver in the guest/pod. It’s decoupled from any vendor implementation while 
-adding a generic control plane and SW infrastructure to support it. Given that it’s 
-an abstraction layer on top of SRIOV (Single Root I/O Virtualization) it is also 
-future proof to support emerging technologies such as scalable IOV.
+Virtual data path acceleration (vDPA) in essence is an approach to standardize
+the NIC SRIOV data plane using the virtio ring layout and placing a single
+standard virtio driver in the guest/pod. It’s decoupled from any vendor
+implementation while adding a generic control plane and SW infrastructure to
+support it. Given that it’s an abstraction layer on top of SRIOV (Single Root
+I/O Virtualization) it is also future proof to support emerging technologies
+such as scalable IOV.
 
 Main aspects of this solution:
+
 - primary interface in the pod is configured as a virtio/vDPA device
 - OVS HW offload enabled
 - NIC configured in switchdev mode
@@ -95,7 +97,8 @@ spec:
 
 ## Verify vDPA is Working
 
-Run ethtool to verify the correctness of the virtio/vDPA interface in the pod:
+Run ethtool to verify the correctness of the virtio/vDPA interface in the
+pod:
 
 ```bash
 kubectl exec -it vdpa-pod1 -- ethtool -i eth0

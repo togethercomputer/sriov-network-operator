@@ -1,5 +1,4 @@
 ---
-title: Externally Manage PF
 authors:
   - SchSeba
 reviewers:
@@ -13,8 +12,9 @@ last-updated: 12-07-2023
 
 ## Summary
 
-Allow the SR-IOV network operator to configure and allocate a subset of virtual functions from
-a physical function that is configured externally from SR-IOV network operator.
+Allow the SR-IOV network operator to configure and allocate a subset of
+virtual functions from a physical function that is configured externally from
+SR-IOV network operator.
 
 ## Motivation
 
@@ -59,6 +59,7 @@ Then the operator will configure the subset of virtual functions with the reques
 configmap with the expected information to create the relevant pools.
 
 Existing sriov network config daemon flow:
+
 1. Apply the `numOfVfs`
 2. Configure the MTU on the PF
 3. Copy the Administrative mac address from the VFs
@@ -66,11 +67,13 @@ Existing sriov network config daemon flow:
 5. restart sriov network device plugin
 
 Externally manage sriov network config daemon flow:
+
 1. Copy the Administrative mac address from the VFs
 2. Bind the right driver for the VF
 3. restart sriov network device plugin
 
 In both flows:
+
 * In case of Infiniband link type it will generate random node and port GUID for the interface.
 * In case of RDMA (both for ETH and IB) it will perform an unbind/bind of the VF driver to set RDMA Node/Port GUID.
 
@@ -88,7 +91,8 @@ If the user want to create the virtual functions after the SR-IOV Network config
 to disable the webhook. the policy will be on failed state until the virtual functions needed for the policy exist
 on the node. the SR-IOV Network config daemon will continue to reconcile until the virtual functions exists
 
-#### Policy Example:
+#### Policy Example
+
 ```yaml
 apiVersion: sriovnetwork.openshift.io/v1
 kind: SriovNetworkNodePolicy
@@ -107,10 +111,11 @@ spec:
   externallyManaged: true
 ```
 
-The PF and VFs 0-4 are externally managed. 
+The PF and VFs 0-4 are externally managed.
 For example nmstate will create 10 vfs, but will only consume VF 0 and 4 in its configuration. Nmstate will also manage the MTU and other parameters of the PF.
 
-#### Another Policy Example:
+#### Another Policy Example
+
 In this case we allocate all the virtual functions from the PF
 
 ```yaml
@@ -136,18 +141,17 @@ One if the main use cases for this is if the user want to do some custom configu
 out of tree drivers or other stuff that the operator doesn't support.
 
 #### Validation
+
 The SR-IOV network operator will do a validation webhook to check if the requested `numVfs` is equal to what the user allocate
 if not it will reject the policy creation.
 
-The SR-IOV network operator will do a validation webhook to check if the requested MTU is lower or equal to what exist on the PF 
+The SR-IOV network operator will do a validation webhook to check if the requested MTU is lower or equal to what exist on the PF
 if not it will reject the policy creation.
-
 
 *Note:* Same validation will be done in the SR-IOV config-daemon container to cover cases where the user doesn't want to deploy"
 the webhook and to cover scale-up adding new nodes. If the verification failed in the policy apply stage
-the `sriovNetworkNodeState.status.SyncStatus` field will be report a `Failed` status and the error description will 
+the `sriovNetworkNodeState.status.SyncStatus` field will be report a `Failed` status and the error description will
 get exposed in `sriovNetworkNodeState.status.LastSyncError`
-
 
 #### Configuration
 
@@ -184,7 +188,9 @@ type Interface struct {
 ### Implementation Details/Notes/Constraints
 
 #### Webhook
+
 For the webhook we add more validations when the policy contains `ExternallyManaged: true`
+
 * `numVfs` in the policy equal is equal or lower the number of virtual functions on the system
 * `MTU` in the policy equals or lower the MTU we discover on the PF
 * `LinkType` in the policy equals the link type we discover on the PF
@@ -200,8 +206,8 @@ This is where most of the changes for this feature are implemented.
 
 * do a validation same as on the webhook to check the PF have everything we need to apply the requested
 policy, by checking the `numVfs`, `MTU` and `LinkType`.
-* skip all the PF configuration like `numVfs`, `MTU` and `LinkType`. he will only perform the virtual function 
-driver binding, administrative mac allocation and MTU. 
+* skip all the PF configuration like `numVfs`, `MTU` and `LinkType`. he will only perform the virtual function
+driver binding, administrative mac allocation and MTU.
 * in case of Infiniband link type it will generate random node and port GUID for the interface
 * in case of RDMA (both for ETH and IB) it will perform an unbind/bind of the VF driver to set RDMA Node/Port GUID.
 * reset the device plugin so kubelet will be able to discover the SR-IOV devices.

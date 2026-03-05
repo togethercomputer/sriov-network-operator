@@ -1,5 +1,4 @@
 ---
-title: IB VF GUID Configuration
 authors:
   - almaslennikov
 reviewers:
@@ -11,9 +10,11 @@ last-updated: 13-03-2024
 # IB VF GUID Configuration
 
 ## Summary
+
 Allow SR-IOV Network Operator to use a static configuration file from the host filesystem to assign GUIDs to IB VFs
 
 ## Motivation
+
 We have customers using the SR-IOV operator to create IB VFs, and they need a way to automate GUID assignment,
 so that IB VFs are automatically bound to the required PKeys and no additional manual configuration is needed.
 We would like SR-IOV Network Operator to configure VFs with the set of assigned guids based on provided configuration.
@@ -29,7 +30,6 @@ Now the GUIDs are assigned by the sriov-network-config-daemon randomly.
 ### Non-Goals
 
 * Dynamic GUID allocation is out of scope of this proposal
-
 
 ### Assumptions
 
@@ -126,7 +126,7 @@ The alternative solution is also based on the GUID configuration file being depl
 The difference here is that GUID assignment is done on the cni level when a VF is allocated to a pod.
 ib-sriov-cni manages a host-local per-PF pool of allocated/free GUIDs and dynamically allocates the next free GUID to an allocated VF.
 
-### Workflow:
+### Workflow
 
 1. A script is deployed to the host and creates a static GUID config file. This step is out of scope of the operator and can also be carried out manually. The script would usually need to be custom and based on the specific GUID provisioning system in place.
 2. SR-IOV network operator creates IB VFs with random GUIDs (as done now)
@@ -139,11 +139,13 @@ ib-sriov-cni manages a host-local per-PF pool of allocated/free GUIDs and dynami
 ## Comparison between the two alternatives
 
 The SR-IOV Network Operator approach:
+
 * Easier to implement and less error-prone
 * Manages the whole lifecycle of the VF (GUID is assigned at creation and never changes throughout the lifecycle)
 * Operator has better visibility into the amount of configured VFs
 
 The IB-SRIOV-CNI approach:
+
 * Offers more flexibility (Only when a VF is requested for an IB network will it be assigned a GUID)
 * Easier to maintain complex use cases
-    * 2 PFs on the node evenly split between 2 PKeys. The CNI approach will require 2 per-PF resource pools and 4 network attachments. The operator approach will require 4 resource pools and 4 network attachments, one for each PKey-PF pair.
+  * 2 PFs on the node evenly split between 2 PKeys. The CNI approach will require 2 per-PF resource pools and 4 network attachments. The operator approach will require 4 resource pools and 4 network attachments, one for each PKey-PF pair.

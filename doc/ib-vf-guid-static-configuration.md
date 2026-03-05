@@ -1,6 +1,7 @@
 # Infiniband VF GUID Static Configuration
 
-SR-IOV Network Operator is able to use a static configuration file from the host filesystem to assign GUIDs to IB VFs.
+SR-IOV Network Operator is able to use a static configuration file from the
+host filesystem to assign GUIDs to IB VFs.
 
 ## Prerequisites
 
@@ -9,9 +10,11 @@ SR-IOV Network Operator is able to use a static configuration file from the host
 
 ### Configuration file
 
-Config file should be stored at `/etc/sriov-operator/infiniband/guids`. This location is writable across most cloud platforms.
+Config file should be stored at `/etc/sriov-operator/infiniband/guids`. This
+location is writable across most cloud platforms.
 
-VF to GUID assignment, based on this file, is ordered. VF0 takes the GUID0, VF1 takes the GUID1 etc.
+VF to GUID assignment, based on this file, is ordered. VF0 takes the GUID0,
+VF1 takes the GUID1 etc.
 
 Each PF has its own set of GUIDs.
 
@@ -38,20 +41,24 @@ Example of the config file:
 
 Config file parameters:
 
-* `pci_address` is a PCI address of a PF
-* `pf_guid` is a GUID of a PF. Can be obtained with `ibstat` command.
-* `guids` is an array of VF GUID strings
-* `guidsRange` is an object representing the start and end of a VF GUID range. It has two fields:
-    * `start` is a VF GUID range start
-    * `end` is a VF GUID range end
+- `pci_address` is a PCI address of a PF
+- `pf_guid` is a GUID of a PF. Can be obtained with `ibstat` command.
+- `guids` is an array of VF GUID strings
+- `guidsRange` is an object representing the start and end of a VF GUID range.
+  It has two fields:
+  - `start` is a VF GUID range start
+  - `end` is a VF GUID range end
 
 Requirements for the config file:
 
-* `pci_address` and `pf_guid` cannot be set at the same time for a single device - should return an error
-* if the list contains multiple entries for the same device, the first one shall be taken
-* `rangeStart` and `rangeEnd` are both included in the range
-* `guids` list and range cannot be both set at the same time for a single device - should return an error
-* GUIDs are assigned once and not change throughout the lifecycle of the host
+- `pci_address` and `pf_guid` cannot be set at the same time for a single
+  device - should return an error
+- if the list contains multiple entries for the same device, the first one
+  shall be taken
+- `rangeStart` and `rangeEnd` are both included in the range
+- `guids` list and range cannot be both set at the same time for a single
+  device - should return an error
+- GUIDs are assigned once and not change throughout the lifecycle of the host
 
 ### Deploy SriovNetworkNodePolicy
 
@@ -87,4 +94,3 @@ ip link
     vf 0     link/infiniband ... NODE_GUID 02:00:00:00:00:00:00:00, PORT_GUID 02:00:00:00:00:00:00:00, link-state enable, trust off, query_rss off
     vf 1     link/infiniband ... NODE_GUID 02:00:00:00:00:00:00:01, PORT_GUID 02:00:00:00:00:00:00:01, link-state enable, trust off, query_rss off
 ```
-

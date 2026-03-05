@@ -1,0 +1,11 @@
+self-hosted-runner:
+  labels:
+  - ubuntu-22.04-4core
+  - ubuntu-22.04-64core
+  - ubuntu-22.04-8core
+  - ubuntu-22.04-arm-4core
+  - ubuntu-24.04-4core
+  - ubuntu-24.04-8core
+  - ubuntu-24.04-arm-4core
+  - sriov
+  - ocp

@@ -2,14 +2,21 @@
 
 ## Prerequisites
 
-1. A supported SRIOV hardware on the cluster nodes. Supported models can be found [here](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/doc/supported-hardware.md).
+1. A supported SRIOV hardware on the cluster nodes. Supported models can be
+   found in the
+   [supported hardware list](https://github.com/k8snetworkplumbingwg/sriov-network-operator/blob/master/doc/supported-hardware.md).
 2. Kubernetes or Openshift cluster running on bare metal nodes.
-3. Multus-cni is deployed as default CNI plugin, and there is a default CNI plugin (flannel, openshift-sdn etc.) available for Multus-cni.
-4. On RedHat Enterprise Linux and Ubuntu operating systems, the `rdma-core` package must be installed to support RDMA resource provisioning. On RedHat CoreOS the package installation is not required.
+3. Multus-cni is deployed as default CNI plugin, and there is a default CNI
+   plugin (flannel, openshift-sdn etc.) available for Multus-cni.
+4. On RedHat Enterprise Linux and Ubuntu operating systems, the `rdma-core`
+   package must be installed to support RDMA resource provisioning. On RedHat
+   CoreOS the package installation is not required.
 
 ## Installation
 
-Make sure to have installed the Operator-SDK, as shown in its [install documentation](https://sdk.operatorframework.io/docs/installation/), and that the binaries are available in your \$PATH.
+Make sure to have installed the Operator-SDK, as shown in its
+[install documentation](https://sdk.operatorframework.io/docs/installation/),
+and that the binaries are available in your \$PATH.
 
 Clone this GitHub repository.
 
@@ -26,15 +33,20 @@ make deploy-setup
 ```
 
 If you are running a Kubernetes cluster:
+
 ```bash
 make deploy-setup-k8s
 ```
 
-Webhooks are disabled when deploying on a Kubernetes cluster as per the instructions above. To enable webhooks on Kubernetes cluster, there are two options:
+Webhooks are disabled when deploying on a Kubernetes cluster as per the
+instructions above. To enable webhooks on Kubernetes cluster, there are two
+options:
 
-1. Create certificates for each of the two webhooks using a single CA whose cert you provide through an environment variable.
+1. Create certificates for each of the two webhooks using a single CA whose
+   cert you provide through an environment variable.
 
    For example, given `cacert.pem`, `key.pem` and `cert.pem`:
+
    ```bash
    kubectl create ns sriov-network-operator
    kubectl -n sriov-network-operator create secret tls operator-webhook-cert --cert=cert.pem --key=key.pem
@@ -45,12 +57,14 @@ Webhooks are disabled when deploying on a Kubernetes cluster as per the instruct
    make deploy-setup-k8s
    ```
 
-2. Using https://cert-manager.io/, deploy it as:
+2. Using <https://cert-manager.io/>, deploy it as:
+
    ```bash
    kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.3.0/cert-manager.yaml
    ```
 
    Define the appropriate Issuer and Certificates, as an example:
+
    ```bash
    kubectl create ns sriov-network-operator
    cat <<EOF | kubectl apply -f -
@@ -89,13 +103,16 @@ Webhooks are disabled when deploying on a Kubernetes cluster as per the instruct
    ```
 
     And then deploy the operator:
+
     ```bash
     export ADMISSION_CONTROLLERS_ENABLED=true
     export ADMISSION_CONTROLLERS_CERTIFICATES_CERT_MANAGER_ENABLED=true
     make deploy-setup-k8s
     ```
 
-By default, the operator will be deployed in namespace 'sriov-network-operator' for Kubernetes cluster, you can check if the deployment is finished successfully.
+By default, the operator will be deployed in namespace 'sriov-network-operator'
+for Kubernetes cluster, you can check if the deployment is finished
+successfully.
 
 ```bash
 $ kubectl get -n sriov-network-operator all
@@ -116,13 +133,18 @@ NAME                                                DESIRED   CURRENT   READY   
 replicaset.apps/sriov-network-operator-54d7545f65   1         1         1       10s
 ```
 
-You may need to label SR-IOV worker nodes using `node-role.kubernetes.io/worker` label, if not already.
+You may need to label SR-IOV worker nodes using `node-role.kubernetes.io/worker`
+label, if not already.
 
-**Note:** By default, SR-IOV Operator will be deployed in namespace 'openshift-sriov-network-operator' for OpenShift cluster.
+**Note:** By default, SR-IOV Operator will be deployed in namespace
+'openshift-sriov-network-operator' for OpenShift cluster.
 
 ## Configuration
 
-After the operator gets installed, you can configure it with creating the custom resource of SriovNetwork and SriovNetworkNodePolicy. But before that, you may want to check the status of SriovNetworkNodeState CRs to find out all the SRIOV capable devices in you cluster.
+After the operator gets installed, you can configure it with creating the
+custom resource of SriovNetwork and SriovNetworkNodePolicy. But before that,
+you may want to check the status of SriovNetworkNodeState CRs to find out all
+the SRIOV capable devices in you cluster.
 
 Here comes an example. As you can see, there are 2 SR-IOV NICs from Intel.
 
@@ -148,7 +170,8 @@ status:
     vendor: "8086"
 ```
 
-You can choose the NIC you want when creating SriovNetworkNodePolicy CR, by specifying the 'nicSelector'.
+You can choose the NIC you want when creating SriovNetworkNodePolicy CR, by
+specifying the 'nicSelector'.
 
 ```yaml
 apiVersion: sriovnetwork.openshift.io/v1
@@ -171,7 +194,9 @@ spec:
   deviceType: netdevice
 ```
 
-After applying your SriovNetworkNodePolicy CR, check the status of SriovNetworkNodeState again, you should be able to see the NIC has been configured as instructed.
+After applying your SriovNetworkNodePolicy CR, check the status of
+SriovNetworkNodeState again, you should be able to see the NIC has been
+configured as instructed.
 
 ```bash
 $ kubectl get sriovnetworknodestates.sriovnetwork.openshift.io -n sriov-network-operator node-1 -o yaml
@@ -200,7 +225,9 @@ $ kubectl get sriovnetworknodestates.sriovnetwork.openshift.io -n sriov-network-
 ...
 ```
 
-At the same time, the SRIOV device plugin and CNI plugin has been provisioned to the worker node. You may check if resource name 'intel-nics' is reported  by device plugin correctly.
+At the same time, the SRIOV device plugin and CNI plugin has been provisioned
+to the worker node. You may check if resource name 'intel-nics' is reported by
+device plugin correctly.
 
 ```bash
 $ kubectl get no -o json | jq -r '[.items[] | {name:.metadata.name, allocable:.status.allocatable}]'
@@ -221,7 +248,9 @@ $ kubectl get no -o json | jq -r '[.items[] | {name:.metadata.name, allocable:.s
 ]
 ```
 
-Now you can create a SriovNetwork CR which refer to the 'resourceName' defined in SriovNetworkNodePolicy. Then a NetworkAttachmentDefinition CR will be generated by operator with the same name and namespace.
+Now you can create a SriovNetwork CR which refer to the 'resourceName' defined
+in SriovNetworkNodePolicy. Then a NetworkAttachmentDefinition CR will be
+generated by operator with the same name and namespace.
 
 Here is an example:
 

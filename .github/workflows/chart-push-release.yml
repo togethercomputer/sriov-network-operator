@@ -1,4 +1,4 @@
-name: "Push helm chart on release"
+name: Push helm chart on release
 
 env:
   IMAGE_NAME: ghcr.io/${{ github.repository }}

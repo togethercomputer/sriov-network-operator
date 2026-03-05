@@ -14,12 +14,12 @@ jobs:
     steps:
 
     - name: Set up Go 1.22
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: fmt
       run: IS_CONTAINER=yes make fmt
@@ -33,12 +33,12 @@ jobs:
     steps:
 
     - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: test pkg
       run: make test-pkg
@@ -64,12 +64,12 @@ jobs:
     steps:
 
     - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: check go modules are up to date
       run: make check-deps
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: check if the config/ folder is up to date
       run: make check-manifests
@@ -89,13 +89,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v6
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
         version: v1.55.2
@@ -116,12 +116,12 @@ jobs:
     steps:
 
     - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v5
       with:
         go-version: 1.22.x
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: test pkg
       run: make test-pkg
@@ -156,17 +156,17 @@ jobs:
       TEST_REPORT_PATH: k8s-artifacts
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go 1.22
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 1.22.x
 
       - name: run test
         run: make test-e2e-conformance-virtual-k8s-cluster-ci
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ env.TEST_REPORT_PATH }}
@@ -175,8 +175,8 @@ jobs:
       - name: remove virtual cluster
         if: always()
         run: |
-          kcli delete cluster $CLUSTER_NAME -y
-          kcli delete network $CLUSTER_NAME -y
+          kcli delete cluster "$CLUSTER_NAME" -y
+          kcli delete network "$CLUSTER_NAME" -y
 
   virtual-ocp:
     name: ocp
@@ -190,17 +190,17 @@ jobs:
       TEST_REPORT_PATH: ocp-artifacts
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Go 1.22
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 1.22.x
 
       - name: run test
         run: make test-e2e-conformance-virtual-ocp-cluster-ci
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ env.TEST_REPORT_PATH }}
@@ -209,5 +209,5 @@ jobs:
       - name: remove virtual cluster
         if: always()
         run: |
-          kcli delete cluster $CLUSTER_NAME -y
-          kcli delete network $CLUSTER_NAME -y
+          kcli delete cluster "$CLUSTER_NAME" -y
+          kcli delete network "$CLUSTER_NAME" -y
