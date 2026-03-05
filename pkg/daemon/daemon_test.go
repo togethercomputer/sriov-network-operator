@@ -34,6 +34,7 @@ import (
 
 var SriovDevicePluginPod corev1.Pod
 
+//nolint:paralleltest // Ginkgo entry point
 func TestConfigDaemon(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Config Daemon Suite")

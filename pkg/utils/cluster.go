@@ -155,7 +155,7 @@ func AnnotateObject(ctx context.Context, obj client.Object, key, value string, c
 // AnnotateNode add annotation to a node
 func AnnotateNode(ctx context.Context, nodeName string, key, value string, c client.Client) error {
 	node := &corev1.Node{}
-	err := c.Get(context.TODO(), client.ObjectKey{Name: nodeName}, node)
+	err := c.Get(ctx, client.ObjectKey{Name: nodeName}, node)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func removeLabelObject(ctx context.Context, obj client.Object, key string, c cli
 // LabelNode add label to a node
 func LabelNode(ctx context.Context, nodeName string, key, value string, c client.Client) error {
 	node := &corev1.Node{}
-	err := c.Get(context.TODO(), client.ObjectKey{Name: nodeName}, node)
+	err := c.Get(ctx, client.ObjectKey{Name: nodeName}, node)
 	if err != nil {
 		return err
 	}
@@ -228,7 +228,7 @@ func LabelNode(ctx context.Context, nodeName string, key, value string, c client
 
 func RemoveLabelFromNode(ctx context.Context, nodeName string, key string, c client.Client) error {
 	node := &corev1.Node{}
-	err := c.Get(context.TODO(), client.ObjectKey{Name: nodeName}, node)
+	err := c.Get(ctx, client.ObjectKey{Name: nodeName}, node)
 	if err != nil {
 		return err
 	}

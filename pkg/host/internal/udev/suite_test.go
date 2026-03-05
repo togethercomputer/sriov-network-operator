@@ -13,6 +13,7 @@ import (
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestUdev(t *testing.T) {
 	log.SetLogger(zap.New(
 		zap.WriteTo(GinkgoWriter),

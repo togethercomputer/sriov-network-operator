@@ -5,6 +5,7 @@
 package mock_helper
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -983,10 +984,10 @@ func (mr *MockHostHelpersInterfaceMockRecorder) ResetSriovDevice(ifaceStatus int
 }
 
 // RunCommand mocks base method.
-func (m *MockHostHelpersInterface) RunCommand(arg0 string, arg1 ...string) (string, string, error) {
+func (m *MockHostHelpersInterface) RunCommand(arg0 context.Context, arg1 string, arg2 ...string) (string, string, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0}
-	for _, a := range arg1 {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "RunCommand", varargs...)
@@ -997,9 +998,9 @@ func (m *MockHostHelpersInterface) RunCommand(arg0 string, arg1 ...string) (stri
 }
 
 // RunCommand indicates an expected call of RunCommand.
-func (mr *MockHostHelpersInterfaceMockRecorder) RunCommand(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+func (mr *MockHostHelpersInterfaceMockRecorder) RunCommand(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0}, arg1...)
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunCommand", reflect.TypeOf((*MockHostHelpersInterface)(nil).RunCommand), varargs...)
 }
 

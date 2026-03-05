@@ -172,7 +172,7 @@ func Clean(operatorNamespace, namespace string, cs *testclient.ClientSet, discov
 }
 
 func AddLabel(cs corev1client.NamespacesGetter, ctx context.Context, namespaceName, key, value string) error {
-	ns, err := cs.Namespaces().Get(context.Background(), namespaceName, metav1.GetOptions{})
+	ns, err := cs.Namespaces().Get(ctx, namespaceName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to get namespace [%s]: %v", namespaceName, err)
 	}

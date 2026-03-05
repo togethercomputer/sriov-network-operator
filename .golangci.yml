@@ -86,8 +86,8 @@ linters:
   # - zerologlint      # detects wrong zerolog usage
 
   # --- Testing ---
-  # - paralleltest     # detects missing t.Parallel() in tests
-  # - tparallel        # detects inappropriate t.Parallel() usage
+  - paralleltest # detects missing t.Parallel() in tests
+  - tparallel # detects inappropriate t.Parallel() usage
   # - thelper          # detects test helpers without t.Helper()
   # - testpackage      # enforces use of separate _test package
   # - testifylint      # checks usage of testify

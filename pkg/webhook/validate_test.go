@@ -165,6 +165,7 @@ func newDefaultNetworkPoolConfig() *SriovNetworkPoolConfig {
 }
 
 func TestValidateSriovOperatorConfigWithDefaultOperatorConfig(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	config := newDefaultOperatorConfig()
@@ -190,6 +191,7 @@ func TestValidateSriovOperatorConfigWithDefaultOperatorConfig(t *testing.T) {
 }
 
 func TestValidateSriovOperatorConfigDisableDrain(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	config := newDefaultOperatorConfig()
@@ -223,6 +225,7 @@ func TestValidateSriovOperatorConfigDisableDrain(t *testing.T) {
 }
 
 func TestValidateSriovNetworkPoolConfigWithDefault(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	config := newDefaultNetworkPoolConfig()
@@ -242,6 +245,7 @@ func TestValidateSriovNetworkPoolConfigWithDefault(t *testing.T) {
 }
 
 func TestValidateSriovNetworkPoolConfigWithParallelAndHWOffload(t *testing.T) {
+	t.Parallel()
 	g := NewGomegaWithT(t)
 
 	config := newDefaultNetworkPoolConfig()
@@ -258,6 +262,7 @@ func TestValidateSriovNetworkPoolConfigWithParallelAndHWOffload(t *testing.T) {
 }
 
 func TestValidateSriovNetworkNodePolicyWithDefaultPolicy(t *testing.T) {
+	t.Parallel()
 	var err error
 	var ok bool
 	policy := &SriovNetworkNodePolicy{
@@ -290,6 +295,7 @@ func TestValidateSriovNetworkNodePolicyWithDefaultPolicy(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithValidPolicy(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
@@ -313,6 +319,7 @@ func TestValidatePolicyForNodeStateWithValidPolicy(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithInvalidNumVfsPolicy(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -339,6 +346,7 @@ func TestValidatePolicyForNodeStateWithInvalidNumVfsPolicy(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithInvalidNumVfsExternallyCreated(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -366,6 +374,7 @@ func TestValidatePolicyForNodeStateWithInvalidNumVfsExternallyCreated(t *testing
 }
 
 func TestValidatePolicyForNodeStateWithValidNumVfsExternallyCreated(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -393,6 +402,7 @@ func TestValidatePolicyForNodeStateWithValidNumVfsExternallyCreated(t *testing.T
 }
 
 func TestValidatePolicyForNodeStateWithValidLowerNumVfsExternallyCreated(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -420,6 +430,7 @@ func TestValidatePolicyForNodeStateWithValidLowerNumVfsExternallyCreated(t *test
 }
 
 func TestValidatePolicyForNodePolicyWithOutExternallyManageConflict(t *testing.T) {
+	t.Parallel()
 	appliedPolicy := newNodePolicy()
 	appliedPolicy.Spec.ExternallyManaged = true
 	policy := &SriovNetworkNodePolicy{
@@ -447,6 +458,7 @@ func TestValidatePolicyForNodePolicyWithOutExternallyManageConflict(t *testing.T
 }
 
 func TestValidatePolicyForNodePolicyWithExternallyManageConflict(t *testing.T) {
+	t.Parallel()
 	appliedPolicy := newNodePolicy()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -473,6 +485,7 @@ func TestValidatePolicyForNodePolicyWithExternallyManageConflict(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndMTU(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -501,6 +514,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndMTU(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndDifferentMTU(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -529,6 +543,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndDifferentMTU(t *testin
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndLinkType(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -566,6 +581,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndLinkType(t *testing.T)
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndDifferentLinkType(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -595,6 +611,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndDifferentLinkType(t *t
 }
 
 func TestValidatePolicyForNodePolicyWithOverlappedVfRange(t *testing.T) {
+	t.Parallel()
 	appliedPolicy := newNodePolicy()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -620,6 +637,7 @@ func TestValidatePolicyForNodePolicyWithOverlappedVfRange(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithUpdatedExistingVfRange(t *testing.T) {
+	t.Parallel()
 	appliedPolicy := newNodePolicy()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -646,6 +664,7 @@ func TestValidatePolicyForNodeStateWithUpdatedExistingVfRange(t *testing.T) {
 }
 
 func TestValidatePoliciesWithDifferentExcludeTopologyForTheSameResource(t *testing.T) {
+	t.Parallel()
 	current := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{Name: "currentPolicy"},
 		Spec: SriovNetworkNodePolicySpec{
@@ -669,6 +688,7 @@ func TestValidatePoliciesWithDifferentExcludeTopologyForTheSameResource(t *testi
 }
 
 func TestValidatePoliciesWithDifferentExcludeTopologyForTheSameResourceAndTheSamePF(t *testing.T) {
+	t.Parallel()
 	current := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{Name: "currentPolicy"},
 		Spec: SriovNetworkNodePolicySpec{
@@ -696,6 +716,7 @@ func TestValidatePoliciesWithDifferentExcludeTopologyForTheSameResourceAndTheSam
 }
 
 func TestValidatePoliciesWithSameExcludeTopologyForTheSameResource(t *testing.T) {
+	t.Parallel()
 	current := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{Name: "currentPolicy"},
 		Spec: SriovNetworkNodePolicySpec{
@@ -719,6 +740,7 @@ func TestValidatePoliciesWithSameExcludeTopologyForTheSameResource(t *testing.T)
 }
 
 func TestValidatePoliciesWithDifferentNumVfForTheSameResourceAndTheSameRootDevice(t *testing.T) {
+	t.Parallel()
 	current := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{Name: "currentPolicy"},
 		Spec: SriovNetworkNodePolicySpec{
@@ -744,6 +766,7 @@ func TestValidatePoliciesWithDifferentNumVfForTheSameResourceAndTheSameRootDevic
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithValidVendorDevice(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -766,6 +789,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithValidVendorDevice(t *testing.T)
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendor(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -787,6 +811,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendor(t *testing.T) {
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendorDevMode(t *testing.T) {
+	t.Parallel()
 	t.Setenv("DEV_MODE", "TRUE")
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
@@ -809,6 +834,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendorDevMode(t *testing
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidDevice(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -830,6 +856,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidDevice(t *testing.T) {
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendorDevice(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -852,6 +879,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidVendorDevice(t *testing.
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithConflictIsRdmaAndDeviceType(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: constants.DeviceTypeVfioPci,
@@ -875,6 +903,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithConflictIsRdmaAndDeviceType(t *
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithConflictDeviceTypeAndVirtioVdpaType(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: constants.DeviceTypeVfioPci,
@@ -899,6 +928,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithConflictDeviceTypeAndVirtioVdpa
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithConflictDeviceTypeAndVhostVdpaType(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: constants.DeviceTypeVfioPci,
@@ -923,6 +953,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithConflictDeviceTypeAndVhostVdpaT
 }
 
 func TestStaticValidateSriovNetworkNodePolicyVirtioVdpaMustSpecifySwitchDev(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -946,6 +977,7 @@ func TestStaticValidateSriovNetworkNodePolicyVirtioVdpaMustSpecifySwitchDev(t *t
 }
 
 func TestStaticValidateSriovNetworkNodePolicyVhostVdpaMustSpecifySwitchDev(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -969,6 +1001,7 @@ func TestStaticValidateSriovNetworkNodePolicyVhostVdpaMustSpecifySwitchDev(t *te
 }
 
 func TestValidatePolicyForNodeStateVirtioVdpaWithNotSupportedVendor(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -996,6 +1029,7 @@ func TestValidatePolicyForNodeStateVirtioVdpaWithNotSupportedVendor(t *testing.T
 }
 
 func TestValidatePolicyForNodeStateVhostVdpaWithNotSupportedVendor(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		ObjectMeta: metav1.ObjectMeta{
@@ -1023,6 +1057,7 @@ func TestValidatePolicyForNodeStateVhostVdpaWithNotSupportedVendor(t *testing.T)
 }
 
 func TestValidatePolicyForNodeStateWithInvalidDevice(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
@@ -1045,6 +1080,7 @@ func TestValidatePolicyForNodeStateWithInvalidDevice(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithInvalidPfName(t *testing.T) {
+	t.Parallel()
 	interfaceSelected = false
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
@@ -1068,6 +1104,7 @@ func TestValidatePolicyForNodeStateWithInvalidPfName(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithValidPfName(t *testing.T) {
+	t.Parallel()
 	interfaceSelected = false
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
@@ -1091,6 +1128,7 @@ func TestValidatePolicyForNodeStateWithValidPfName(t *testing.T) {
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidNicSelector(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType:  "netdevice",
@@ -1108,6 +1146,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidNicSelector(t *testing.T
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithInvalidLinkTypeForSwitchdev(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType:  "netdevice",
@@ -1130,6 +1169,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithInvalidLinkTypeForSwitchdev(t *
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithBridgeConfigWithoutSwitchdev(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType: "netdevice",
@@ -1150,6 +1190,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithBridgeConfigWithoutSwitchdev(t 
 }
 
 func TestStaticValidateSriovNetworkNodePolicyWithBridgeConfigWithExternallyManaged(t *testing.T) {
+	t.Parallel()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
 			DeviceType:        "netdevice",
@@ -1172,6 +1213,7 @@ func TestStaticValidateSriovNetworkNodePolicyWithBridgeConfigWithExternallyManag
 }
 
 func TestValidatePolicyForNodeStateWithValidNetFilter(t *testing.T) {
+	t.Parallel()
 	interfaceSelected = false
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
@@ -1195,6 +1237,7 @@ func TestValidatePolicyForNodeStateWithValidNetFilter(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithValidVFAndNetFilter(t *testing.T) {
+	t.Parallel()
 	interfaceSelected = false
 	state := &SriovNetworkNodeState{
 		Spec: SriovNetworkNodeStateSpec{
@@ -1259,6 +1302,7 @@ func TestValidatePolicyForNodeStateWithValidVFAndNetFilter(t *testing.T) {
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndSwitchdev(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
@@ -1283,6 +1327,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndSwitchdev(t *testing.T
 }
 
 func TestValidatePolicyForNodeStateWithExternallyManageAndSwitchdevAndWrongVFCount(t *testing.T) {
+	t.Parallel()
 	state := newNodeState()
 	policy := &SriovNetworkNodePolicy{
 		Spec: SriovNetworkNodePolicySpec{
@@ -1307,6 +1352,7 @@ func TestValidatePolicyForNodeStateWithExternallyManageAndSwitchdevAndWrongVFCou
 }
 
 func TestValidatePolicyForNodePolicyAllowSwitchdevWithExternallyManage(t *testing.T) {
+	t.Parallel()
 	appliedPolicy := newNodePolicy()
 	appliedPolicy.Spec.ExternallyManaged = true
 

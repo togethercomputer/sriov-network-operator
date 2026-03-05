@@ -20,6 +20,7 @@ import (
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestK8sPlugin(t *testing.T) {
 	log.SetLogger(zap.New(
 		zap.WriteTo(GinkgoWriter),
@@ -211,7 +212,7 @@ var _ = Describe("K8s plugin", func() {
 			newServiceNameMatcher("ovs-vswitchd.service"),
 		).Return(true, nil)
 		hostHelper.EXPECT().Chroot("/host").Return(func() error { return nil }, nil)
-		hostHelper.EXPECT().RunCommand("ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload").Return("\"true\"\n", "", nil)
+		hostHelper.EXPECT().RunCommand(gomock.Any(), "ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload").Return("\"true\"\n", "", nil)
 		hostHelper.EXPECT().UpdateSystemService(newServiceNameMatcher("ovs-vswitchd.service")).Return(nil)
 		needDrain, needReboot, err := k8sPlugin.OnNodeStateChange(&sriovnetworkv1.SriovNetworkNodeState{
 			Spec: sriovnetworkv1.SriovNetworkNodeStateSpec{Interfaces: []sriovnetworkv1.Interface{{EswitchMode: "switchdev"}}}})

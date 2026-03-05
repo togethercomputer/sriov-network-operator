@@ -112,6 +112,7 @@ func findKubecfg(path, ext string) string {
 	return cfg
 }
 
+//nolint:paralleltest // Ginkgo entry point
 func TestAPIs(t *testing.T) {
 	_, reporterConfig := GinkgoConfiguration()
 

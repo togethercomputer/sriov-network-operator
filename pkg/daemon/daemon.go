@@ -753,7 +753,7 @@ func (dn *Daemon) rebootNode() {
 	// However note we use `;` instead of `&&` so we keep rebooting even
 	// if kubelet failed to shutdown - that way the machine will still eventually reboot
 	// as systemd will time out the stop invocation.
-	stdOut, StdErr, err := dn.HostHelpers.RunCommand("systemd-run", "--unit", "sriov-network-config-daemon-reboot",
+	stdOut, StdErr, err := dn.HostHelpers.RunCommand(context.Background(), "systemd-run", "--unit", "sriov-network-config-daemon-reboot",
 		"--description", "sriov-network-config-daemon reboot node", "/bin/sh", "-c", "systemctl stop kubelet.service; reboot")
 
 	if err != nil {

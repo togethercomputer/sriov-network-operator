@@ -24,7 +24,6 @@ import (
 
 type configController struct {
 	k8sManager manager.Manager
-	ctx        context.Context
 	cancel     context.CancelFunc
 	wg         *sync.WaitGroup
 }
@@ -148,12 +147,9 @@ func newConfigController() *configController {
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
-	ctx, cancel := context.WithCancel(context.Background())
 	wg := sync.WaitGroup{}
 	controller = &configController{
 		k8sManager: k8sManager,
-		ctx:        ctx,
-		cancel:     cancel,
 		wg:         &wg,
 	}
 
@@ -161,12 +157,14 @@ func newConfigController() *configController {
 }
 
 func (c *configController) start() {
+	ctx, cancel := context.WithCancel(context.Background())
+	c.cancel = cancel
 	c.wg.Add(1)
 	go func() {
 		defer c.wg.Done()
 		defer GinkgoRecover()
 		By("Start controller manager")
-		err := c.k8sManager.Start(c.ctx)
+		err := c.k8sManager.Start(ctx)
 		Expect(err).ToNot(HaveOccurred())
 	}()
 }

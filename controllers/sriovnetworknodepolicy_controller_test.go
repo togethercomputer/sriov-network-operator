@@ -40,6 +40,7 @@ func mustMarshallSelector(t *testing.T, input *dptypes.NetDeviceSelectors) *json
 }
 
 func TestRenderDevicePluginConfigData(t *testing.T) {
+	t.Parallel()
 	table := []struct {
 		tname       string
 		policy      sriovnetworkv1.SriovNetworkNodePolicy
@@ -121,6 +122,7 @@ func TestRenderDevicePluginConfigData(t *testing.T) {
 		policyList := sriovnetworkv1.SriovNetworkNodePolicyList{Items: []sriovnetworkv1.SriovNetworkNodePolicy{tc.policy}}
 
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			resourceList, err := reconciler.renderDevicePluginConfigData(context.TODO(), &policyList, &node)
 			if err != nil {
 				t.Error(tc.tname, "renderDevicePluginConfigData has failed")

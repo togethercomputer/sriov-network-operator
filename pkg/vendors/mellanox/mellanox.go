@@ -1,6 +1,7 @@
 package mlxutils
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -78,7 +79,7 @@ func New(utilsHelper utils.CmdInterface) MellanoxInterface {
 func (m *mellanoxHelper) MstConfigReadData(pciAddress string) (string, string, error) {
 	log.Log.Info("MstConfigReadData()", "device", pciAddress)
 	args := []string{"-e", "-d", pciAddress, "q"}
-	stdout, stderr, err := m.utils.RunCommand("mstconfig", args...)
+	stdout, stderr, err := m.utils.RunCommand(context.Background(), "mstconfig", args...)
 	return stdout, stderr, err
 }
 
@@ -151,7 +152,7 @@ func (m *mellanoxHelper) MlxResetFW(pciAddresses []string) error {
 		cmdArgs := []string{"-d", pciAddress, "--skip_driver", "-l", "3", "-y", "reset"}
 		log.Log.Info("mellanox-plugin: resetFW()", "cmd-args", cmdArgs)
 		// We have to ensure that pciutils is installed into the container image Dockerfile.sriov-network-config-daemon
-		_, stderr, err := m.utils.RunCommand("mstfwreset", cmdArgs...)
+		_, stderr, err := m.utils.RunCommand(context.Background(), "mstfwreset", cmdArgs...)
 		if err != nil {
 			log.Log.Error(err, "mellanox-plugin resetFW(): failed", "stderr", stderr)
 			errs = append(errs, err)
@@ -192,7 +193,7 @@ func (m *mellanoxHelper) MlxConfigFW(attributesToChange map[string]MlxNic) error
 		if len(cmdArgs) <= 4 {
 			continue
 		}
-		_, strerr, err := m.utils.RunCommand("mstconfig", cmdArgs...)
+		_, strerr, err := m.utils.RunCommand(context.Background(), "mstconfig", cmdArgs...)
 		if err != nil {
 			log.Log.Error(err, "mellanox-plugin configFW(): failed", "stderr", strerr)
 			return err

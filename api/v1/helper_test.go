@@ -174,6 +174,7 @@ func TestRendering(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			var b bytes.Buffer
 			w := bufio.NewWriter(&b)
 			rendered, err := tc.network.RenderNetAttDef()
@@ -222,6 +223,7 @@ func TestIBRendering(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			var b bytes.Buffer
 			w := bufio.NewWriter(&b)
 			rendered, err := tc.network.RenderNetAttDef()
@@ -316,6 +318,7 @@ func TestOVSRendering(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			var b bytes.Buffer
 			w := bufio.NewWriter(&b)
 			rendered, err := tc.network.RenderNetAttDef()
@@ -794,6 +797,7 @@ func TestSriovNetworkNodePolicyApply(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			err := tc.policy.Apply(tc.currentState, tc.equalP)
 			if tc.expectedErr && err == nil {
 				t.Errorf("Apply expecting error.")
@@ -842,6 +846,7 @@ func TestVirtioVdpaNodePolicyApply(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			err := tc.policy.Apply(tc.currentState, tc.equalP)
 			if tc.expectedErr && err == nil {
 				t.Errorf("Apply expecting error.")
@@ -890,6 +895,7 @@ func TestVhostVdpaNodePolicyApply(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			err := tc.policy.Apply(tc.currentState, tc.equalP)
 			if tc.expectedErr && err == nil {
 				t.Errorf("Apply expecting error.")
@@ -928,6 +934,7 @@ func TestGetEswitchModeFromSpec(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			result := v1.GetEswitchModeFromSpec(tc.spec)
 			if diff := cmp.Diff(tc.expectedResult, result); diff != "" {
 				t.Errorf("unexpected result (-want +got):\n%s", diff)
@@ -961,6 +968,7 @@ func TestGetEswitchModeFromStatus(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			result := v1.GetEswitchModeFromStatus(tc.spec)
 			if diff := cmp.Diff(tc.expectedResult, result); diff != "" {
 				t.Errorf("unexpected result (-want +got):\n%s", diff)
@@ -1040,6 +1048,7 @@ func TestSriovNetworkPoolConfig_MaxUnavailable(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			pool := v1.SriovNetworkPoolConfig{
 				Spec: v1.SriovNetworkPoolConfigSpec{
 					MaxUnavailable: &tc.maxUn,
@@ -1126,6 +1135,7 @@ func TestNeedToUpdateSriov(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			if got := v1.NeedToUpdateSriov(tt.args.ifaceSpec, tt.args.ifaceStatus); got != tt.want {
 				t.Errorf("NeedToUpdateSriov() = %v, want %v", got, tt.want)
 			}
@@ -1495,6 +1505,7 @@ func TestSriovNetworkNodePolicyApplyBridgeConfig(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			err := tc.policy.ApplyBridgeConfig(tc.currentState)
 			if tc.expectedErr && err == nil {
 				t.Errorf("ApplyBridgeConfig expecting error.")
@@ -1540,6 +1551,7 @@ func TestNeedToUpdateBridges(t *testing.T) {
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
+			t.Parallel()
 			result := v1.NeedToUpdateBridges(tc.specBridge, tc.statusBridge)
 			if result != tc.expectedResult {
 				t.Errorf("unexpected result want: %t got: %t", tc.expectedResult, result)
