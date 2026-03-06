@@ -211,14 +211,13 @@ var _ = Describe("Kind E2E", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	It("should have webhook MutatingWebhookConfiguration", func() {
-		Eventually(func(g Gomega) {
-			mwc := &admissionregistrationv1.MutatingWebhookConfiguration{}
-			g.Expect(k8sClient.Get(ctx, types.NamespacedName{
-				Name: "sriov-network-operator-webhook-config",
-			}, mwc)).To(Succeed())
-			g.Expect(mwc.Webhooks).NotTo(BeEmpty())
-		}).WithTimeout(5 * time.Minute).WithPolling(5 * time.Second).Should(Succeed())
+	It("should have operator-webhook DaemonSet created", func() {
+		ds := &appsv1.DaemonSet{}
+		err := k8sClient.Get(ctx, types.NamespacedName{
+			Name: "operator-webhook", Namespace: namespace,
+		}, ds)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(ds.Status.DesiredNumberScheduled).To(BeNumerically(">", 0))
 	})
 
 	It("should deploy the network-resources-injector DaemonSet", func() {
