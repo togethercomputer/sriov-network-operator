@@ -42,6 +42,7 @@ const (
 	devPollInterval = time.Millisecond * 400
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestSriovTests(t *testing.T) {
 	RegisterFailHandler(Fail)
 

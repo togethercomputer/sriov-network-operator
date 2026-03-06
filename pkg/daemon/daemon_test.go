@@ -34,6 +34,7 @@ import (
 
 var SriovDevicePluginPod corev1.Pod
 
+//nolint:paralleltest // Ginkgo entry point
 func TestConfigDaemon(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Config Daemon Suite")
@@ -70,7 +71,7 @@ var _ = Describe("Config Daemon", func() {
 		syncCh = make(chan struct{}, 64)
 
 		// Fill syncCh with values so daemon doesn't wait for a writer
-		for i := 0; i < 64; i++ {
+		for range 64 {
 			syncCh <- struct{}{}
 		}
 

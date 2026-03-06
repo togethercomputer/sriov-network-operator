@@ -6,6 +6,7 @@ concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+
 jobs:
 
   build:
@@ -142,6 +143,94 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: lcov.out
+
+  kind-e2e:
+    name: kind-e2e
+    needs: [build, test, golangci]
+    runs-on: ubuntu-22.04-4core
+    env:
+      TEST_REPORT_PATH: kind-e2e-artifacts
+    steps:
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: run kind e2e
+      run: make test-e2e-kind-virtual
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ${{ env.TEST_REPORT_PATH }}
+        path: ./${{ env.TEST_REPORT_PATH }}
+
+  virtual-k8s-conformance:
+    if: ${{ vars.ENABLE_VIRTUAL_E2E == 'true' }}
+    name: virtual-k8s-conformance
+    needs: [build, test, golangci]
+    runs-on: ubuntu-22.04-4core
+    env:
+      TEST_REPORT_PATH: virtual-k8s-conformance-artifacts
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: go.mod
+
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | \
+        sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Verify KVM
+      run: |
+        ls -la /dev/kvm
+        sudo apt-get install -y cpu-checker
+        kvm-ok
+
+    - name: Install virtualization deps
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          qemu-kvm qemu-system-x86 qemu-utils \
+          libvirt-daemon-system libvirt-clients \
+          bridge-utils genisoimage \
+          podman
+        sudo usermod -aG kvm,libvirt "$USER"
+        sudo systemctl enable --now libvirtd
+
+    - name: Install kcli
+      run: |
+        sudo pip3 install kcli
+        kcli version
+
+    - name: Install ginkgo
+      run: make ginkgo
+
+    - name: Run virtual cluster conformance
+      run: sudo -E make test-e2e-conformance-virtual-k8s-cluster-ci
+      timeout-minutes: 60
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ${{ env.TEST_REPORT_PATH }}
+        path: ./${{ env.TEST_REPORT_PATH }}
+
+    - name: Remove virtual cluster
+      if: always()
+      run: |
+        sudo kcli delete cluster virtual -y
+        sudo kcli delete network virtual -y
 
   virtual-k8s-cluster:
     if: ${{ vars.ENABLE_E2E == 'true' }}  # requires self-hosted [sriov] runner

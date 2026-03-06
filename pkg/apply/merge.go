@@ -150,7 +150,7 @@ func MergeWebhookForUpdate(current, updated *uns.Unstructured) error {
 	}
 
 	for _, updatedWebhook := range updatedWebhooks {
-		updateWebhookMap := updatedWebhook.(map[string]interface{})
+		updateWebhookMap := updatedWebhook.(map[string]any)
 		caBundle, ok, err := uns.NestedString(updateWebhookMap, "clientConfig", "caBundle")
 		if err != nil {
 			return nil
@@ -197,9 +197,9 @@ func MergeWebhookForUpdate(current, updated *uns.Unstructured) error {
 	return nil
 }
 
-func findByName(objList []interface{}, name string) *map[string]interface{} {
+func findByName(objList []any, name string) *map[string]any {
 	for _, obj := range objList {
-		objMap := obj.(map[string]interface{})
+		objMap := obj.(map[string]any)
 		if objMap["name"] == name {
 			return &objMap
 		}

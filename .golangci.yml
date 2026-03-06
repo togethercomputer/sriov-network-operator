@@ -3,138 +3,138 @@ version: "2"
 linters:
   default: none
   enable:
-    # --- Bugs & Correctness ---
-    - bodyclose          # checks whether HTTP response body is closed
-    - exhaustive         # checks exhaustiveness of enum switch statements
-    - staticcheck        # comprehensive static analysis (replaces stylecheck, gosimple)
-    # - durationcheck    # checks for two durations multiplied together
-    # - nilerr           # finds code that returns nil even after checking err != nil
-    # - noctx            # detects HTTP requests without context.Context
-    # - rowserrcheck     # checks whether sql.Rows.Err is checked
-    # - sqlclosecheck    # checks that sql.Rows, sql.Stmt are closed
-    # - govet            # reports suspicious constructs (go vet)
-    # - contextcheck     # checks for non-inherited context usage
-    # - errcheck         # checks for unchecked errors — noisy, enable incrementally
-    # - nilnesserr       # reports err != nil checks that return a different nil error
-    # - nilnil           # checks no simultaneous return of nil error and invalid value
-    # - spancheck        # checks for mistakes with OpenTelemetry spans
-    # - musttag          # enforces field tags in (un)marshaled structs
+  # --- Bugs & Correctness ---
+  - bodyclose # checks whether HTTP response body is closed
+  - exhaustive # checks exhaustiveness of enum switch statements
+  - staticcheck # comprehensive static analysis (replaces stylecheck, gosimple)
+  # - durationcheck    # checks for two durations multiplied together
+  # - nilerr           # finds code that returns nil even after checking err != nil
+  - noctx # detects HTTP requests without context.Context
+  # - rowserrcheck     # checks whether sql.Rows.Err is checked
+  # - sqlclosecheck    # checks that sql.Rows, sql.Stmt are closed
+  # - govet            # reports suspicious constructs (go vet)
+  - contextcheck # checks for non-inherited context usage
+  # - errcheck         # checks for unchecked errors — noisy, enable incrementally
+  # - nilnesserr       # reports err != nil checks that return a different nil error
+  # - nilnil           # checks no simultaneous return of nil error and invalid value
+  # - spancheck        # checks for mistakes with OpenTelemetry spans
+  # - musttag          # enforces field tags in (un)marshaled structs
 
-    # --- Error Handling ---
-    # - errname          # checks that sentinel errors are Err-prefixed, error types Error-suffixed
-    # - errorlint        # finds issues with error wrapping (Go 1.13+)
-    # - err113           # checks error handling expressions (errors.New in returns, etc.)
-    # - wrapcheck        # checks errors from external packages are wrapped
+  # --- Error Handling ---
+  # - errname          # checks that sentinel errors are Err-prefixed, error types Error-suffixed
+  # - errorlint        # finds issues with error wrapping (Go 1.13+)
+  # - err113           # checks error handling expressions (errors.New in returns, etc.)
+  # - wrapcheck        # checks errors from external packages are wrapped
 
-    # --- Performance ---
-    - ineffassign        # detects unused assignments to existing variables
-    - unconvert          # removes unnecessary type conversions
-    # - wastedassign     # finds wasted assignment statements
-    # - prealloc         # finds slice declarations that could be pre-allocated
-    # - perfsprint       # checks fmt.Sprintf replaceable with faster alternatives
+  # --- Performance ---
+  - ineffassign # detects unused assignments to existing variables
+  - unconvert # removes unnecessary type conversions
+  # - wastedassign     # finds wasted assignment statements
+  # - prealloc         # finds slice declarations that could be pre-allocated
+  # - perfsprint       # checks fmt.Sprintf replaceable with faster alternatives
 
-    # --- Style & Consistency ---
-    - dogsled            # checks assignments with too many blank identifiers
-    - goconst            # finds repeated strings replaceable by constants
-    - goprintffuncname   # checks printf-like functions are named with f suffix
-    - misspell           # finds commonly misspelled English words
-    - unused             # checks for unused constants, variables, functions, types
-    - whitespace         # checks for unnecessary newlines at start/end of blocks
-    - depguard           # checks package imports against allow/deny lists
-    # - dupword          # checks for duplicate words in source code
-    # - godot            # checks if comments end in a period
-    # - nakedret         # checks functions with naked returns aren't too long
-    # - nlreturn         # checks for newline before return/branch statements
-    # - revive           # configurable drop-in replacement for golint
-    # - predeclared      # finds code that shadows Go's predeclared identifiers
-    # - usestdlibvars    # detects opportunity to use stdlib variables/constants
-    # - nonamedreturns   # reports all named returns
+  # --- Style & Consistency ---
+  - dogsled # checks assignments with too many blank identifiers
+  - goconst # finds repeated strings replaceable by constants
+  - goprintffuncname # checks printf-like functions are named with f suffix
+  - misspell # finds commonly misspelled English words
+  - unused # checks for unused constants, variables, functions, types
+  - whitespace # checks for unnecessary newlines at start/end of blocks
+  - depguard # checks package imports against allow/deny lists
+  # - dupword          # checks for duplicate words in source code
+  # - godot            # checks if comments end in a period
+  # - nakedret         # checks functions with naked returns aren't too long
+  # - nlreturn         # checks for newline before return/branch statements
+  # - revive           # configurable drop-in replacement for golint
+  # - predeclared      # finds code that shadows Go's predeclared identifiers
+  # - usestdlibvars    # detects opportunity to use stdlib variables/constants
+  # - nonamedreturns   # reports all named returns
 
-    # --- Complexity ---
-    # - gocyclo          # computes and checks cyclomatic complexity
-    # - gocognit         # computes and checks cognitive complexity
-    # - funlen           # checks for long functions
-    # - cyclop           # checks function and package cyclomatic complexity
-    # - maintidx         # measures maintainability index
-    # - nestif           # reports deeply nested if statements
+  # --- Complexity ---
+  # - gocyclo          # computes and checks cyclomatic complexity
+  # - gocognit         # computes and checks cognitive complexity
+  # - funlen           # checks for long functions
+  # - cyclop           # checks function and package cyclomatic complexity
+  # - maintidx         # measures maintainability index
+  # - nestif           # reports deeply nested if statements
 
-    # --- Code Patterns ---
-    - nosprintfhostport  # checks for misuse of Sprintf to construct host:port URLs
-    # - ginkgolinter     # enforces ginkgo/gomega standards
-    # - gocritic         # diagnostics for bugs, performance, style issues
-    # - forcetypeassert  # finds forced type assertions without ok check
-    # - exhaustruct      # checks all struct fields are initialized
-    # - containedctx     # detects struct containing context.Context
-    # - reassign         # checks package variables are not reassigned
-    # - ireturn          # accept interfaces, return concrete types
-    # - varnamelen       # checks variable name length matches scope
+  # --- Code Patterns ---
+  - nosprintfhostport # checks for misuse of Sprintf to construct host:port URLs
+  # - ginkgolinter     # enforces ginkgo/gomega standards
+  # - gocritic         # diagnostics for bugs, performance, style issues
+  # - forcetypeassert  # finds forced type assertions without ok check
+  # - exhaustruct      # checks all struct fields are initialized
+  - containedctx # detects struct containing context.Context
+  # - reassign         # checks package variables are not reassigned
+  # - ireturn          # accept interfaces, return concrete types
+  # - varnamelen       # checks variable name length matches scope
 
-    # --- Security ---
-    # - gosec            # inspects source code for security problems
+  # --- Security ---
+  # - gosec            # inspects source code for security problems
 
-    # --- Modules & Imports ---
-    # - gomoddirectives  # manages replace/retract/exclude in go.mod
-    # - gomodguard       # allow/blocklist for direct Go module dependencies
-    # - importas         # enforces consistent import aliases
+  # --- Modules & Imports ---
+  # - gomoddirectives  # manages replace/retract/exclude in go.mod
+  # - gomodguard       # allow/blocklist for direct Go module dependencies
+  # - importas         # enforces consistent import aliases
 
-    # --- SQL ---
-    # - unqueryvet       # detects SELECT * in SQL queries
+  # --- SQL ---
+  # - unqueryvet       # detects SELECT * in SQL queries
 
-    # --- Logging ---
-    # - loggercheck      # checks key-value pairs for common loggers (zap, slog, logr)
-    # - sloglint         # ensures consistent log/slog style
-    # - zerologlint      # detects wrong zerolog usage
+  # --- Logging ---
+  # - loggercheck      # checks key-value pairs for common loggers (zap, slog, logr)
+  # - sloglint         # ensures consistent log/slog style
+  # - zerologlint      # detects wrong zerolog usage
 
-    # --- Testing ---
-    # - paralleltest     # detects missing t.Parallel() in tests
-    # - tparallel        # detects inappropriate t.Parallel() usage
-    # - thelper          # detects test helpers without t.Helper()
-    # - testpackage      # enforces use of separate _test package
-    # - testifylint      # checks usage of testify
-    # - usetesting       # reports functions replaceable with testing package
+  # --- Testing ---
+  - paralleltest # detects missing t.Parallel() in tests
+  - tparallel # detects inappropriate t.Parallel() usage
+  # - thelper          # detects test helpers without t.Helper()
+  # - testpackage      # enforces use of separate _test package
+  # - testifylint      # checks usage of testify
+  # - usetesting       # reports functions replaceable with testing package
 
-    # --- Modernization ---
-    # - modernize        # suggests simplifications using modern Go features
-    # - exptostd         # detects x/exp functions replaceable by stdlib
-    # - intrange         # finds for loops that could use integer range
-    # - copyloopvar      # detects unnecessary loop variable copies (Go 1.22+)
-    # - mirror           # reports wrong mirror patterns of bytes/strings usage
+  # --- Modernization ---
+  - modernize # suggests simplifications using modern Go features
+  # - exptostd         # detects x/exp functions replaceable by stdlib
+  # - intrange         # finds for loops that could use integer range
+  # - copyloopvar      # detects unnecessary loop variable copies (Go 1.22+)
+  # - mirror           # reports wrong mirror patterns of bytes/strings usage
 
   disable:
-    # --- Not applicable to this project ---
-    - arangolint         # arangodb client best practices — not used
-    - protogetter        # proto message field getters — not used
-    - tagliatelle        # struct tag naming conventions — conflicts with k8s json tags
-    - gosmopolitan       # i18n anti-patterns — not applicable
-    - zerologlint        # zerolog usage — not used
-    - testifylint        # testify usage — project uses ginkgo/gomega
-    - inamedparam        # unnamed interface params — too noisy for k8s-style interfaces
+  # --- Not applicable to this project ---
+  - arangolint # arangodb client best practices — not used
+  - protogetter # proto message field getters — not used
+  - tagliatelle # struct tag naming conventions — conflicts with k8s json tags
+  - gosmopolitan # i18n anti-patterns — not applicable
+  - zerologlint # zerolog usage — not used
+  - testifylint # testify usage — project uses ginkgo/gomega
+  - inamedparam # unnamed interface params — too noisy for k8s-style interfaces
 
-    # --- Too opinionated / noisy ---
-    - exhaustruct        # require all struct fields initialized — impractical with k8s types
-    - varnamelen         # variable name length — too strict
-    - wsl_v5             # whitespace formatting — too opinionated
-    - gochecknoglobals   # no globals — impractical for operator pattern
-    - gochecknoinits     # no init functions — impractical for scheme registration
-    - nlreturn           # newline before return — too noisy
-    - noinlineerr        # no inline error handling — too restrictive
-    - decorder           # declaration order — too strict
-    - grouper            # expression group analysis — too opinionated
-    - funcorder          # function order — too strict
-    - embeddedstructfieldcheck # embedded struct field ordering — too opinionated
-    - iotamixing         # iota in mixed const blocks — too strict
-    - godox              # flags TODO/FIXME — useful but too noisy during development
+  # --- Too opinionated / noisy ---
+  - exhaustruct # require all struct fields initialized — impractical with k8s types
+  - varnamelen # variable name length — too strict
+  - wsl_v5 # whitespace formatting — too opinionated
+  - gochecknoglobals # no globals — impractical for operator pattern
+  - gochecknoinits # no init functions — impractical for scheme registration
+  - nlreturn # newline before return — too noisy
+  - noinlineerr # no inline error handling — too restrictive
+  - decorder # declaration order — too strict
+  - grouper # expression group analysis — too opinionated
+  - funcorder # function order — too strict
+  - embeddedstructfieldcheck # embedded struct field ordering — too opinionated
+  - iotamixing # iota in mixed const blocks — too strict
+  - godox # flags TODO/FIXME — useful but too noisy during development
 
-    # --- Deprecated ---
-    - wsl                # deprecated in favor of wsl_v5
+  # --- Deprecated ---
+  - wsl # deprecated in favor of wsl_v5
 
   settings:
     depguard:
       rules:
         main:
           deny:
-            - pkg: github.com/sirupsen/logrus
-              desc: logging is allowed only by logutils.Log
+          - pkg: github.com/sirupsen/logrus
+            desc: logging is allowed only by logutils.Log
     dupl:
       threshold: 100
     funlen:
@@ -145,18 +145,18 @@ linters:
       min-occurrences: 2
     gocritic:
       disabled-checks:
-        - dupImport
-        - ifElseChain
-        - octalLiteral
-        - whyNoLint
-        - wrapperFunc
-        - unnamedResult
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+      - unnamedResult
       enabled-tags:
-        - diagnostic
-        - experimental
-        - opinionated
-        - performance
-        - style
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
       settings:
         hugeParam:
           sizeThreshold: 512
@@ -170,58 +170,61 @@ linters:
       locale: US
     mnd:
       checks:
-        - argument
-        - case
-        - condition
-        - return
+      - argument
+      - case
+      - condition
+      - return
     prealloc:
       simple: true
       range-loops: true
       for-loops: false
     staticcheck:
       dot-import-whitelist:
-        - github.com/onsi/ginkgo/v2
-        - github.com/onsi/gomega
-        - github.com/onsi/gomega/gstruct
+      - github.com/onsi/ginkgo/v2
+      - github.com/onsi/gomega
+      - github.com/onsi/gomega/gstruct
 
   exclusions:
     generated: lax
     presets:
-      - comments
-      - common-false-positives
-      - legacy
-      - std-error-handling
+    - comments
+    - common-false-positives
+    - legacy
+    - std-error-handling
     rules:
-      - linters:
-          - dupl
-          - goconst
-          - gosec
-          - lll
-          - mnd
-          - staticcheck
-        path: _test\.go
-      - linters:
-          - goconst
-        path: test/conformance/tests
-      - linters:
-          - goconst
-        path: (.+)_test\.go
+    - linters:
+      - dupl
+      - goconst
+      - gosec
+      - lll
+      - mnd
+      - staticcheck
+      path: _test\.go
+    - linters:
+      - goconst
+      path: test/conformance/tests
+    - linters:
+      - goconst
+      path: (.+)_test\.go
+    - linters:
+      - paralleltest
+      path: pkg/webhook/validate_test\.go
     paths:
-      - third_party$
-      - builtin$
-      - examples$
+    - third_party$
+    - builtin$
+    - examples$
 
 formatters:
   enable:
-    - gofmt
-    - goimports
+  - gofmt
+  - goimports
   settings:
     goimports:
       local-prefixes:
-        - github.com/k8snetworkplumbingwg/sriov-network-operator
+      - github.com/k8snetworkplumbingwg/sriov-network-operator
   exclusions:
     generated: lax
     paths:
-      - third_party$
-      - builtin$
-      - examples$
+    - third_party$
+    - builtin$
+    - examples$

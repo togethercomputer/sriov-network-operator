@@ -170,7 +170,7 @@ func (dn *Daemon) Run(stopCh <-chan struct{}, exitCh <-chan error) error {
 	informer := informerFactory.Sriovnetwork().V1().SriovNetworkNodeStates().Informer()
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: dn.enqueueNodeState,
-		UpdateFunc: func(old, new interface{}) {
+		UpdateFunc: func(old, new any) {
 			dn.enqueueNodeState(new)
 		},
 	})
@@ -224,7 +224,7 @@ func (dn *Daemon) runWorker() {
 	}
 }
 
-func (dn *Daemon) enqueueNodeState(obj interface{}) {
+func (dn *Daemon) enqueueNodeState(obj any) {
 	var ns *sriovnetworkv1.SriovNetworkNodeState
 	var ok bool
 	if ns, ok = obj.(*sriovnetworkv1.SriovNetworkNodeState); !ok {
@@ -245,7 +245,7 @@ func (dn *Daemon) processNextWorkItem() bool {
 	log.Log.V(2).Info("get item from queue", "item", obj.(int64))
 
 	// We wrap this block in a func so we can defer c.workqueue.Done.
-	err := func(obj interface{}) error {
+	err := func(obj any) error {
 		// We call Done here so the workqueue knows we have finished
 		// processing this item.
 		defer dn.workqueue.Done(obj)
@@ -284,11 +284,11 @@ func (dn *Daemon) processNextWorkItem() bool {
 	return true
 }
 
-func (dn *Daemon) operatorConfigAddHandler(obj interface{}) {
+func (dn *Daemon) operatorConfigAddHandler(obj any) {
 	dn.operatorConfigChangeHandler(&sriovnetworkv1.SriovOperatorConfig{}, obj)
 }
 
-func (dn *Daemon) operatorConfigChangeHandler(old, new interface{}) {
+func (dn *Daemon) operatorConfigChangeHandler(old, new any) {
 	oldCfg := old.(*sriovnetworkv1.SriovOperatorConfig)
 	newCfg := new.(*sriovnetworkv1.SriovOperatorConfig)
 	if newCfg.Namespace != vars.Namespace || newCfg.Name != consts.DefaultConfigName {
@@ -753,7 +753,7 @@ func (dn *Daemon) rebootNode() {
 	// However note we use `;` instead of `&&` so we keep rebooting even
 	// if kubelet failed to shutdown - that way the machine will still eventually reboot
 	// as systemd will time out the stop invocation.
-	stdOut, StdErr, err := dn.HostHelpers.RunCommand("systemd-run", "--unit", "sriov-network-config-daemon-reboot",
+	stdOut, StdErr, err := dn.HostHelpers.RunCommand(context.Background(), "systemd-run", "--unit", "sriov-network-config-daemon-reboot",
 		"--description", "sriov-network-config-daemon reboot node", "/bin/sh", "-c", "systemctl stop kubelet.service; reboot")
 
 	if err != nil {

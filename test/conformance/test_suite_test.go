@@ -30,6 +30,7 @@ func init() {
 	reportPath = flag.String("report", "", "the path of the report directory containing details for failed tests")
 }
 
+//nolint:paralleltest // Ginkgo entry point
 func TestTest(t *testing.T) {
 	// We want to collect logs before any resource is deleted in AfterEach, so we register the global fail handler
 	// in a way such that the reporter's Dump is always called before the default Fail.

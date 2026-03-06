@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -13,6 +14,7 @@ import (
 	"github.com/jaypipes/ghw/pkg/option"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestUtilsVirtual(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Utils")
@@ -45,7 +47,7 @@ var _ = Describe("Virtual", func() {
 				ghw.Network = net.New
 			})
 
-			metaData, _, err := getOpenstackData(false)
+			metaData, _, err := getOpenstackData(context.Background(), false)
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(metaData.Devices).To(HaveLen(2))

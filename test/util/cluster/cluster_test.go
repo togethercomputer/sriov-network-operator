@@ -17,6 +17,7 @@ func init() {
 }
 
 func TestFindSriovDevices(t *testing.T) {
+	t.Parallel()
 	nodes := &EnabledNodes{
 		Nodes: []string{"worker-0", "worker-1"},
 		States: map[string]sriovv1.SriovNetworkNodeState{
@@ -68,6 +69,7 @@ func TestFindSriovDevices(t *testing.T) {
 }
 
 func TestFindSriovDevicesFilteredByEnv(t *testing.T) {
+	t.Parallel()
 	nodes := &EnabledNodes{
 		Nodes: []string{"worker-0"},
 		States: map[string]sriovv1.SriovNetworkNodeState{
@@ -104,6 +106,7 @@ func TestFindSriovDevicesFilteredByEnv(t *testing.T) {
 }
 
 func TestFindSriovDevicesFilteredByEnvOnDifferentNode(t *testing.T) {
+	t.Parallel()
 	nodes := &EnabledNodes{
 		Nodes: []string{"worker-0"},
 		States: map[string]sriovv1.SriovNetworkNodeState{

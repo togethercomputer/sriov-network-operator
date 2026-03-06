@@ -368,12 +368,7 @@ func (p *SriovNetworkNodePolicy) Selected(node *corev1.Node) bool {
 }
 
 func StringInArray(val string, array []string) bool {
-	for i := range array {
-		if array[i] == val {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(array, val)
 }
 
 func RemoveString(s string, slice []string) (result []string, found bool) {
@@ -974,8 +969,8 @@ func (s *SriovNetworkPoolConfig) MaxUnavailable(numOfNodes int) (int, error) {
 	intOrPercent := *s.Spec.MaxUnavailable
 
 	if intOrPercent.Type == intstrutil.String {
-		if strings.HasSuffix(intOrPercent.StrVal, "%") {
-			i := strings.TrimSuffix(intOrPercent.StrVal, "%")
+		if before, ok := strings.CutSuffix(intOrPercent.StrVal, "%"); ok {
+			i := before
 			v, err := strconv.Atoi(i)
 			if err != nil {
 				return 0, fmt.Errorf("invalid value %q: %v", intOrPercent.StrVal, err)

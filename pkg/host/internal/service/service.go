@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -64,7 +65,7 @@ func (s *service) IsServiceEnabled(servicePath string) (bool, error) {
 	defer exit()
 
 	// TODO: add check for the output and logs
-	_, _, err = s.utilsHelper.RunCommand("systemctl", "is-enabled", serviceName)
+	_, _, err = s.utilsHelper.RunCommand(context.Background(), "systemctl", "is-enabled", serviceName)
 	return err == nil, nil
 }
 
@@ -101,7 +102,7 @@ func (s *service) EnableService(service *types.Service) error {
 	// we use reenable command (the command is a combination of disable+enable) to reset
 	// symlinks for the unit and make sure that only symlinks that are currently
 	// configured in the [Install] section exist for the service.
-	_, _, err = s.utilsHelper.RunCommand("systemctl", "reenable", service.Name)
+	_, _, err = s.utilsHelper.RunCommand(context.Background(), "systemctl", "reenable", service.Name)
 	return err
 }
 

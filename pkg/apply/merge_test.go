@@ -358,7 +358,7 @@ webhooks:
 	g.Expect(ok).To(BeTrue())
 	g.Expect(len(webhooks)).To(Equal(1))
 
-	webhook0, ok := webhooks[0].(map[string]interface{})
+	webhook0, ok := webhooks[0].(map[string]any)
 	g.Expect(ok).To(BeTrue())
 	caBundle, ok, err := uns.NestedString(webhook0, "clientConfig", "caBundle")
 	g.Expect(err).NotTo(HaveOccurred())

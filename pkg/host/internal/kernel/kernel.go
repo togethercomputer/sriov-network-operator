@@ -1,10 +1,12 @@
 package kernel
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -39,7 +41,7 @@ func (k *kernel) LoadKernelModule(name string, args ...string) error {
 		return nil
 	}
 
-	_, _, err = k.utilsHelper.RunCommand("/bin/sh", "-c", fmt.Sprintf("%s modprobe %s %s", chrootDefinition, name, cmdArgs))
+	_, _, err = k.utilsHelper.RunCommand(context.Background(), "/bin/sh", "-c", fmt.Sprintf("%s modprobe %s %s", chrootDefinition, name, cmdArgs))
 	if err != nil {
 		log.Log.Error(err, "LoadKernelModule(): failed to load kernel module with arguments", "name", name, "args", args)
 		return err
@@ -51,7 +53,7 @@ func (k *kernel) IsKernelModuleLoaded(kernelModuleName string) (bool, error) {
 	log.Log.Info("IsKernelModuleLoaded(): check if kernel module is loaded", "name", kernelModuleName)
 	chrootDefinition := utils.GetChrootExtension()
 
-	stdout, stderr, err := k.utilsHelper.RunCommand("/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep \"^%s\"", chrootDefinition, kernelModuleName))
+	stdout, stderr, err := k.utilsHelper.RunCommand(context.Background(), "/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep \"^%s\"", chrootDefinition, kernelModuleName))
 	if err != nil && len(stderr) != 0 {
 		log.Log.Error(err, "IsKernelModuleLoaded(): failed to check if kernel module is loaded",
 			"name", kernelModuleName, "stderr", stderr)
@@ -102,12 +104,7 @@ func (k *kernel) GetCurrentKernelArgs() (string, error) {
 // several times in the kernel cmd line. We can only ensure that the kernel cmd line has the key/val kernel arg that we set.
 func (k *kernel) IsKernelArgsSet(cmdLine string, karg string) bool {
 	elements := strings.Fields(cmdLine)
-	for _, element := range elements {
-		if element == karg {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(elements, karg)
 }
 
 // Unbind unbind driver for one device
@@ -263,7 +260,7 @@ func (k *kernel) CheckRDMAEnabled() (bool, error) {
 	log.Log.V(2).Info("CheckRDMAEnabled()")
 	chrootDefinition := utils.GetChrootExtension()
 
-	_, stderr, mlx5Err := k.utilsHelper.RunCommand("/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep --quiet 'mlx5_core'", chrootDefinition))
+	_, stderr, mlx5Err := k.utilsHelper.RunCommand(context.Background(), "/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep --quiet 'mlx5_core'", chrootDefinition))
 	if mlx5Err != nil && len(stderr) != 0 {
 		log.Log.Error(mlx5Err, "CheckRDMAEnabled(): failed to check for kernel module 'mlx5_core'", "stderr", stderr)
 		return false, fmt.Errorf("%s", stderr)
@@ -281,7 +278,7 @@ func (k *kernel) rdmaModulesAreLoaded() (bool, error) {
 	chrootDefinition := utils.GetChrootExtension()
 
 	// check if the driver is already loaded in to the system
-	_, stderr, err := k.utilsHelper.RunCommand("/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep --quiet '\\(^ib\\|^rdma\\)'", chrootDefinition))
+	_, stderr, err := k.utilsHelper.RunCommand(context.Background(), "/bin/sh", "-c", fmt.Sprintf("%s lsmod | grep --quiet '\\(^ib\\|^rdma\\)'", chrootDefinition))
 	if err != nil && len(stderr) != 0 {
 		log.Log.Error(err, "rdmaModulesAreLoaded(): fail to check if ib and rdma kernel modules are loaded", "stderr", stderr)
 		return false, fmt.Errorf("%s", stderr)
@@ -301,7 +298,7 @@ func (k *kernel) IsKernelLockdownMode() bool {
 	path := utils.GetHostExtension()
 	path = filepath.Join(path, "/sys/kernel/security/lockdown")
 
-	stdout, stderr, err := k.utilsHelper.RunCommand("cat", path)
+	stdout, stderr, err := k.utilsHelper.RunCommand(context.Background(), "cat", path)
 	log.Log.V(2).Info("IsKernelLockdownMode()", "output", stdout, "error", err)
 	if err != nil {
 		log.Log.Error(err, "IsKernelLockdownMode(): failed to check for lockdown file", "stderr", stderr)

@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"fmt"
+	"slices"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -106,11 +107,9 @@ func loadVendorPlugins(ns *sriovnetworkv1.SriovNetworkNodeState, helpers helper.
 }
 
 func isPluginDisabled(pluginName string, disabledPlugins []string) bool {
-	for _, p := range disabledPlugins {
-		if p == pluginName {
-			log.Log.V(2).Info("plugin is disabled", "name", pluginName)
-			return true
-		}
+	if slices.Contains(disabledPlugins, pluginName) {
+		log.Log.V(2).Info("plugin is disabled", "name", pluginName)
+		return true
 	}
 	return false
 }

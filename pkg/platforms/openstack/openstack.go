@@ -1,6 +1,7 @@
 package openstack
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -114,8 +115,8 @@ func New(hostManager host.HostManagerInterface) OpenstackInterface {
 }
 
 // GetOpenstackData gets the metadata and network_data
-func getOpenstackData(mountConfigDrive bool) (metaData *OSPMetaData, networkData *OSPNetworkData, err error) {
-	metaData, networkData, err = getOpenstackDataFromConfigDrive(mountConfigDrive)
+func getOpenstackData(ctx context.Context, mountConfigDrive bool) (metaData *OSPMetaData, networkData *OSPNetworkData, err error) {
+	metaData, networkData, err = getOpenstackDataFromConfigDrive(ctx, mountConfigDrive)
 	if err != nil {
 		log.Log.Error(err, "GetOpenStackData(): non-fatal error getting OpenStack data from config drive")
 		metaData, networkData, err = getOpenstackDataFromMetadataService()
@@ -160,10 +161,10 @@ func getOpenstackData(mountConfigDrive bool) (metaData *OSPMetaData, networkData
 }
 
 // getConfigDriveDevice returns the config drive device which was found
-func getConfigDriveDevice() (string, error) {
+func getConfigDriveDevice(ctx context.Context) (string, error) {
 	dev := "/dev/disk/by-label/" + configDriveLabel
 	if _, err := os.Stat(dev); os.IsNotExist(err) {
-		out, err := exec.Command(
+		out, err := exec.CommandContext(ctx,
 			"blkid", "-l",
 			"-t", "LABEL="+configDriveLabel,
 			"-o", "device",
@@ -178,7 +179,7 @@ func getConfigDriveDevice() (string, error) {
 }
 
 // mountConfigDriveDevice mounts the config drive and return the path
-func mountConfigDriveDevice(device string) (string, error) {
+func mountConfigDriveDevice(ctx context.Context, device string) (string, error) {
 	if device == "" {
 		return "", fmt.Errorf("device is empty")
 	}
@@ -186,7 +187,7 @@ func mountConfigDriveDevice(device string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error creating temp directory: %w", err)
 	}
-	cmd := exec.Command("mount", "-o", "ro", "-t", "auto", device, tmpDir)
+	cmd := exec.CommandContext(ctx, "mount", "-o", "ro", "-t", "auto", device, tmpDir)
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("error mounting config drive: %w", err)
 	}
@@ -195,11 +196,11 @@ func mountConfigDriveDevice(device string) (string, error) {
 }
 
 // ummountConfigDriveDevice ummounts the config drive device
-func ummountConfigDriveDevice(path string) error {
+func ummountConfigDriveDevice(ctx context.Context, path string) error {
 	if path == "" {
 		return fmt.Errorf("path is empty")
 	}
-	cmd := exec.Command("umount", path)
+	cmd := exec.CommandContext(ctx, "umount", path)
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("error umounting config drive: %w", err)
 	}
@@ -208,7 +209,7 @@ func ummountConfigDriveDevice(path string) error {
 }
 
 // getOpenstackDataFromConfigDrive reads the meta_data and network_data files
-func getOpenstackDataFromConfigDrive(mountConfigDrive bool) (metaData *OSPMetaData, networkData *OSPNetworkData, err error) {
+func getOpenstackDataFromConfigDrive(ctx context.Context, mountConfigDrive bool) (metaData *OSPMetaData, networkData *OSPNetworkData, err error) {
 	metaData = &OSPMetaData{}
 	networkData = &OSPNetworkData{}
 	var configDrivePath string
@@ -216,16 +217,16 @@ func getOpenstackDataFromConfigDrive(mountConfigDrive bool) (metaData *OSPMetaDa
 	var metadataf *os.File
 	ospMetaDataFilePath := ospMetaDataFile
 	if mountConfigDrive {
-		configDriveDevice, err := getConfigDriveDevice()
+		configDriveDevice, err := getConfigDriveDevice(ctx)
 		if err != nil {
 			return metaData, networkData, fmt.Errorf("error finding config drive device: %w", err)
 		}
-		configDrivePath, err = mountConfigDriveDevice(configDriveDevice)
+		configDrivePath, err = mountConfigDriveDevice(ctx, configDriveDevice)
 		if err != nil {
 			return metaData, networkData, fmt.Errorf("error mounting config drive device: %w", err)
 		}
 		defer func() {
-			if e := ummountConfigDriveDevice(configDrivePath); err == nil && e != nil {
+			if e := ummountConfigDriveDevice(ctx, configDrivePath); err == nil && e != nil {
 				err = fmt.Errorf("error umounting config drive device: %w", e)
 			}
 			if e := os.Remove(configDrivePath); err == nil && e != nil {
@@ -331,7 +332,7 @@ func (o *openstackContext) CreateOpenstackDevicesInfo() error {
 	log.Log.Info("CreateOpenstackDevicesInfo()")
 	devicesInfo := make(OSPDevicesInfo)
 
-	metaData, networkData, err := getOpenstackData(true)
+	metaData, networkData, err := getOpenstackData(context.TODO(), true)
 	if err != nil {
 		log.Log.Error(err, "failed to read OpenStack data")
 		return err

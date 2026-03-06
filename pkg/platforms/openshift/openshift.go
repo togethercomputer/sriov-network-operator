@@ -310,7 +310,7 @@ func (c *openshiftContext) GetNodeMachinePoolName(ctx context.Context, node *cor
 func (c *openshiftContext) ChangeMachineConfigPoolPause(ctx context.Context, mcp *mcv1.MachineConfigPool, pause bool) error {
 	log.Log.Info("ChangeMachineConfigPoolPause:()")
 
-	patchString := []byte(fmt.Sprintf(`{"spec":{"paused":%t}}`, pause))
+	patchString := fmt.Appendf(nil, `{"spec":{"paused":%t}}`, pause)
 	patch := client.RawPatch(types.MergePatchType, patchString)
 	err := c.kubeClient.Patch(ctx, mcp, patch)
 	if err != nil {

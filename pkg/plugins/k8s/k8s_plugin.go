@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"context"
 	"strings"
 
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -312,7 +313,7 @@ func (p *K8sPlugin) isOVSHwOffloadingEnabled() bool {
 		return false
 	}
 	defer exit()
-	out, _, err := p.hostHelper.RunCommand("ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload")
+	out, _, err := p.hostHelper.RunCommand(context.Background(), "ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload")
 	if err != nil {
 		log.Log.V(2).Info("isOVSHwOffloadingEnabled() check failed, assume offloading is disabled", "error", err.Error())
 		return false

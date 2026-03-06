@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,7 +18,7 @@ import (
 //go:generate ../../bin/mockgen -destination mock/mock_utils.go -source utils.go
 type CmdInterface interface {
 	Chroot(string) (func() error, error)
-	RunCommand(string, ...string) (string, string, error)
+	RunCommand(context.Context, string, ...string) (string, string, error)
 }
 
 type utilsHelper struct {
@@ -50,11 +51,11 @@ func (u *utilsHelper) Chroot(path string) (func() error, error) {
 }
 
 // RunCommand runs a command
-func (u *utilsHelper) RunCommand(command string, args ...string) (string, string, error) {
+func (u *utilsHelper) RunCommand(ctx context.Context, command string, args ...string) (string, string, error) {
 	log.Log.Info("RunCommand()", "command", command, "args", args)
 	var stdout, stderr bytes.Buffer
 
-	cmd := exec.Command(command, args...)
+	cmd := exec.CommandContext(ctx, command, args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 

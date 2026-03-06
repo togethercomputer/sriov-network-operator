@@ -38,7 +38,7 @@ func restoreOrigFuncs() {
 }
 
 func getTestSriovInterfaceConfig(platform int) []byte {
-	return []byte(fmt.Sprintf(`spec:
+	return fmt.Appendf(nil, `spec:
     interfaces:
         - pciaddress: 0000:d8:00.0
           numvfs: 4
@@ -58,7 +58,7 @@ func getTestSriovInterfaceConfig(platform int) []byte {
 unsupportedNics: false
 platformType: %d
 manageSoftwareBridges: true
-`, platform))
+`, platform)
 }
 
 var testSriovSupportedNicIDs = `8086 1583 154c
@@ -81,7 +81,7 @@ type nodeStateContainsDeviceMatcher struct {
 	deviceName string
 }
 
-func (ns *nodeStateContainsDeviceMatcher) Matches(x interface{}) bool {
+func (ns *nodeStateContainsDeviceMatcher) Matches(x any) bool {
 	s, ok := x.(*sriovnetworkv1.SriovNetworkNodeState)
 	if !ok {
 		return false

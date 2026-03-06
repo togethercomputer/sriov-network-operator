@@ -1,6 +1,7 @@
 package udev
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -38,7 +39,7 @@ func (u *udev) PrepareNMUdevRule(supportedVfIds []string) error {
 	}
 
 	// create the pf finder script for udev rules
-	stdout, stderr, err := u.utilsHelper.RunCommand("/bin/bash", filepath.Join(vars.FilesystemRoot, consts.UdevDisableNM))
+	stdout, stderr, err := u.utilsHelper.RunCommand(context.Background(), "/bin/bash", filepath.Join(vars.FilesystemRoot, consts.UdevDisableNM))
 	if err != nil {
 		log.Log.Error(err, "PrepareNMUdevRule(): failed to prepare nmUdevRule", "stderr", stderr)
 		return err
@@ -114,12 +115,12 @@ func (u *udev) RemoveVfRepresentorUdevRule(pfPciAddress string) error {
 func (u *udev) LoadUdevRules() error {
 	log.Log.V(2).Info("LoadUdevRules()")
 	udevAdmTool := "udevadm"
-	_, stderr, err := u.utilsHelper.RunCommand(udevAdmTool, "control", "--reload-rules")
+	_, stderr, err := u.utilsHelper.RunCommand(context.Background(), udevAdmTool, "control", "--reload-rules")
 	if err != nil {
 		log.Log.Error(err, "LoadUdevRules(): failed to reload rules", "error", stderr)
 		return err
 	}
-	_, stderr, err = u.utilsHelper.RunCommand(udevAdmTool, "trigger", "--action", "add", "--attr-match", "subsystem=net")
+	_, stderr, err = u.utilsHelper.RunCommand(context.Background(), udevAdmTool, "trigger", "--action", "add", "--attr-match", "subsystem=net")
 	if err != nil {
 		log.Log.Error(err, "LoadUdevRules(): failed to trigger rules", "error", stderr)
 		return err
@@ -131,7 +132,7 @@ func (u *udev) LoadUdevRules() error {
 // The command watches the udev event queue, and exits if all current events are handled.
 func (u *udev) WaitUdevEventsProcessed(timeout int) error {
 	log.Log.V(2).Info("WaitUdevEventsProcessed()")
-	_, stderr, err := u.utilsHelper.RunCommand("udevadm", "settle", "-t", strconv.Itoa(timeout))
+	_, stderr, err := u.utilsHelper.RunCommand(context.Background(), "udevadm", "settle", "-t", strconv.Itoa(timeout))
 	if err != nil {
 		log.Log.Error(err, "WaitUdevEventsProcessed(): failed to wait for udev rules to process", "error", stderr, "timeout", timeout)
 		return err

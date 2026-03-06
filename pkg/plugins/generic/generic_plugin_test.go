@@ -15,6 +15,7 @@ import (
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestGenericPlugin(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Test Generic Plugin")
@@ -43,7 +44,7 @@ var _ = Describe("Generic plugin", func() {
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgRdmaShared).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIommuPassthrough).Return(false).AnyTimes()
 
-		hostHelper.EXPECT().RunCommand(gomock.Any(), gomock.Any()).Return("", "", nil).AnyTimes()
+		hostHelper.EXPECT().RunCommand(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return("", "", nil).AnyTimes()
 
 		genericPlugin, err = NewGenericPlugin(hostHelper)
 		Expect(err).ToNot(HaveOccurred())
@@ -967,7 +968,6 @@ var _ = Describe("Generic plugin", func() {
 				Expect(changed).To(BeTrue())
 			})
 			It("should not configure RDMA kernel args", func() {
-				hostHelper.EXPECT().SetRDMASubsystem("").Return(nil)
 				rdmaState.Spec.System = sriovnetworkv1.System{}
 				err := genericPlugin.(*GenericPlugin).configRdmaKernelArg(rdmaState)
 				Expect(err).ToNot(HaveOccurred())

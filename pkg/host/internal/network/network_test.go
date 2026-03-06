@@ -19,7 +19,7 @@ import (
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/helpers"
 )
 
-func getDevlinkParam(t uint8, value interface{}) *netlink.DevlinkParam {
+func getDevlinkParam(t uint8, value any) *netlink.DevlinkParam {
 	return &netlink.DevlinkParam{
 		Name: "test_param",
 		Type: t,

@@ -431,6 +431,7 @@ var _ = Describe("[sriov] operator", Ordered, func() {
 						mainDeviceForNode := findMainSriovDevice(executorPod, sriovDeviceList)
 						if mainDeviceForNode == nil {
 							Skip("Could not find pf used as gateway")
+							return
 						}
 						By("Using device " + mainDeviceForNode.Name + " on node " + testNode)
 

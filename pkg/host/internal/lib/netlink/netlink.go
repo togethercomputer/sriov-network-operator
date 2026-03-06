@@ -62,7 +62,7 @@ type NetlinkLib interface {
 	// Equivalent to: `devlink dev param set <bus>/<device> name <param> cmode <cmode> value <value>`
 	// cmode argument should contain valid cmode value as uint8, modes are define in nl.DEVLINK_PARAM_CMODE_* constants
 	// value argument should have one of the following types: uint8, uint16, uint32, string, bool
-	DevlinkSetDeviceParam(bus string, device string, param string, cmode uint8, value interface{}) error
+	DevlinkSetDeviceParam(bus string, device string, param string, cmode uint8, value any) error
 	// RdmaLinkByName finds a link by name and returns a pointer to the object if
 	// found and nil error, otherwise returns error code.
 	RdmaLinkByName(name string) (*netlink.RdmaLink, error)
@@ -173,7 +173,7 @@ func (w *libWrapper) DevlinkGetDeviceParamByName(bus string, device string, para
 // Equivalent to: `devlink dev param set <bus>/<device> name <param> cmode <cmode> value <value>`
 // cmode argument should contain valid cmode value as uint8, modes are define in nl.DEVLINK_PARAM_CMODE_* constants
 // value argument should have one of the following types: uint8, uint16, uint32, string, bool
-func (w *libWrapper) DevlinkSetDeviceParam(bus string, device string, param string, cmode uint8, value interface{}) error {
+func (w *libWrapper) DevlinkSetDeviceParam(bus string, device string, param string, cmode uint8, value any) error {
 	return netlink.DevlinkSetDeviceParam(bus, device, param, cmode, value)
 }
 

@@ -20,6 +20,7 @@ import (
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestK8sPlugin(t *testing.T) {
 	log.SetLogger(zap.New(
 		zap.WriteTo(GinkgoWriter),
@@ -30,11 +31,11 @@ func TestK8sPlugin(t *testing.T) {
 }
 
 // changes current working dir before calling the real function
-func registerCall(m *gomock.Call, realF interface{}) *gomock.Call {
+func registerCall(m *gomock.Call, realF any) *gomock.Call {
 	cur, _ := os.Getwd()
-	return m.Do(func(_ ...interface{}) {
+	return m.Do(func(_ ...any) {
 		os.Chdir("../../..")
-	}).DoAndReturn(realF).Do(func(_ ...interface{}) {
+	}).DoAndReturn(realF).Do(func(_ ...any) {
 		os.Chdir(cur)
 	})
 }
@@ -55,7 +56,7 @@ type serviceNameMatcher struct {
 	name string
 }
 
-func (snm *serviceNameMatcher) Matches(x interface{}) bool {
+func (snm *serviceNameMatcher) Matches(x any) bool {
 	s, ok := x.(*hostTypes.Service)
 	if !ok {
 		return false
@@ -211,7 +212,7 @@ var _ = Describe("K8s plugin", func() {
 			newServiceNameMatcher("ovs-vswitchd.service"),
 		).Return(true, nil)
 		hostHelper.EXPECT().Chroot("/host").Return(func() error { return nil }, nil)
-		hostHelper.EXPECT().RunCommand("ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload").Return("\"true\"\n", "", nil)
+		hostHelper.EXPECT().RunCommand(gomock.Any(), "ovs-vsctl", "get", "Open_vSwitch", ".", "other_config:hw-offload").Return("\"true\"\n", "", nil)
 		hostHelper.EXPECT().UpdateSystemService(newServiceNameMatcher("ovs-vswitchd.service")).Return(nil)
 		needDrain, needReboot, err := k8sPlugin.OnNodeStateChange(&sriovnetworkv1.SriovNetworkNodeState{
 			Spec: sriovnetworkv1.SriovNetworkNodeStateSpec{Interfaces: []sriovnetworkv1.Interface{{EswitchMode: "switchdev"}}}})

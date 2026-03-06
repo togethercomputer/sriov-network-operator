@@ -196,27 +196,27 @@ var _ = Describe("UDEV", func() {
 	})
 	Context("LoadUdevRules", func() {
 		It("Succeed", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "control", "--reload-rules").Return("", "", nil)
-			utilsMock.EXPECT().RunCommand("udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", nil)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "control", "--reload-rules").Return("", "", nil)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", nil)
 			Expect(s.LoadUdevRules()).NotTo(HaveOccurred())
 		})
 		It("Failed to reload rules", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "control", "--reload-rules").Return("", "", testError)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "control", "--reload-rules").Return("", "", testError)
 			Expect(s.LoadUdevRules()).To(MatchError(testError))
 		})
 		It("Failed to trigger rules", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "control", "--reload-rules").Return("", "", nil)
-			utilsMock.EXPECT().RunCommand("udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", testError)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "control", "--reload-rules").Return("", "", nil)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "trigger", "--action", "add", "--attr-match", "subsystem=net").Return("", "", testError)
 			Expect(s.LoadUdevRules()).To(MatchError(testError))
 		})
 	})
 	Context("WaitUdevEventsProcessed", func() {
 		It("Succeed", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "settle", "-t", "10").Return("", "", nil)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "settle", "-t", "10").Return("", "", nil)
 			Expect(s.WaitUdevEventsProcessed(10)).NotTo(HaveOccurred())
 		})
 		It("Command Failed", func() {
-			utilsMock.EXPECT().RunCommand("udevadm", "settle", "-t", "20").Return("", "", testError)
+			utilsMock.EXPECT().RunCommand(gomock.Any(), "udevadm", "settle", "-t", "20").Return("", "", testError)
 			Expect(s.WaitUdevEventsProcessed(20)).To(MatchError(testError))
 		})
 	})

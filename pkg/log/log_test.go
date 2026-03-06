@@ -68,6 +68,7 @@ var _ = g.Describe("Logging", func() {
 	})
 })
 
+//nolint:paralleltest // Ginkgo entry point
 func TestLogging(t *testing.T) {
 	o.RegisterFailHandler(g.Fail)
 	g.RunSpecs(t, "Logging Suite")

@@ -22,7 +22,7 @@ import (
 
 type RenderData struct {
 	Funcs template.FuncMap
-	Data  map[string]interface{}
+	Data  map[string]any
 }
 
 type RenderConfig struct {
@@ -42,7 +42,7 @@ const (
 func MakeRenderData() RenderData {
 	return RenderData{
 		Funcs: template.FuncMap{},
-		Data:  map[string]interface{}{},
+		Data:  map[string]any{},
 	}
 }
 

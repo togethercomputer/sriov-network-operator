@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
+//nolint:paralleltest // Ginkgo entry point
 func TestVdpa(t *testing.T) {
 	log.SetLogger(zap.New(
 		zap.WriteTo(GinkgoWriter),
