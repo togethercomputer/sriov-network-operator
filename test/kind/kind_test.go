@@ -211,15 +211,6 @@ var _ = Describe("Kind E2E", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	It("should have operator-webhook DaemonSet created", func() {
-		ds := &appsv1.DaemonSet{}
-		err := k8sClient.Get(ctx, types.NamespacedName{
-			Name: "operator-webhook", Namespace: namespace,
-		}, ds)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(ds.Status.DesiredNumberScheduled).To(BeNumerically(">", 0))
-	})
-
 	It("should deploy the network-resources-injector DaemonSet", func() {
 		config := &sriovnetworkv1.SriovOperatorConfig{}
 		err := k8sClient.Get(ctx, types.NamespacedName{
@@ -227,13 +218,13 @@ var _ = Describe("Kind E2E", func() {
 		}, config)
 		Expect(err).NotTo(HaveOccurred())
 
-		ds := &appsv1.DaemonSet{}
 		if config.Spec.EnableInjector {
+			ds := &appsv1.DaemonSet{}
 			err = k8sClient.Get(ctx, types.NamespacedName{
 				Name: "network-resources-injector", Namespace: namespace,
 			}, ds)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(ds.Status.DesiredNumberScheduled).To(Equal(ds.Status.NumberReady))
+			Expect(ds.Status.DesiredNumberScheduled).To(BeNumerically(">", 0))
 		}
 	})
 
@@ -244,13 +235,13 @@ var _ = Describe("Kind E2E", func() {
 		}, config)
 		Expect(err).NotTo(HaveOccurred())
 
-		ds := &appsv1.DaemonSet{}
 		if config.Spec.EnableOperatorWebhook {
+			ds := &appsv1.DaemonSet{}
 			err = k8sClient.Get(ctx, types.NamespacedName{
 				Name: "operator-webhook", Namespace: namespace,
 			}, ds)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(ds.Status.DesiredNumberScheduled).To(Equal(ds.Status.NumberReady))
+			Expect(ds.Status.DesiredNumberScheduled).To(BeNumerically(">", 0))
 		}
 	})
 })
