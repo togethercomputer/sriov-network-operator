@@ -150,13 +150,22 @@ var _ = BeforeSuite(func() {
 				"node %s has SyncStatus %q", ns.Name, ns.Status.SyncStatus)
 		}
 	}).WithTimeout(pollTimeout).WithPolling(pollInterval).Should(Succeed(), func() string {
-		// Dump pod status for debugging if timeout
-		out, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+		// Dump debugging info on timeout
+		pods, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
 			"get", "pods", "-n", namespace, "-o", "wide").CombinedOutput()
-		logs, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+		ds, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+			"get", "daemonsets", "-n", namespace, "-o", "wide").CombinedOutput()
+		operatorLogs, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+			"logs", "-n", namespace, "-l", "app=sriov-network-operator",
+			"--tail=50").CombinedOutput()
+		daemonLogs, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
 			"logs", "-n", namespace, "-l", "app=sriov-network-config-daemon",
-			"--tail=30").CombinedOutput()
-		return fmt.Sprintf("Pods:\n%s\nDaemon logs:\n%s", string(out), string(logs))
+			"--tail=50").CombinedOutput()
+		events, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+			"get", "events", "-n", namespace, "--sort-by=.lastTimestamp",
+			"--field-selector=type!=Normal").CombinedOutput()
+		return fmt.Sprintf("Pods:\n%s\nDaemonSets:\n%s\nOperator logs:\n%s\nDaemon logs:\n%s\nWarning events:\n%s",
+			string(pods), string(ds), string(operatorLogs), string(daemonLogs), string(events))
 	}())
 })
 
