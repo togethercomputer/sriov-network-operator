@@ -149,7 +149,15 @@ var _ = BeforeSuite(func() {
 			g.Expect(ns.Status.SyncStatus).To(Equal("Succeeded"),
 				"node %s has SyncStatus %q", ns.Name, ns.Status.SyncStatus)
 		}
-	}).WithTimeout(pollTimeout).WithPolling(pollInterval).Should(Succeed())
+	}).WithTimeout(pollTimeout).WithPolling(pollInterval).Should(Succeed(), func() string {
+		// Dump pod status for debugging if timeout
+		out, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+			"get", "pods", "-n", namespace, "-o", "wide").CombinedOutput()
+		logs, _ := exec.Command("kubectl", "--kubeconfig", kubeconfigPath,
+			"logs", "-n", namespace, "-l", "app=sriov-network-config-daemon",
+			"--tail=30").CombinedOutput()
+		return fmt.Sprintf("Pods:\n%s\nDaemon logs:\n%s", string(out), string(logs))
+	}())
 })
 
 var _ = AfterSuite(func() {
@@ -422,7 +430,8 @@ func installHelmChart(kubeconfigPath string) {
 			},
 		},
 		"sriovOperatorConfig": map[string]interface{}{
-			"deploy": true,
+			"deploy":       true,
+			"disableDrain": true,
 		},
 	}
 
