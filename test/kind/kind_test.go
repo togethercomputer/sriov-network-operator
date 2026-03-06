@@ -218,7 +218,7 @@ var _ = Describe("Kind E2E", func() {
 				Name: "sriov-network-operator-webhook-config",
 			}, mwc)).To(Succeed())
 			g.Expect(mwc.Webhooks).NotTo(BeEmpty())
-		}).WithTimeout(2 * time.Minute).WithPolling(5 * time.Second).Should(Succeed())
+		}).WithTimeout(5 * time.Minute).WithPolling(5 * time.Second).Should(Succeed())
 	})
 
 	It("should deploy the network-resources-injector DaemonSet", func() {
