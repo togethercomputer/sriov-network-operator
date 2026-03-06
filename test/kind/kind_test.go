@@ -293,9 +293,9 @@ func createTarContext(dir string) (io.Reader, error) {
 			return err
 		}
 
-		// Skip .git directory and other unnecessary paths
+		// Skip unnecessary paths
 		relPath, _ := filepath.Rel(dir, path)
-		if strings.HasPrefix(relPath, ".git") || strings.HasPrefix(relPath, "Library") {
+		if strings.HasPrefix(relPath, "Library") {
 			if info.IsDir() {
 				return filepath.SkipDir
 			}
