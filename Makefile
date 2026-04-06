@@ -32,7 +32,6 @@ export GOPATH?=$(shell go env GOPATH)
 export GO111MODULE=on
 PKGS=$(shell go list ./... | grep -v -E '/vendor/|/test|/examples')
 TESTPKGS?=./...
-ENVTEST_K8S_VERSION ?= 1.29.x
 
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
