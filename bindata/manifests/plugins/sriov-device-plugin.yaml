@@ -39,6 +39,38 @@ spec:
         - name: {{ . }}
       {{- end }}
       {{- end }}
+      initContainers:
+      - name: wait-for-node-state
+        image: {{.SRIOVNetworkConfigDaemonImage}}
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          APISERVER=https://kubernetes.default.svc
+          TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+          echo "Waiting for SriovNetworkNodeState/${NODE_NAME} to be Succeeded..."
+          while true; do
+            STATUS=$(curl -sf --cacert "${CACERT}" \
+              -H "Authorization: Bearer ${TOKEN}" \
+              "${APISERVER}/apis/sriovnetwork.openshift.io/v1/namespaces/${NAMESPACE}/sriovnetworknodestates/${NODE_NAME}" \
+              2>/dev/null | grep -o '"syncStatus":"[^"]*"' | cut -d'"' -f4)
+            if [ "${STATUS}" = "Succeeded" ]; then
+              echo "SriovNetworkNodeState/${NODE_NAME} is Succeeded, proceeding"
+              exit 0
+            fi
+            echo "syncStatus='${STATUS}', retrying in 10s..."
+            sleep 10
+          done
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
       containers:
       - name: sriov-device-plugin
         image: {{.SRIOVDevicePluginImage}}
