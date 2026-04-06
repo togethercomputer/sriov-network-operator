@@ -40,11 +40,6 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name: Install envtest binaries
-      run: |
-        go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.19
-        echo "KUBEBUILDER_ASSETS=$(setup-envtest use 1.29 --bin-dir /tmp -p path)" >> $GITHUB_ENV
-
     - name: test pkg
       run: make test-pkg
 
@@ -127,11 +122,6 @@ jobs:
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
-    - name: Install envtest binaries
-      run: |
-        go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.19
-        echo "KUBEBUILDER_ASSETS=$(setup-envtest use 1.29 --bin-dir /tmp -p path)" >> $GITHUB_ENV
 
     - name: test pkg
       run: make test-pkg
