@@ -136,6 +136,23 @@ func (DrainStateAnnotationPredicate) Update(e event.UpdateEvent) bool {
 	return oldAnno != newAnno
 }
 
+// NodeStateSyncStatusPredicate fires when SriovNetworkNodeState.Status.SyncStatus changes
+type NodeStateSyncStatusPredicate struct {
+	predicate.Funcs
+}
+
+func (NodeStateSyncStatusPredicate) Update(e event.UpdateEvent) bool {
+	oldState, ok := e.ObjectOld.(*sriovnetworkv1.SriovNetworkNodeState)
+	if !ok {
+		return false
+	}
+	newState, ok := e.ObjectNew.(*sriovnetworkv1.SriovNetworkNodeState)
+	if !ok {
+		return false
+	}
+	return oldState.Status.SyncStatus != newState.Status.SyncStatus
+}
+
 func GetImagePullSecrets() []string {
 	imagePullSecrets := os.Getenv("IMAGE_PULL_SECRETS")
 	if imagePullSecrets != "" {
@@ -192,7 +209,6 @@ func syncPluginDaemonObjs(ctx context.Context,
 	data.Data["ImagePullSecrets"] = GetImagePullSecrets()
 	data.Data["NodeSelectorField"] = GetNodeSelectorForDevicePlugin(dc)
 	data.Data["UseCDI"] = dc.Spec.UseCDI
-	data.Data["SRIOVNetworkConfigDaemonImage"] = os.Getenv("SRIOV_NETWORK_CONFIG_DAEMON_IMAGE")
 	objs, err := renderDsForCR(constants.PluginPath, &data)
 	if err != nil {
 		logger.Error(err, "Fail to render SR-IoV manifests")
