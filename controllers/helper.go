@@ -136,6 +136,23 @@ func (DrainStateAnnotationPredicate) Update(e event.UpdateEvent) bool {
 	return oldAnno != newAnno
 }
 
+// NodeStateSyncStatusPredicate fires when SriovNetworkNodeState.Status.SyncStatus changes
+type NodeStateSyncStatusPredicate struct {
+	predicate.Funcs
+}
+
+func (NodeStateSyncStatusPredicate) Update(e event.UpdateEvent) bool {
+	oldState, ok := e.ObjectOld.(*sriovnetworkv1.SriovNetworkNodeState)
+	if !ok {
+		return false
+	}
+	newState, ok := e.ObjectNew.(*sriovnetworkv1.SriovNetworkNodeState)
+	if !ok {
+		return false
+	}
+	return oldState.Status.SyncStatus != newState.Status.SyncStatus
+}
+
 func GetImagePullSecrets() []string {
 	imagePullSecrets := os.Getenv("IMAGE_PULL_SECRETS")
 	if imagePullSecrets != "" {

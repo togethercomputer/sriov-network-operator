@@ -35,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -205,6 +206,8 @@ func (r *SriovNetworkNodePolicyReconciler) SetupWithManager(mgr ctrl.Manager) er
 		Watches(&corev1.Node{}, nodeEvenHandler).
 		Watches(&sriovnetworkv1.SriovNetworkNodePolicy{}, delayedEventHandler).
 		Watches(&sriovnetworkv1.SriovNetworkPoolConfig{}, delayedEventHandler).
+		Watches(&sriovnetworkv1.SriovNetworkNodeState{}, delayedEventHandler,
+			builder.WithPredicates(NodeStateSyncStatusPredicate{})).
 		WatchesRawSource(&source.Channel{Source: eventChan}, delayedEventHandler).
 		Complete(r)
 }
@@ -238,14 +241,26 @@ func (r *SriovNetworkNodePolicyReconciler) syncDevicePluginConfigMap(ctx context
 				return err
 			}
 		} else {
-			// if we have policies we should add the enabled label for the device plugin
-			err = utils.LabelNode(ctx, node.Name, constants.SriovDevicePluginLabel, constants.SriovDevicePluginLabelEnabled, r.Client)
+			// If already Enabled (reconfiguration case), skip the SriovNetworkNodeState lookup
+			if node.Labels[constants.SriovDevicePluginLabel] == constants.SriovDevicePluginLabelEnabled {
+				continue
+			}
+			// Only enable the device plugin once the node state has successfully synced.
+			ns := &sriovnetworkv1.SriovNetworkNodeState{}
+			err = r.Get(ctx, types.NamespacedName{Namespace: vars.Namespace, Name: node.Name}, ns)
+			if err != nil && !errors.IsNotFound(err) {
+				logger.Error(err, "failed to get SriovNetworkNodeState", "node", node.Name)
+				return err
+			}
+			labelValue := constants.SriovDevicePluginLabelDisabled
+			if ns.Status.SyncStatus == constants.SyncStatusSucceeded {
+				labelValue = constants.SriovDevicePluginLabelEnabled
+			}
+			err = utils.LabelNode(ctx, node.Name, constants.SriovDevicePluginLabel, labelValue, r.Client)
 			if err != nil {
 				logger.Error(err, "failed to label node for device plugin label",
-					"labelKey",
-					constants.SriovDevicePluginLabel,
-					"labelValue",
-					constants.SriovDevicePluginLabelEnabled)
+					"labelKey", constants.SriovDevicePluginLabel,
+					"labelValue", labelValue)
 				return err
 			}
 		}
