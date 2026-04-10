@@ -241,21 +241,20 @@ func (r *SriovNetworkNodePolicyReconciler) syncDevicePluginConfigMap(ctx context
 				return err
 			}
 		} else {
-			// Only enable the device plugin when the node state has successfully synced.
-			// If already Enabled (reconfiguration case), keep it Enabled to avoid evicting the running pod.
+			// If already Enabled (reconfiguration case), skip the SriovNetworkNodeState lookup 
+			if node.Labels[constants.SriovDevicePluginLabel] == constants.SriovDevicePluginLabelEnabled {
+				continue
+			}
+			// Only enable the device plugin once the node state has successfully synced.
 			ns := &sriovnetworkv1.SriovNetworkNodeState{}
 			err = r.Get(ctx, types.NamespacedName{Namespace: vars.Namespace, Name: node.Name}, ns)
 			if err != nil && !errors.IsNotFound(err) {
 				logger.Error(err, "failed to get SriovNetworkNodeState", "node", node.Name)
 				return err
 			}
-			currentLabel := node.Labels[constants.SriovDevicePluginLabel]
-			var labelValue string
-			if ns.Status.SyncStatus == constants.SyncStatusSucceeded ||
-				currentLabel == constants.SriovDevicePluginLabelEnabled {
+			labelValue := constants.SriovDevicePluginLabelDisabled
+			if ns.Status.SyncStatus == constants.SyncStatusSucceeded {
 				labelValue = constants.SriovDevicePluginLabelEnabled
-			} else {
-				labelValue = constants.SriovDevicePluginLabelDisabled
 			}
 			err = utils.LabelNode(ctx, node.Name, constants.SriovDevicePluginLabel, labelValue, r.Client)
 			if err != nil {
