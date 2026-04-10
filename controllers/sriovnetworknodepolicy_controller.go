@@ -241,7 +241,7 @@ func (r *SriovNetworkNodePolicyReconciler) syncDevicePluginConfigMap(ctx context
 				return err
 			}
 		} else {
-			// If already Enabled (reconfiguration case), skip the SriovNetworkNodeState lookup 
+			// If already Enabled (reconfiguration case), skip the SriovNetworkNodeState lookup
 			if node.Labels[constants.SriovDevicePluginLabel] == constants.SriovDevicePluginLabelEnabled {
 				continue
 			}
