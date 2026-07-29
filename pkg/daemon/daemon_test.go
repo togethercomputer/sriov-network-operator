@@ -335,3 +335,41 @@ func updateSriovNetworkNodeState(c snclient.Interface, nodeState *sriovnetworkv1
 		Update(context.Background(), nodeState, metav1.UpdateOptions{})
 	return err
 }
+
+var _ = Describe("operatorConfigChangeHandler", func() {
+	It("updates Mellanox firmware feature gates", func() {
+		previousNamespace := vars.Namespace
+		previousReset := vars.MlxPluginFwReset
+		previousSkipResetOnDeselect := vars.MlxPluginSkipFwResetOnDeselect
+		DeferCleanup(func() {
+			vars.Namespace = previousNamespace
+			vars.MlxPluginFwReset = previousReset
+			vars.MlxPluginSkipFwResetOnDeselect = previousSkipResetOnDeselect
+		})
+		vars.Namespace = "sriov-network-operator"
+
+		d := &Daemon{featureGate: featuregate.New()}
+
+		config := &sriovnetworkv1.SriovOperatorConfig{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      consts.DefaultConfigName,
+				Namespace: vars.Namespace,
+			},
+			Spec: sriovnetworkv1.SriovOperatorConfigSpec{
+				FeatureGates: map[string]bool{
+					consts.MellanoxFirmwareResetFeatureGate: true,
+				},
+			},
+		}
+
+		d.operatorConfigChangeHandler(&sriovnetworkv1.SriovOperatorConfig{}, config)
+
+		Expect(vars.MlxPluginFwReset).To(BeTrue())
+		Expect(vars.MlxPluginSkipFwResetOnDeselect).To(BeFalse())
+
+		config.Spec.FeatureGates[consts.MellanoxSkipFirmwareResetOnDeselectFeatureGate] = true
+		d.operatorConfigChangeHandler(&sriovnetworkv1.SriovOperatorConfig{}, config)
+
+		Expect(vars.MlxPluginSkipFwResetOnDeselect).To(BeTrue())
+	})
+})

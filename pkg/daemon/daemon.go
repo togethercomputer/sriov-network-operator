@@ -312,6 +312,7 @@ func (dn *Daemon) operatorConfigChangeHandler(old, new interface{}) {
 	}
 
 	vars.MlxPluginFwReset = dn.featureGate.IsEnabled(consts.MellanoxFirmwareResetFeatureGate)
+	vars.MlxPluginSkipFwResetOnDeselect = dn.featureGate.IsEnabled(consts.MellanoxSkipFirmwareResetOnDeselectFeatureGate)
 }
 
 func (dn *Daemon) nodeStateSyncHandler() error {
