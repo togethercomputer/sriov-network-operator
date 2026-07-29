@@ -268,7 +268,7 @@ func IsDualPort(pciAddress string, mellanoxNicsStatus map[string]map[string]srio
 	return len(mellanoxNicsStatus[pciAddressPrefix]) > 1
 }
 
-// handleTotalVfs return required total VFs or max (required VFs for dual port NIC) and needReboot if totalVfs will change
+// HandleTotalVfs returns the required VF capacity and whether a firmware change is needed.
 func HandleTotalVfs(fwCurrent, fwNext, attrs *MlxNic, ifaceSpec sriovnetworkv1.Interface, isDualPort bool, mellanoxNicsSpec map[string]sriovnetworkv1.Interface) (
 	totalVfs int, needReboot, changeWithoutReboot bool) {
 	totalVfs = ifaceSpec.NumVfs
@@ -295,17 +295,28 @@ func HandleTotalVfs(fwCurrent, fwNext, attrs *MlxNic, ifaceSpec sriovnetworkv1.I
 		return
 	}
 
-	if fwCurrent.TotalVfs != totalVfs {
-		log.Log.V(2).Info("Changing TotalVfs, needs reboot", "current", fwCurrent.TotalVfs, "requested", totalVfs)
+	// Preserve spare firmware capacity unless the policy explicitly disables SR-IOV.
+	if totalVfs == 0 && fwCurrent.TotalVfs != 0 {
+		log.Log.V(2).Info("Changing TotalVfs to 0 as explicitly requested by the policy, needs reboot",
+			"current", fwCurrent.TotalVfs)
+		attrs.TotalVfs = 0
+		needReboot = true
+	} else if fwCurrent.TotalVfs < totalVfs {
+		log.Log.V(2).Info("Increasing TotalVfs, needs reboot", "current", fwCurrent.TotalVfs, "requested", totalVfs)
 		attrs.TotalVfs = totalVfs
 		needReboot = true
 	}
 
 	// Remove policy then re-apply it
-	if !needReboot && fwNext.TotalVfs != totalVfs {
-		log.Log.V(2).Info("Changing TotalVfs to same as Next Boot value, doesn't require rebooting",
+	if totalVfs == 0 && !needReboot && fwNext.TotalVfs != 0 {
+		log.Log.V(2).Info("Restoring staged Next Boot TotalVfs to 0, doesn't require rebooting",
+			"current", fwCurrent.TotalVfs, "next", fwNext.TotalVfs)
+		attrs.TotalVfs = 0
+		changeWithoutReboot = true
+	} else if !needReboot && fwNext.TotalVfs < fwCurrent.TotalVfs {
+		log.Log.V(2).Info("Restoring staged Next Boot TotalVfs to the current firmware value, doesn't require rebooting",
 			"current", fwCurrent.TotalVfs, "next", fwNext.TotalVfs, "requested", totalVfs)
-		attrs.TotalVfs = totalVfs
+		attrs.TotalVfs = fwCurrent.TotalVfs
 		changeWithoutReboot = true
 	}
 
