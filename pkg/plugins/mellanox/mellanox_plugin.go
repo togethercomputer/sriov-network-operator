@@ -142,51 +142,55 @@ func (p *MellanoxPlugin) OnNodeStateChange(new *sriovnetworkv1.SriovNetworkNodeS
 	}
 
 	// Set total VFs to 0 for mellanox interfaces with no spec
-	for pciPrefix, portsMap := range mellanoxNicsStatus {
-		if _, ok := processedNics[pciPrefix]; ok {
-			continue
-		}
+	if !vars.MlxPluginSkipFwResetOnDeselect {
+		for pciPrefix, portsMap := range mellanoxNicsStatus {
+			if _, ok := processedNics[pciPrefix]; ok {
+				continue
+			}
 
-		// Add the nic to processed Nics to not repeat the process for dual nic ports
-		processedNics[pciPrefix] = true
-		pciAddress := pciPrefix + "0"
+			// Add the nic to processed Nics to not repeat the process for dual nic ports
+			processedNics[pciPrefix] = true
+			pciAddress := pciPrefix + "0"
 
-		// Skip devices not configured by the operator
-		isConfigured, err := p.nicConfiguredByOperator(portsMap)
-		if err != nil {
-			return false, false, err
-		}
-		if !isConfigured {
-			log.Log.V(2).Info("None of the ports are configured by the operator skipping firmware reset",
-				"portMap", portsMap)
-			continue
-		}
+			// Skip devices not configured by the operator
+			isConfigured, err := p.nicConfiguredByOperator(portsMap)
+			if err != nil {
+				return false, false, err
+			}
+			if !isConfigured {
+				log.Log.V(2).Info("None of the ports are configured by the operator skipping firmware reset",
+					"portMap", portsMap)
+				continue
+			}
 
-		// Skip externally managed NICs
-		hasExternally, err := p.nicHasExternallyManagedPFs(portsMap)
-		if err != nil {
-			return false, false, err
-		}
-		if hasExternally {
-			log.Log.V(2).Info("One of the ports is configured as externally managed skipping firmware reset",
-				"portMap", portsMap)
-			continue
-		}
+			// Skip externally managed NICs
+			hasExternally, err := p.nicHasExternallyManagedPFs(portsMap)
+			if err != nil {
+				return false, false, err
+			}
+			if hasExternally {
+				log.Log.V(2).Info("One of the ports is configured as externally managed skipping firmware reset",
+					"portMap", portsMap)
+				continue
+			}
 
-		// Skip unsupported devices
-		if id := sriovnetworkv1.GetVfDeviceID(portsMap[pciAddress].DeviceID); id == "" {
-			continue
-		}
+			// Skip unsupported devices
+			if id := sriovnetworkv1.GetVfDeviceID(portsMap[pciAddress].DeviceID); id == "" {
+				continue
+			}
 
-		_, fwNext, err := p.helpers.GetMlxNicFwData(pciAddress)
-		if err != nil {
-			return false, false, err
-		}
+			_, fwNext, err := p.helpers.GetMlxNicFwData(pciAddress)
+			if err != nil {
+				return false, false, err
+			}
 
-		if fwNext.TotalVfs > 0 || fwNext.EnableSriov {
-			attributesToChange[pciAddress] = mlx.MlxNic{TotalVfs: 0}
-			log.Log.V(2).Info("Changing TotalVfs to 0, doesn't require rebooting", "fwNext.totalVfs", fwNext.TotalVfs)
+			if fwNext.TotalVfs > 0 || fwNext.EnableSriov {
+				attributesToChange[pciAddress] = mlx.MlxNic{TotalVfs: 0}
+				log.Log.V(2).Info("Changing TotalVfs to 0, doesn't require rebooting", "fwNext.totalVfs", fwNext.TotalVfs)
+			}
 		}
+	} else {
+		log.Log.Info("mellanox plugin OnNodeStateChange(): skipping TotalVfs reset for NICs with no spec")
 	}
 
 	if needReboot {

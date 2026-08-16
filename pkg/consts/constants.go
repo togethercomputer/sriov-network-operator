@@ -160,6 +160,10 @@ const (
 	// MellanoxFirmwareResetFeatureGate: enables the firmware reset via mstfwreset before a reboot
 	MellanoxFirmwareResetFeatureGate = "mellanoxFirmwareReset"
 
+	// MellanoxSkipFirmwareResetOnDeselectFeatureGate: when enabled, deselected NICs keep their firmware VF settings
+	// (for substrates where firmware is managed externally, e.g. DPUs)
+	MellanoxSkipFirmwareResetOnDeselectFeatureGate = "mellanoxSkipFirmwareResetOnDeselect"
+
 	// The path to the file on the host filesystem that contains the IB GUID distribution for IB VFs
 	InfinibandGUIDConfigFilePath = SriovConfBasePath + "/infiniband/guids"
 )

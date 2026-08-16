@@ -57,6 +57,9 @@ var (
 	// MlxPluginFwReset global variable enables mstfwreset before rebooting a node on VF changes
 	MlxPluginFwReset = false
 
+	// MlxPluginSkipFwResetOnDeselect skips clearing firmware VF settings for deselected NICs
+	MlxPluginSkipFwResetOnDeselect = false
+
 	// FilesystemRoot used by test to mock interactions with filesystem
 	FilesystemRoot = ""
 

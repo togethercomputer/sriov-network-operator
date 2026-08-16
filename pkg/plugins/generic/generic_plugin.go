@@ -172,10 +172,17 @@ func (p *GenericPlugin) CheckStatusChanges(current *sriovnetworkv1.SriovNetworkN
 	for _, iface := range current.Spec.Interfaces {
 		found := false
 		for _, ifaceStatus := range current.Status.Interfaces {
-			// TODO: remove the check for ExternallyManaged - https://github.com/k8snetworkplumbingwg/sriov-network-operator/issues/632
-			if iface.PciAddress == ifaceStatus.PciAddress && !iface.ExternallyManaged {
+			if iface.PciAddress == ifaceStatus.PciAddress {
 				found = true
-				if sriovnetworkv1.NeedToUpdateSriov(&iface, &ifaceStatus) {
+				// Compare only VF state that the operator manages.
+				// TODO: remove the special handling for ExternallyManaged - https://github.com/k8snetworkplumbingwg/sriov-network-operator/issues/632
+				if iface.ExternallyManaged {
+					if externallyManagedNeedToReconcile(&iface, &ifaceStatus) {
+						log.Log.Info("CheckStatusChanges(): out-of-band change detected for externally managed interface",
+							"address", iface.PciAddress)
+						return true, nil
+					}
+				} else if sriovnetworkv1.NeedToUpdateSriov(&iface, &ifaceStatus) {
 					log.Log.Info("CheckStatusChanges(): status changed for interface", "address", iface.PciAddress)
 					return true, nil
 				}
@@ -201,6 +208,45 @@ func (p *GenericPlugin) CheckStatusChanges(current *sriovnetworkv1.SriovNetworkN
 	}
 
 	return shouldUpdate, nil
+}
+
+// externallyManagedNeedToReconcile reports VF drift without comparing externally managed PF settings.
+func externallyManagedNeedToReconcile(iface *sriovnetworkv1.Interface, ifaceStatus *sriovnetworkv1.InterfaceExt) bool {
+	// VF creation is handled externally, the daemon cannot repair missing VFs.
+	// Reconcile anyway: apply fails validation and surfaces a Failed sync status.
+	if ifaceStatus.NumVfs < iface.NumVfs {
+		log.Log.V(0).Info("externallyManagedNeedToReconcile(): externally managed VFs missing",
+			"address", iface.PciAddress, "current", ifaceStatus.NumVfs, "required", iface.NumVfs)
+		return true
+	}
+
+	if iface.NumVfs > 0 {
+		for _, vfStatus := range ifaceStatus.VFs {
+			for _, groupSpec := range iface.VfGroups {
+				if !sriovnetworkv1.IndexInRange(vfStatus.VfID, groupSpec.VfRange) {
+					continue
+				}
+				if vfStatus.Driver == "" {
+					log.Log.V(0).Info("externallyManagedNeedToReconcile(): VF has no driver",
+						"address", iface.PciAddress, "vf", vfStatus.VfID, "desired", groupSpec.DeviceType)
+					return true
+				}
+				if groupSpec.DeviceType != "" && groupSpec.DeviceType != consts.DeviceTypeNetDevice {
+					if groupSpec.DeviceType != vfStatus.Driver {
+						log.Log.V(0).Info("externallyManagedNeedToReconcile(): VF driver mismatch",
+							"address", iface.PciAddress, "vf", vfStatus.VfID,
+							"desired", groupSpec.DeviceType, "current", vfStatus.Driver)
+						return true
+					}
+				} else if sriovnetworkv1.StringInArray(vfStatus.Driver, vars.DpdkDrivers) {
+					log.Log.V(0).Info("externallyManagedNeedToReconcile(): VF is bound to a DPDK driver but a netdevice is requested",
+						"address", iface.PciAddress, "vf", vfStatus.VfID, "current", vfStatus.Driver)
+					return true
+				}
+			}
+		}
+	}
+	return false
 }
 
 func (p *GenericPlugin) syncDriverState() error {
