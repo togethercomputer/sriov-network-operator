@@ -41,6 +41,9 @@ spec:
 {{- if .pKeyConfigured -}}
   "pkey":"{{.pKey}}",
 {{- end -}}
+{{- if .IBKubernetesEnabledConfigured -}}
+  "ibKubernetesEnabled":{{.IBKubernetesEnabled}},
+{{- end -}}
 {{- if .StateConfigured -}}
   "link_state":"{{.SriovCniState}}",
 {{- end -}}

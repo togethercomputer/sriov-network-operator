@@ -44,6 +44,11 @@ type SriovIBNetworkSpec struct {
 	// by the operator.
 	MetaPluginsConfig string `json:"metaPlugins,omitempty"`
 	PKey              string `json:"pKey,omitempty"`
+	// Enforce ib-kubernetes GUID delivery for this network. When true, the
+	// rendered ib-sriov CNI config carries "ibKubernetesEnabled": true and a
+	// CNI ADD fails closed with a named error unless ib-kubernetes has marked
+	// the pod configured and delivered an InfiniBand GUID.
+	IBKubernetesEnabled bool `json:"ibKubernetesEnabled,omitempty"`
 }
 
 // SriovIBNetworkStatus defines the observed state of SriovIBNetwork

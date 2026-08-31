@@ -728,6 +728,12 @@ func (cr *SriovIBNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 		data.Data["pKeyConfigured"] = true
 		data.Data["pKey"] = cr.Spec.PKey
 	}
+
+	// ib-kubernetes GUID delivery enforcement (fail closed in the ib-sriov CNI).
+	// The key is rendered only when enabled; the CNI defaults it to false.
+	data.Data["IBKubernetesEnabledConfigured"] = cr.Spec.IBKubernetesEnabled
+	data.Data["IBKubernetesEnabled"] = cr.Spec.IBKubernetesEnabled
+
 	if cr.Spec.IPAM != "" {
 		data.Data["SriovCniIpam"] = SriovCniIpam + ":" + strings.Join(strings.Fields(cr.Spec.IPAM), "")
 	} else {
@@ -771,6 +777,8 @@ func (cr *SriovNetwork) RenderNetAttDef() (*uns.Unstructured, error) {
 	data.Data["CniType"] = "sriov"
 	data.Data["SriovNetworkName"] = cr.Name
 	data.Data["pKeyConfigured"] = false
+	// ibKubernetesEnabled applies only to SriovIBNetwork rendering
+	data.Data["IBKubernetesEnabledConfigured"] = false
 	if cr.Spec.NetworkNamespace == "" {
 		data.Data["SriovNetworkNamespace"] = cr.Namespace
 	} else {

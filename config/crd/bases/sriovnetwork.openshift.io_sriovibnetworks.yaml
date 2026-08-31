@@ -44,6 +44,13 @@ spec:
                   Capabilities to be configured for this network.
                   Capabilities supported: (infinibandGUID), e.g. '{"infinibandGUID": true}'
                 type: string
+              ibKubernetesEnabled:
+                description: |-
+                  Enforce ib-kubernetes GUID delivery for this network. When true, the
+                  rendered ib-sriov CNI config carries "ibKubernetesEnabled": true and a
+                  CNI ADD fails closed with a named error unless ib-kubernetes has marked
+                  the pod configured and delivered an InfiniBand GUID.
+                type: boolean
               ipam:
                 description: IPAM configuration to be used for this network.
                 type: string

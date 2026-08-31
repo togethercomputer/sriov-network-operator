@@ -217,6 +217,22 @@ func TestIBRendering(t *testing.T) {
 				},
 			},
 		},
+		{
+			// Live-equivalent checker NAD shape (ENG-84938): infinibandGUID
+			// capability, pkey, link_state enable, empty ipam, plus the
+			// fail-closed ib-kubernetes enforcement key.
+			tname: "ibkubernetesenabled",
+			network: v1.SriovIBNetwork{
+				Spec: v1.SriovIBNetworkSpec{
+					NetworkNamespace:    "testnamespace",
+					ResourceName:        "testresource",
+					Capabilities:        `{"infinibandGUID": true}`,
+					PKey:                "0x0040",
+					LinkState:           "enable",
+					IBKubernetesEnabled: true,
+				},
+			},
+		},
 	}
 	for _, tc := range testtable {
 		t.Run(tc.tname, func(t *testing.T) {
