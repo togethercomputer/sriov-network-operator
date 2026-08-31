@@ -76,6 +76,14 @@ var _ = Describe("SriovIBNetwork Controller", Ordered, func() {
 				ResourceName: "resource_1",
 				IPAM:         `{"type":"host-local","subnet":"10.56.217.0/24","rangeStart":"10.56.217.171","rangeEnd":"10.56.217.181","routes":[{"dst":"0.0.0.0/0"}],"gateway":"10.56.217.1"}`,
 			},
+			"ib-test-5": {
+				ResourceName:        "resource_1",
+				NetworkNamespace:    "default",
+				Capabilities:        `{"infinibandGUID": true}`,
+				PKey:                "0x0040",
+				LinkState:           "enable",
+				IBKubernetesEnabled: true,
+			},
 		}
 		sriovnets := util.GenerateSriovIBNetworkCRs(testNamespace, specs)
 		DescribeTable("should be possible to create/delete net-att-def",
@@ -114,6 +122,7 @@ var _ = Describe("SriovIBNetwork Controller", Ordered, func() {
 			Entry("without IPAM", sriovnets["ib-test-2"]),
 			Entry("with linkState on", sriovnets["ib-test-3"]),
 			Entry("without networkNamespace flag", sriovnets["ib-test-4"]),
+			Entry("with ib-kubernetes fail-closed rendering", sriovnets["ib-test-5"]),
 		)
 
 		newSpecs := map[string]sriovnetworkv1.SriovIBNetworkSpec{
@@ -281,11 +290,25 @@ var _ = Describe("SriovIBNetwork Controller", Ordered, func() {
 func generateExpectedIBNetConfig(cr *sriovnetworkv1.SriovIBNetwork) string {
 	ipam := emptyCurls
 	state := getLinkState(cr.Spec.LinkState)
+	capabilities := ""
+	pkey := ""
+	ibKubernetesEnabled := ""
 
 	if cr.Spec.IPAM != "" {
 		ipam = cr.Spec.IPAM
 	}
-	configStr, err := formatJSON(fmt.Sprintf(`{ "cniVersion":"1.0.0", "name":"%s","type":"ib-sriov",%s"ipam":%s }`, cr.GetName(), state, ipam))
+	if cr.Spec.Capabilities != "" {
+		capabilities = fmt.Sprintf(`"capabilities":%s,`, cr.Spec.Capabilities)
+	}
+	if cr.Spec.PKey != "" {
+		pkey = fmt.Sprintf(`"pkey":"%s",`, cr.Spec.PKey)
+	}
+	if cr.Spec.IBKubernetesEnabled {
+		ibKubernetesEnabled = `"ibKubernetesEnabled":true,`
+	}
+	configStr, err := formatJSON(fmt.Sprintf(
+		`{ "cniVersion":"1.0.0", "name":"%s","type":"ib-sriov",%s%s%s%s"ipam":%s }`,
+		cr.GetName(), capabilities, pkey, ibKubernetesEnabled, state, ipam))
 	if err != nil {
 		panic(err)
 	}

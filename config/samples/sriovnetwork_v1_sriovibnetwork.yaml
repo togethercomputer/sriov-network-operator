@@ -3,5 +3,9 @@ kind: SriovIBNetwork
 metadata:
   name: sriovibnetwork-sample
 spec:
-  # Add fields here
-  foo: bar
+  networkNamespace: default
+  resourceName: ib_network
+  capabilities: '{"infinibandGUID": true}'
+  pKey: "0x0040"
+  linkState: enable
+  ibKubernetesEnabled: true
