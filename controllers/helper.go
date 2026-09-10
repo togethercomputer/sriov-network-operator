@@ -328,7 +328,7 @@ func updateDaemonsetNodeSelector(obj *uns.Unstructured, nodeSelector map[string]
 
 func findNodePoolConfig(ctx context.Context, node *corev1.Node, c k8sclient.Client) (*sriovnetworkv1.SriovNetworkPoolConfig, []corev1.Node, error) {
 	logger := log.FromContext(ctx)
-	logger.Info("FindNodePoolConfig():")
+	logger.V(1).Info("FindNodePoolConfig():")
 	// get all the sriov network pool configs
 	npcl := &sriovnetworkv1.SriovNetworkPoolConfigList{}
 	err := c.List(ctx, npcl)
