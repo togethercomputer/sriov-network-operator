@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v3
+    - name: Set up Go 1.26.10
+      uses: actions/setup-go@be3c94b385c4f180051c996d336f57a34c397495 # v3
       with:
-        go-version: 1.22.x
+        go-version: 1.26.10
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
     - name: fmt
       run: IS_CONTAINER=yes make fmt
@@ -32,13 +32,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+    - name: Set up Go 1.26.10
+      uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # v2
       with:
-        go-version: 1.22.x
+        go-version: 1.26.10
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
     - name: test pkg
       run: make test-pkg
@@ -63,13 +63,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+    - name: Set up Go 1.26.10
+      uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # v2
       with:
-        go-version: 1.22.x
+        go-version: 1.26.10
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
     - name: check go modules are up to date
       run: make check-deps
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
     - name: check if the config/ folder is up to date
       run: make check-manifests
@@ -88,14 +88,14 @@ jobs:
     name: Golangci-lint
     runs-on: ubuntu-latest
     steps:
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+    - name: Set up Go 1.26.10
+      uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # v2
       with:
-        go-version: 1.22.x
+        go-version: 1.26.10
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3
       with:
         # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
         version: v1.55.2
@@ -104,9 +104,9 @@ jobs:
     name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca # master
         with:
           severity: error
 
@@ -115,13 +115,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Set up Go 1.22
-      uses: actions/setup-go@v2
+    - name: Set up Go 1.26.10
+      uses: actions/setup-go@bfdd3570ce990073878bf10f6b2d79082de49492 # v2
       with:
-        go-version: 1.22.x
+        go-version: 1.26.10
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
     - name: test pkg
       run: make test-pkg
@@ -139,7 +139,7 @@ jobs:
       run: make merge-test-coverage
 
     - name: Coveralls
-      uses: coverallsapp/github-action@1.1.3
+      uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057 # 1.1.3
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: lcov.out
@@ -156,17 +156,17 @@ jobs:
       TEST_REPORT_PATH: k8s-artifacts
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
-      - name: Set up Go 1.22
-        uses: actions/setup-go@v3
+      - name: Set up Go 1.26.10
+        uses: actions/setup-go@be3c94b385c4f180051c996d336f57a34c397495 # v3
         with:
-          go-version: 1.22.x
+          go-version: 1.26.10
 
       - name: run test
         run: make test-e2e-conformance-virtual-k8s-cluster-ci
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5 # v3
         if: always()
         with:
           name: ${{ env.TEST_REPORT_PATH }}
@@ -190,17 +190,17 @@ jobs:
       TEST_REPORT_PATH: ocp-artifacts
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
 
-      - name: Set up Go 1.22
-        uses: actions/setup-go@v3
+      - name: Set up Go 1.26.10
+        uses: actions/setup-go@be3c94b385c4f180051c996d336f57a34c397495 # v3
         with:
-          go-version: 1.22.x
+          go-version: 1.26.10
 
       - name: run test
         run: make test-e2e-conformance-virtual-ocp-cluster-ci
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@ff15f0306b3f739f7b6fd43fb5d26cd321bd4de5 # v3
         if: always()
         with:
           name: ${{ env.TEST_REPORT_PATH }}

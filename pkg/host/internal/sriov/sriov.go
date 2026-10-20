@@ -408,7 +408,7 @@ func (s *sriov) checkExternallyManagedPF(iface *sriovnetworkv1.Interface) error 
 			"functions %d but the policy is configured as ExternallyManaged for device %s",
 			iface.NumVfs, currentNumVfs, iface.PciAddress)
 		log.Log.Error(nil, errMsg)
-		return fmt.Errorf(errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 	currentEswitchMode := s.GetNicSriovMode(iface.PciAddress)
 	expectedEswitchMode := sriovnetworkv1.GetEswitchModeFromSpec(iface)
@@ -416,7 +416,7 @@ func (s *sriov) checkExternallyManagedPF(iface *sriovnetworkv1.Interface) error 
 		errMsg := fmt.Sprintf("checkExternallyManagedPF(): requested ESwitchMode mode \"%s\" is not equal to configured \"%s\" "+
 			"but the policy is configured as ExternallyManaged for device %s", expectedEswitchMode, currentEswitchMode, iface.PciAddress)
 		log.Log.Error(nil, errMsg)
-		return fmt.Errorf(errMsg)
+		return fmt.Errorf("%s", errMsg)
 	}
 	currentMtu := s.networkHelper.GetNetdevMTU(iface.PciAddress)
 	if iface.Mtu > 0 && iface.Mtu > currentMtu {
