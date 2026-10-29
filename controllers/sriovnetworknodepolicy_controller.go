@@ -316,8 +316,10 @@ func (r *SriovNetworkNodePolicyReconciler) syncAllSriovNetworkNodeStates(ctx con
 		if netPoolConfig != nil {
 			ns.Spec.System.RdmaMode = netPoolConfig.Spec.RdmaMode
 		}
-		j, _ := json.Marshal(ns)
-		logger.V(2).Info("SriovNetworkNodeState CR", "content", j)
+		if logger.V(2).Enabled() {
+			j, _ := json.Marshal(ns)
+			logger.V(2).Info("SriovNetworkNodeState CR", "content", j)
+		}
 		if err := r.syncSriovNetworkNodeState(ctx, dc, npl, ns, &node); err != nil {
 			logger.Error(err, "Fail to sync", "SriovNetworkNodeState", ns.Name)
 			return err
@@ -409,7 +411,7 @@ func (r *SriovNetworkNodePolicyReconciler) syncSriovNetworkNodeState(ctx context
 				continue
 			}
 			if p.Selected(node) {
-				logger.Info("apply", "policy", p.Name, "node", node.Name)
+				logger.V(1).Info("apply", "policy", p.Name, "node", node.Name)
 				// Merging only for policies with the same priority (ppp == p.Spec.Priority)
 				// This boolean flag controls merging of PF configuration (e.g. mtu, numvfs etc)
 				// when VF partition is configured.
