@@ -37,7 +37,7 @@ var _ = Describe("Generic plugin", func() {
 		hostHelper.EXPECT().SetRDMASubsystem("").Return(nil).AnyTimes()
 		hostHelper.EXPECT().GetCurrentKernelArgs().Return("", nil).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIntelIommu).Return(false).AnyTimes()
-		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIommuPt).Return(false).AnyTimes()
+		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIommuOn).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgPciRealloc).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgRdmaExclusive).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgRdmaShared).Return(false).AnyTimes()
@@ -922,7 +922,7 @@ var _ = Describe("Generic plugin", func() {
 				genericPlugin.(*GenericPlugin).addVfioDesiredKernelArg(vfioNetworkNodeState)
 
 				Expect(genericPlugin.(*GenericPlugin).DesiredKernelArgs[consts.KernelArgIntelIommu]).To(BeTrue())
-				Expect(genericPlugin.(*GenericPlugin).DesiredKernelArgs[consts.KernelArgIommuPt]).To(BeTrue())
+				Expect(genericPlugin.(*GenericPlugin).DesiredKernelArgs[consts.KernelArgIommuOn]).To(BeTrue())
 
 				changed, err := genericPlugin.CheckStatusChanges(vfioNetworkNodeState)
 				Expect(err).ToNot(HaveOccurred())
@@ -932,7 +932,7 @@ var _ = Describe("Generic plugin", func() {
 			It("should set the correct kernel args on AMD CPUs", func() {
 				hostHelper.EXPECT().GetCPUVendor().Return(hostTypes.CPUVendorAMD, nil)
 				genericPlugin.(*GenericPlugin).addVfioDesiredKernelArg(vfioNetworkNodeState)
-				Expect(genericPlugin.(*GenericPlugin).DesiredKernelArgs[consts.KernelArgIommuPt]).To(BeTrue())
+				Expect(genericPlugin.(*GenericPlugin).DesiredKernelArgs[consts.KernelArgIommuOn]).To(BeTrue())
 			})
 
 			It("should set the correct kernel args on ARM CPUs", func() {

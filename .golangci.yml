@@ -78,7 +78,6 @@ linters:
     - dogsled
     # TODO fix issues- dupl
     # TODO fix issues- errcheck
-    - exportloopref
     - exhaustive
     # TODO fix issues- funlen
       #- gochecknoinits
