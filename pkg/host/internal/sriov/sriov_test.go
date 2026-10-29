@@ -86,8 +86,7 @@ var _ = Describe("SRIOV", func() {
 			}).MinTimes(1)
 			hostMock.EXPECT().GetNetDevLinkSpeed("enp216s0f0np0").Return("100000 Mb/s")
 			hostMock.EXPECT().GetNetDevLinkAdminState("enp216s0f0np0").Return("up")
-			hostMock.EXPECT().GetNetDevNodeGUID("0000:d8:00.2").Return("guid1")
-			hostMock.EXPECT().GetVfGUID("enp216s0f0np0", "0000:d8:00.0", 0).Return(net.HardwareAddr{}, nil)
+			hostMock.EXPECT().GetVfGUID("0000:d8:00.2", "0000:d8:00.0", 0).Return(net.HardwareAddr{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77}, nil)
 			storeManagerMode.EXPECT().LoadPfsStatus("0000:d8:00.0").Return(nil, false, nil)
 
 			dputilsLibMock.EXPECT().IsSriovPF("0000:d8:00.0").Return(true)
@@ -141,7 +140,7 @@ var _ = Describe("SRIOV", func() {
 					Mtu:             1500,
 					VfID:            0,
 					RepresentorName: "enp216s0f0np0_0",
-					GUID:            "guid1",
+					GUID:            "00:11:22:33:44:55:66:77",
 				}},
 			}))
 		})
