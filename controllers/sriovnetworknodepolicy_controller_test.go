@@ -16,8 +16,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/client-go/util/workqueue"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 
 	dptypes "github.com/k8snetworkplumbingwg/sriov-network-device-plugin/pkg/types"
 
@@ -37,6 +39,46 @@ func mustMarshallSelector(t *testing.T, input *dptypes.NetDeviceSelectors) *json
 	}
 	ret := json.RawMessage(out)
 	return &ret
+}
+
+func TestNodeEventHandler(t *testing.T) {
+	node := func(labels map[string]string, annotations map[string]string) *corev1.Node {
+		return &corev1.Node{ObjectMeta: metav1.ObjectMeta{Name: "node-1", Labels: labels, Annotations: annotations}}
+	}
+	labels := map[string]string{"node-role.kubernetes.io/worker": "", "feature.node.kubernetes.io/network-sriov.capable": "true"}
+
+	updates := []struct {
+		tname    string
+		old, new *corev1.Node
+		expSyncs int
+	}{
+		{"annotation-only update (e.g. kubevirt heartbeat)", node(labels, map[string]string{"kubevirt.io/heartbeat": "1"}), node(labels, map[string]string{"kubevirt.io/heartbeat": "2"}), 0},
+		{"identical labels", node(labels, nil), node(map[string]string{"node-role.kubernetes.io/worker": "", "feature.node.kubernetes.io/network-sriov.capable": "true"}, nil), 0},
+		{"nil vs empty labels", node(nil, nil), node(map[string]string{}, nil), 0},
+		{"label value changed", node(labels, nil), node(map[string]string{"node-role.kubernetes.io/worker": "", "feature.node.kubernetes.io/network-sriov.capable": "false"}, nil), 1},
+		{"label added", node(labels, nil), node(map[string]string{"node-role.kubernetes.io/worker": "", "feature.node.kubernetes.io/network-sriov.capable": "true", "machine.together.ai/tranche": "1"}, nil), 1},
+		{"label removed", node(labels, nil), node(map[string]string{"node-role.kubernetes.io/worker": ""}, nil), 1},
+	}
+	for _, tc := range updates {
+		t.Run(tc.tname, func(t *testing.T) {
+			syncs := 0
+			h := nodeEventHandler(func(q workqueue.RateLimitingInterface) { syncs++ })
+			h.Update(context.Background(), event.UpdateEvent{ObjectOld: tc.old, ObjectNew: tc.new}, nil)
+			if syncs != tc.expSyncs {
+				t.Errorf("expected %d syncs, got %d", tc.expSyncs, syncs)
+			}
+		})
+	}
+
+	t.Run("create and delete always sync", func(t *testing.T) {
+		syncs := 0
+		h := nodeEventHandler(func(q workqueue.RateLimitingInterface) { syncs++ })
+		h.Create(context.Background(), event.CreateEvent{Object: node(labels, nil)}, nil)
+		h.Delete(context.Background(), event.DeleteEvent{Object: node(labels, nil)}, nil)
+		if syncs != 2 {
+			t.Errorf("expected 2 syncs, got %d", syncs)
+		}
+	})
 }
 
 func TestRenderDevicePluginConfigData(t *testing.T) {
