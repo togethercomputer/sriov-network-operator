@@ -193,6 +193,11 @@ func (r *SriovNetworkNodePolicyReconciler) SetupWithManager(mgr ctrl.Manager) er
 // labels change. Other Node updates (status heartbeats, annotations) can't change which
 // policies match the node, so they are ignored. Semantic equality treats nil and empty
 // label maps as equal.
+//
+// The rendered NodeState spec also depends on SriovNetworkNodeState.Status (e.g. the
+// interfaces a new node's daemon reports), which this controller doesn't watch. Those
+// changes are picked up by the periodic resync (ResyncPeriod, 5 min) instead of the next
+// Node heartbeat, as upstream does since v1.6.0.
 func nodeEventHandler(qHandler func(q workqueue.RateLimitingInterface)) handler.Funcs {
 	// we want to act fast on new or deleted nodes
 	return handler.Funcs{
