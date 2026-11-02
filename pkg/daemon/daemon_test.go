@@ -29,12 +29,14 @@ import (
 	snclientset "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/client/clientset/versioned/fake"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/consts"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/featuregate"
+	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper"
 	mock_helper "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/helper/mock"
 	mock_platforms "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/mock"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/platforms/openshift"
 	plugin "github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins/fake"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/plugins/generic"
+	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/utils"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/pkg/vars"
 	"github.com/k8snetworkplumbingwg/sriov-network-operator/test/util/fakefilesystem"
 )
@@ -364,6 +366,7 @@ var _ = Describe("rebootNode", func() {
 				hostHelper.EXPECT().RunCommand(
 					"systemd-run",
 					"--wait",
+					"--collect",
 					"--unit", rebootUnitName,
 					"--description", rebootUnitDescription,
 					"/bin/sh", "-c", expectedCommand,
@@ -502,6 +505,7 @@ var _ = Describe("rebootNode", func() {
 			hostHelper.EXPECT().RunCommand(
 				"systemd-run",
 				"--wait",
+				"--collect",
 				"--unit", rebootUnitName,
 				"--description", rebootUnitDescription,
 				"/bin/sh", "-c", k3sAgentRebootCommand,
@@ -514,6 +518,45 @@ var _ = Describe("rebootNode", func() {
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring(scheduleErr.Error()))
 		Expect(exitCalled).To(BeTrue())
+	})
+
+	It("does not retain a failed fixed-name unit before retry", func() {
+		tempDir := GinkgoT().TempDir()
+		systemdRunPath := filepath.Join(tempDir, "systemd-run")
+		unitStatePath := filepath.Join(tempDir, "unit-state")
+		callLogPath := filepath.Join(tempDir, "systemd-run.log")
+		fakeSystemdRun := `#!/bin/sh
+collect=false
+for arg in "$@"; do
+	if [ "$arg" = "--collect" ]; then
+		collect=true
+	fi
+done
+if [ -e "$FAKE_SYSTEMD_UNIT_STATE" ]; then
+	printf 'collision\n' >> "$FAKE_SYSTEMD_RUN_LOG"
+	exit 2
+fi
+printf 'attempt\n' >> "$FAKE_SYSTEMD_RUN_LOG"
+if [ "$collect" != true ]; then
+	: > "$FAKE_SYSTEMD_UNIT_STATE"
+fi
+exit 1
+`
+		Expect(os.WriteFile(systemdRunPath, []byte(fakeSystemdRun), executablePermissions)).To(Succeed())
+		GinkgoT().Setenv("PATH", tempDir+":"+os.Getenv("PATH"))
+		GinkgoT().Setenv("FAKE_SYSTEMD_UNIT_STATE", unitStatePath)
+		GinkgoT().Setenv("FAKE_SYSTEMD_RUN_LOG", callLogPath)
+
+		hostHelper := helper.NewHostHelpers(utils.New(), nil, nil, nil)
+		sut := &Daemon{HostHelpers: hostHelper}
+		nodeAgent := nodeAgentService{name: k3sAgentService, rebootCommand: k3sAgentRebootCommand}
+
+		Expect(sut.runHostRebootUnit(nodeAgent)).To(HaveOccurred())
+		Expect(sut.runHostRebootUnit(nodeAgent)).To(HaveOccurred())
+
+		callLog, err := os.ReadFile(callLogPath)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(string(callLog)).To(Equal("attempt\nattempt\n"))
 	})
 
 	It("preserves restore errors when no reboot was scheduled", func() {
@@ -631,6 +674,7 @@ var _ = Describe("reboot failure status", func() {
 			hostHelper.EXPECT().RunCommand(
 				"systemd-run",
 				"--wait",
+				"--collect",
 				"--unit", rebootUnitName,
 				"--description", rebootUnitDescription,
 				"/bin/sh", "-c", k3sAgentRebootCommand,

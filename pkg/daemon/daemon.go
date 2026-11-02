@@ -849,6 +849,7 @@ func (dn *Daemon) runHostRebootUnit(nodeAgent nodeAgentService) error {
 	stdout, stderr, err := dn.HostHelpers.RunCommand(
 		"systemd-run",
 		"--wait",
+		"--collect",
 		"--unit", rebootUnitName,
 		"--description", rebootUnitDescription,
 		"/bin/sh", "-c", nodeAgent.rebootCommand,
