@@ -2,7 +2,13 @@ package daemon
 
 import (
 	"context"
+	"errors"
 	"flag"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -13,6 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakek8s "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/tools/record"
 	kclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -334,4 +341,427 @@ func updateSriovNetworkNodeState(c snclient.Interface, nodeState *sriovnetworkv1
 		SriovNetworkNodeStates(vars.Namespace).
 		Update(context.Background(), nodeState, metav1.UpdateOptions{})
 	return err
+}
+
+var _ = Describe("rebootNode", func() {
+	DescribeTable("schedules a reboot for exactly one loaded node agent",
+		func(k3sLoadState, kubeletLoadState, expectedCommand string) {
+			mockCtrl := gomock.NewController(GinkgoT())
+			hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+			exitCalled := false
+
+			gomock.InOrder(
+				hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+					exitCalled = true
+					return nil
+				}, nil),
+				hostHelper.EXPECT().RunCommand(
+					"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+				).Return(k3sLoadState+"\n", "", nil),
+				hostHelper.EXPECT().RunCommand(
+					"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+				).Return(kubeletLoadState+"\n", "", nil),
+				hostHelper.EXPECT().RunCommand(
+					"systemd-run",
+					"--wait",
+					"--unit", rebootUnitName,
+					"--description", rebootUnitDescription,
+					"/bin/sh", "-c", expectedCommand,
+				).Return("", "", nil),
+			)
+
+			sut := &Daemon{HostHelpers: hostHelper}
+			Expect(sut.rebootNode()).To(Succeed())
+			Expect(exitCalled).To(BeTrue())
+		},
+		Entry("on k3s", loadedSystemdUnitState, "not-found", k3sAgentRebootCommand),
+		Entry("on standalone kubelet", "not-found", loadedSystemdUnitState, kubeletRebootCommand),
+	)
+
+	It("fails closed when no supported node agent is loaded", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		exitCalled := false
+
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+				exitCalled = true
+				return nil
+			}, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return("not-found\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+			).Return("not-found\n", "", nil),
+		)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("expected exactly one loaded node-agent service, found 0"))
+		Expect(exitCalled).To(BeTrue())
+	})
+
+	It("fails closed when both supported node agents are loaded", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		exitCalled := false
+
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+				exitCalled = true
+				return nil
+			}, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return(loadedSystemdUnitState+"\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+			).Return(loadedSystemdUnitState+"\n", "", nil),
+		)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("expected exactly one loaded node-agent service, found 2"))
+		Expect(exitCalled).To(BeTrue())
+	})
+
+	It("fails closed when service detection fails", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		detectionErr := errors.New("systemctl show failed")
+		exitCalled := false
+
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+				exitCalled = true
+				return nil
+			}, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return("", "failed to query systemd", detectionErr),
+		)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("failed to detect node-agent service"))
+		Expect(err.Error()).To(ContainSubstring(detectionErr.Error()))
+		Expect(exitCalled).To(BeTrue())
+	})
+
+	It("returns immediately when entering the host chroot fails", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		chrootErr := errors.New("chroot failed")
+
+		hostHelper.EXPECT().Chroot(consts.Host).Return(nil, chrootErr)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring(chrootErr.Error()))
+	})
+
+	It("fails closed when chroot succeeds without a restore function", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+
+		hostHelper.EXPECT().Chroot(consts.Host).Return(nil, nil)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("nil restore function"))
+	})
+
+	It("propagates transient unit failures", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		scheduleErr := errors.New("transient unit failed")
+		exitCalled := false
+
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+				exitCalled = true
+				return nil
+			}, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return(loadedSystemdUnitState+"\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+			).Return("not-found\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemd-run",
+				"--wait",
+				"--unit", rebootUnitName,
+				"--description", rebootUnitDescription,
+				"/bin/sh", "-c", k3sAgentRebootCommand,
+			).Return("", "stop failed", scheduleErr),
+		)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring(scheduleErr.Error()))
+		Expect(exitCalled).To(BeTrue())
+	})
+
+	It("preserves restore errors when no reboot was scheduled", func() {
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		restoreErr := errors.New("restore chroot failed")
+
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error {
+				return restoreErr
+			}, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return("not-found\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+			).Return("not-found\n", "", nil),
+		)
+
+		sut := &Daemon{HostHelpers: hostHelper}
+		err := sut.rebootNode()
+
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(ContainSubstring("expected exactly one loaded node-agent service"))
+		Expect(err.Error()).To(ContainSubstring(restoreErr.Error()))
+	})
+})
+
+var _ = Describe("host reboot command", func() {
+	It("does not reach reboot when stopping the node agent fails", func() {
+		calls, err := runHostRebootCommand(k3sAgentRebootCommand, commandFailed, "", commandFailed)
+
+		Expect(err).To(HaveOccurred())
+		Expect(calls).To(Equal([]string{"stop " + k3sAgentService}))
+	})
+
+	It("does not reach reboot while the node agent remains active", func() {
+		calls, err := runHostRebootCommand(k3sAgentRebootCommand, commandSucceeded, "active", commandSucceeded)
+
+		Expect(err).To(HaveOccurred())
+		Expect(calls).To(Equal([]string{
+			"stop " + k3sAgentService,
+			"is-active " + k3sAgentService,
+		}))
+	})
+
+	It("does not reach reboot when node-agent verification fails", func() {
+		calls, err := runHostRebootCommand(k3sAgentRebootCommand, commandSucceeded, "", commandFailed)
+
+		Expect(err).To(HaveOccurred())
+		Expect(calls).To(Equal([]string{
+			"stop " + k3sAgentService,
+			"is-active " + k3sAgentService,
+		}))
+	})
+
+	It("reaches reboot only after the node agent is confirmed inactive", func() {
+		calls, err := runHostRebootCommand(
+			k3sAgentRebootCommand,
+			commandSucceeded,
+			inactiveSystemdUnitState,
+			systemdInactiveExitCode,
+		)
+
+		Expect(err).ToNot(HaveOccurred())
+		Expect(calls).To(Equal([]string{
+			"stop " + k3sAgentService,
+			"is-active " + k3sAgentService,
+			"reboot --no-block",
+		}))
+	})
+})
+
+var _ = Describe("reboot failure status", func() {
+	It("routes reboot precondition errors through Failed and LastSyncError", func() {
+		originalNodeName := vars.NodeName
+		originalNamespace := vars.Namespace
+		vars.NodeName = "reboot-test-node"
+		vars.Namespace = "reboot-test-namespace"
+		DeferCleanup(func() {
+			vars.NodeName = originalNodeName
+			vars.Namespace = originalNamespace
+		})
+		Expect(sriovnetworkv1.AddToScheme(scheme.Scheme)).To(Succeed())
+
+		nodeState := &sriovnetworkv1.SriovNetworkNodeState{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:       vars.NodeName,
+				Namespace:  vars.Namespace,
+				Generation: 2,
+				Annotations: map[string]string{
+					consts.NodeStateDrainAnnotationCurrent: consts.DrainIdle,
+				},
+			},
+		}
+		sriovClient := snclientset.NewSimpleClientset(nodeState)
+		kubeClient := fakek8s.NewSimpleClientset()
+		fakeEventRecorder := record.NewFakeRecorder(2)
+		eventRecorder := &EventRecorder{
+			client:        sriovClient,
+			eventRecorder: fakeEventRecorder,
+		}
+
+		mockCtrl := gomock.NewController(GinkgoT())
+		hostHelper := mock_helper.NewMockHostHelpersInterface(mockCtrl)
+		scheduleErr := errors.New("host reboot unit failed")
+		gomock.InOrder(
+			hostHelper.EXPECT().Chroot(consts.Host).Return(func() error { return nil }, nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", k3sAgentService,
+			).Return(loadedSystemdUnitState+"\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemctl", "show", "--property=LoadState", "--value", kubeletService,
+			).Return("not-found\n", "", nil),
+			hostHelper.EXPECT().RunCommand(
+				"systemd-run",
+				"--wait",
+				"--unit", rebootUnitName,
+				"--description", rebootUnitDescription,
+				"/bin/sh", "-c", k3sAgentRebootCommand,
+			).Return("", "node agent stop failed", scheduleErr),
+		)
+
+		refreshCh := make(chan Message, 2)
+		syncCh := make(chan struct{}, 2)
+		syncCh <- struct{}{}
+		syncCh <- struct{}{}
+		sut := New(
+			nil,
+			sriovClient,
+			kubeClient,
+			hostHelper,
+			nil,
+			nil,
+			nil,
+			syncCh,
+			refreshCh,
+			eventRecorder,
+			featuregate.New(),
+			nil,
+		)
+		DeferCleanup(sut.workqueue.ShutDown)
+		sut.loadedPlugins = map[string]plugin.VendorPlugin{
+			"reboot-required": rebootRequiredPlugin{},
+		}
+		sut.workqueue.Add(nodeState.Generation)
+
+		Expect(sut.processNextWorkItem()).To(BeTrue())
+
+		var inProgress Message
+		Expect(refreshCh).To(Receive(&inProgress))
+		Expect(inProgress.syncStatus).To(Equal(consts.SyncStatusInProgress))
+
+		var failed Message
+		Expect(refreshCh).To(Receive(&failed))
+		Expect(failed.syncStatus).To(Equal(consts.SyncStatusFailed))
+		Expect(failed.lastSyncError).To(ContainSubstring(scheduleErr.Error()))
+
+		writer := &NodeStateStatusWriter{
+			client:        sriovClient,
+			eventRecorder: eventRecorder,
+		}
+		_, err := writer.setNodeStateStatus(failed)
+		Expect(err).ToNot(HaveOccurred())
+
+		updatedNodeState, err := sriovClient.SriovnetworkV1().
+			SriovNetworkNodeStates(vars.Namespace).
+			Get(context.Background(), vars.NodeName, metav1.GetOptions{})
+		Expect(err).ToNot(HaveOccurred())
+		Expect(updatedNodeState.Status.SyncStatus).To(Equal(consts.SyncStatusFailed))
+		Expect(updatedNodeState.Status.LastSyncError).To(ContainSubstring(scheduleErr.Error()))
+
+		var event string
+		Expect(fakeEventRecorder.Events).To(Receive(&event))
+		Expect(event).To(ContainSubstring("Normal SyncStatusChanged"))
+		Expect(event).To(ContainSubstring(scheduleErr.Error()))
+	})
+})
+
+const (
+	commandSucceeded        = 0
+	commandFailed           = 1
+	systemdInactiveExitCode = 3
+	executablePermissions   = 0o755
+)
+
+type rebootRequiredPlugin struct{}
+
+func (rebootRequiredPlugin) Name() string {
+	return "reboot-required"
+}
+
+func (rebootRequiredPlugin) Spec() string {
+	return "1.0"
+}
+
+func (rebootRequiredPlugin) OnNodeStateChange(*sriovnetworkv1.SriovNetworkNodeState) (bool, bool, error) {
+	return false, true, nil
+}
+
+func (rebootRequiredPlugin) CheckStatusChanges(*sriovnetworkv1.SriovNetworkNodeState) (bool, error) {
+	return false, nil
+}
+
+func (rebootRequiredPlugin) Apply() error {
+	return nil
+}
+
+func runHostRebootCommand(command string, stopExit int, activeState string, activeExit int) ([]string, error) {
+	GinkgoHelper()
+
+	tempDir := GinkgoT().TempDir()
+	systemctlPath := filepath.Join(tempDir, "systemctl")
+	callLogPath := filepath.Join(tempDir, "systemctl.log")
+	fakeSystemctl := `#!/bin/sh
+printf '%s\n' "$*" >> "$SYSTEMCTL_LOG"
+case "$1" in
+stop)
+	exit "$STOP_EXIT"
+	;;
+is-active)
+	if [ -n "$ACTIVE_STATE" ]; then
+		printf '%s\n' "$ACTIVE_STATE"
+	fi
+	exit "$ACTIVE_EXIT"
+	;;
+reboot)
+	exit 0
+	;;
+*)
+	exit 64
+	;;
+esac
+`
+	Expect(os.WriteFile(systemctlPath, []byte(fakeSystemctl), executablePermissions)).To(Succeed())
+
+	cmd := exec.Command("/bin/sh", "-c", command)
+	cmd.Env = []string{
+		"PATH=" + tempDir + ":/usr/bin:/bin",
+		"SYSTEMCTL_LOG=" + callLogPath,
+		"STOP_EXIT=" + strconv.Itoa(stopExit),
+		"ACTIVE_STATE=" + activeState,
+		"ACTIVE_EXIT=" + strconv.Itoa(activeExit),
+	}
+	err := cmd.Run()
+
+	callLog, readErr := os.ReadFile(callLogPath)
+	Expect(readErr).ToNot(HaveOccurred())
+	calls := strings.Split(strings.TrimSpace(string(callLog)), "\n")
+	return calls, err
 }

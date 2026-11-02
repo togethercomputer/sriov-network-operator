@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -40,11 +41,38 @@ const (
 	// maxUpdateBackoff is the maximum time to react to a change as we back off
 	// in the face of errors.
 	maxUpdateBackoff = 60 * time.Second
+
+	k3sAgentService              = "k3s-agent.service"
+	kubeletService               = "kubelet.service"
+	loadedSystemdUnitState       = "loaded"
+	inactiveSystemdUnitState     = "inactive"
+	systemdUnitLoadStateProperty = "LoadState"
+	rebootUnitName               = "sriov-network-config-daemon-reboot"
+	rebootUnitDescription        = "sriov-network-config-daemon reboot node"
+	systemctlStopPrefix          = "systemctl stop "
+	systemctlIsActivePrefix      = "systemctl is-active "
+	systemctlRebootCommand       = "systemctl reboot --no-block"
+	shellAnd                     = " && "
+	inactiveStateCheck           = " | grep -Fxq " + inactiveSystemdUnitState
+
+	k3sAgentRebootCommand = systemctlStopPrefix + k3sAgentService + shellAnd +
+		systemctlIsActivePrefix + k3sAgentService + inactiveStateCheck + shellAnd +
+		systemctlRebootCommand
+	kubeletRebootCommand = systemctlStopPrefix + kubeletService + shellAnd +
+		systemctlIsActivePrefix + kubeletService + inactiveStateCheck + shellAnd +
+		systemctlRebootCommand
+
+	requiredLoadedNodeAgentServices = 1
 )
 
 type Message struct {
 	syncStatus    string
 	lastSyncError string
+}
+
+type nodeAgentService struct {
+	name          string
+	rebootCommand string
 }
 
 type Daemon struct {
@@ -517,8 +545,11 @@ func (dn *Daemon) nodeStateSyncHandler() error {
 
 	if reqReboot {
 		log.Log.Info("nodeStateSyncHandler(): reboot node")
-		dn.eventRecorder.SendEvent("RebootNode", "Reboot node has been initiated")
-		dn.rebootNode()
+		if err := dn.rebootNode(); err != nil {
+			log.Log.Error(err, "nodeStateSyncHandler(): failed to schedule node reboot")
+			return err
+		}
+		dn.eventRecorder.SendEvent("RebootNode", "Reboot node has been scheduled")
 		return nil
 	}
 
@@ -736,26 +767,104 @@ func (dn *Daemon) restartDevicePluginPod() error {
 	return nil
 }
 
-func (dn *Daemon) rebootNode() {
+func (dn *Daemon) rebootNode() (returnErr error) {
 	log.Log.Info("rebootNode(): trigger node reboot")
 	exit, err := dn.HostHelpers.Chroot(consts.Host)
 	if err != nil {
-		log.Log.Error(err, "rebootNode(): chroot command failed")
+		return fmt.Errorf("node %q reboot precondition failed: enter host chroot: %w", vars.NodeName, err)
 	}
-	defer exit()
-	// creates a new transient systemd unit to reboot the system.
-	// We explictily try to stop kubelet.service first, before anything else; this
-	// way we ensure the rest of system stays running, because kubelet may need
-	// to do "graceful" shutdown by e.g. de-registering with a load balancer.
-	// However note we use `;` instead of `&&` so we keep rebooting even
-	// if kubelet failed to shutdown - that way the machine will still eventually reboot
-	// as systemd will time out the stop invocation.
-	stdOut, StdErr, err := dn.HostHelpers.RunCommand("systemd-run", "--unit", "sriov-network-config-daemon-reboot",
-		"--description", "sriov-network-config-daemon reboot node", "/bin/sh", "-c", "systemctl stop kubelet.service; reboot")
+	if exit == nil {
+		return fmt.Errorf("node %q reboot precondition failed: chroot returned a nil restore function", vars.NodeName)
+	}
 
+	rebootScheduled := false
+	defer func() {
+		if err := exit(); err != nil {
+			if rebootScheduled {
+				log.Log.Error(err, "rebootNode(): failed to restore host chroot after scheduling reboot")
+				return
+			}
+			if returnErr != nil {
+				returnErr = fmt.Errorf("%w; failed to restore host chroot: %w", returnErr, err)
+				return
+			}
+			returnErr = fmt.Errorf("node %q reboot precondition failed: restore host chroot: %w", vars.NodeName, err)
+		}
+	}()
+
+	nodeAgent, err := dn.detectNodeAgentService()
 	if err != nil {
-		log.Log.Error(err, "failed to reboot node", "stdOut", stdOut, "StdErr", StdErr)
+		return fmt.Errorf("node %q reboot precondition failed: %w", vars.NodeName, err)
 	}
+
+	if err := dn.runHostRebootUnit(nodeAgent); err != nil {
+		return fmt.Errorf("node %q reboot precondition failed: %w", vars.NodeName, err)
+	}
+	rebootScheduled = true
+	return nil
+}
+
+func (dn *Daemon) detectNodeAgentService() (nodeAgentService, error) {
+	supportedServices := [...]nodeAgentService{
+		{name: k3sAgentService, rebootCommand: k3sAgentRebootCommand},
+		{name: kubeletService, rebootCommand: kubeletRebootCommand},
+	}
+	loadedCount := 0
+	loadedService := nodeAgentService{}
+	detectedStates := make([]string, 0, len(supportedServices))
+
+	for _, service := range supportedServices {
+		stdout, stderr, err := dn.HostHelpers.RunCommand(
+			"systemctl", "show", "--property="+systemdUnitLoadStateProperty, "--value", service.name,
+		)
+		if err != nil {
+			return nodeAgentService{}, fmt.Errorf(
+				"failed to detect node-agent service %q (stderr: %q): %w",
+				service.name,
+				strings.TrimSpace(stderr),
+				err,
+			)
+		}
+
+		loadState := strings.TrimSpace(stdout)
+		detectedStates = append(detectedStates, fmt.Sprintf("%s=%s", service.name, loadState))
+		if loadState == loadedSystemdUnitState {
+			loadedCount++
+			loadedService = service
+		}
+	}
+
+	if loadedCount != requiredLoadedNodeAgentServices {
+		return nodeAgentService{}, fmt.Errorf(
+			"expected exactly one loaded node-agent service, found %d (%s)",
+			loadedCount,
+			strings.Join(detectedStates, ", "),
+		)
+	}
+
+	return loadedService, nil
+}
+
+func (dn *Daemon) runHostRebootUnit(nodeAgent nodeAgentService) error {
+	stdout, stderr, err := dn.HostHelpers.RunCommand(
+		"systemd-run",
+		"--wait",
+		"--unit", rebootUnitName,
+		"--description", rebootUnitDescription,
+		"/bin/sh", "-c", nodeAgent.rebootCommand,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"host reboot unit %q failed for node-agent %q (stdout: %q, stderr: %q): %w",
+			rebootUnitName,
+			nodeAgent.name,
+			strings.TrimSpace(stdout),
+			strings.TrimSpace(stderr),
+			err,
+		)
+	}
+
+	return nil
 }
 
 func (dn *Daemon) prepareNMUdevRule() error {
