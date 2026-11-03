@@ -1,5 +1,9 @@
 # sriov-network-operator
 
+> **Together fork.** Together deploys `release-1.4/together`; `master` is an old upstream copy.
+> Merging here does not publish an image: [togethercomputer/sriov-network-operator-image](https://github.com/togethercomputer/sriov-network-operator-image)
+> builds the operator image from the commit pinned in its `fork.env`. The `image-push-*` workflows here are upstream's.
+
 The Sriov Network Operator is designed to help the user to provision and configure SR-IOV CNI plugin and Device plugin in the Openshift cluster.
 
 ## Motivation
