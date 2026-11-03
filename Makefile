@@ -156,8 +156,10 @@ kustomize: ## Download kustomize locally if necessary.
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v4@v4.5.5)
 
 ENVTEST = $(BIN_DIR)/setup-envtest
+ENVTEST_K8S_VERSION ?= 1.28.0
+ENVTEST_VERSION ?= release-0.19
 envtest: ## Download envtest-setup locally if necessary.
-	$(call go-install-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.16)
+	$(call go-install-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION))
 
 GOMOCK = $(shell pwd)/bin/mockgen
 gomock:
