@@ -30,7 +30,6 @@
 #
 # OVERRIDES (environment):
 #   AWS_PROFILE      (default: TC-Prod-PowerUserAccess-651706779278)
-#   PLATFORMS        (default: linux/amd64,linux/arm64)
 #   TAG              (default: git rev-parse --short=8 HEAD)
 #   PRIVATE_TAG      (default: v1.4.0-0.0.2 — bump per release;
 #                     last prod private pin was v1.4.0-0.0.1)
@@ -47,7 +46,6 @@ cd "$(dirname "$0")/.."
 
 AWS_PROFILE="${AWS_PROFILE:-TC-Prod-PowerUserAccess-651706779278}"
 export AWS_PROFILE
-PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"
 TAG="${TAG:-$(git rev-parse --short=8 HEAD)}"
 PRIVATE_TAG="${PRIVATE_TAG:-v1.4.0-0.0.2}"
 PUBLIC_REGISTRY="${PUBLIC_REGISTRY:-public.ecr.aws/k6t4m3l7}"
@@ -105,8 +103,12 @@ for SPEC in "${SPECS[@]}"; do
     echo "ERROR: ${DF} not found (run from the repo root)" >&2
     exit 1
   fi
-  echo "==> Building ${PUBLIC_REGISTRY}/${IMG}:${TAG} from ${DF} for ${PLATFORMS}"
-  run docker buildx build --platform "${PLATFORMS}" -f "${DF}" \
+  echo "==> Building ${PUBLIC_REGISTRY}/${IMG}:${TAG} from ${DF} for linux/amd64,linux/arm64"
+  # Multi-arch is explicit and unconditional here: this script always --push'es,
+  # so building both platforms is correct. (A local `docker build` without
+  # --push cannot load multi-platform results — `make image` therefore stays
+  # single-arch; see IMAGE_BUILD_OPTS in the Makefile.)
+  run docker buildx build --platform linux/amd64,linux/arm64 -f "${DF}" \
     -t "${PUBLIC_REGISTRY}/${IMG}:${TAG}" --push .
 done
 
