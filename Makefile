@@ -11,7 +11,12 @@ export OPERATOR_EXEC?=oc
 
 BUILD_GOPATH=$(TARGET_DIR):$(TARGET_DIR)/vendor:$(CURPATH)/cmd
 IMAGE_BUILDER?=docker
-IMAGE_BUILD_OPTS?=--platform linux/amd64
+# Default to multi-arch (amd64+arm64) images (TCL-9012).
+# Multi-platform builds require Docker Buildx with the docker-container driver
+# (e.g. `docker buildx create --use`, with QEMU/binfmt for the non-native arch).
+# Plain single-arch `docker build` users can override on the command line, e.g.:
+#   make image IMAGE_BUILD_OPTS="--platform linux/amd64"
+IMAGE_BUILD_OPTS?=--platform linux/amd64,linux/arm64
 DOCKERFILE?=Dockerfile
 DOCKERFILE_CONFIG_DAEMON?=Dockerfile.sriov-network-config-daemon
 DOCKERFILE_WEBHOOK?=Dockerfile.webhook
