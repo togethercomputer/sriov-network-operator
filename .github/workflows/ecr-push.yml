@@ -18,6 +18,10 @@ on:
   push:
     branches:
       - release-1.4/together
+      # TEMPORARY (removed before merge): lets this PR branch prove the
+      # publish path end-to-end; workflow_dispatch only indexes workflows
+      # present on the default branch.
+      - jplimack/tcl-9012-ecr-push-ci
   workflow_dispatch: {}
 
 permissions:
