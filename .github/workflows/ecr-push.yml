@@ -1,7 +1,6 @@
 # Multi-arch (linux/amd64+linux/arm64) publish of the three fork images to
-# Together's public ECR gallery (public.ecr.aws/k6t4m3l7, prod account
-# 651706779278). Replaces the manual hack/build-push-ecr.sh publish path with
-# CI (TCL-9012 §E).
+# the prod account's (651706779278) own public ECR registry. Replaces the
+# manual hack/build-push-ecr.sh publish path with CI (TCL-9012 §E).
 #
 # Auth: GitHub Actions OIDC -> arn:aws:iam::651706779278:role/github-actions-oidc-role
 # (tcloud-infra terraform/gha.tf). The role trust StringLike-matches
@@ -9,8 +8,11 @@
 # arn:aws:ecr-public::651706779278:repository/*, so no secrets are stored in
 # this repo. Public ECR auth/control plane is us-east-1 ONLY.
 #
-# Target registry: the tc-prod account's OWN public registry, resolved at run
-# time via `aws ecr-public describe-registries` (currently public.ecr.aws/p0n1u5b4).
+# Target registry: the tc-prod account's OWN public registry,
+# public.ecr.aws/p0n1u5b4 (verified via `aws ecr-public describe-registries`,
+# primaryRegistryAlias p0n1u5b4 ACTIVE). Pinned literally because the OIDC
+# role's ecr-public policy covers repository/* actions only — it lacks
+# ecr-public:DescribeRegistries, so the URI cannot be resolved at run time.
 # NOTE: the legacy hand-push gallery alias public.ecr.aws/k6t4m3l7 is NOT an
 # alias of this account's registry (verified via describe-registries) and is
 # not pushable by this role — pushes there 403. See PR #27 for the full story.
@@ -38,6 +40,8 @@ env:
   AWS_ROLE: arn:aws:iam::651706779278:role/github-actions-oidc-role
   # Public ECR authorization tokens are issued from us-east-1 only.
   AWS_REGION: us-east-1
+  # The tc-prod account's own public registry URI (see header comment).
+  PUBLIC_ECR: public.ecr.aws/p0n1u5b4
   PLATFORMS: linux/amd64,linux/arm64
 
 concurrency:
@@ -73,13 +77,6 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Resolve public ECR registry URI
-        run: |
-          REGISTRY_URI=$(aws ecr-public describe-registries --region "${AWS_REGION}" \
-            --query 'registries[0].registryUri' --output text)
-          echo "Resolved public registry: ${REGISTRY_URI}"
-          echo "PUBLIC_ECR=${REGISTRY_URI}" >> "${GITHUB_ENV}"
 
       - name: Login to public ECR
         run: |
