@@ -1,0 +1,109 @@
+# Multi-arch (linux/amd64+linux/arm64) publish of the three fork images to
+# the prod account's (651706779278) own public ECR registry. Replaces the
+# manual hack/build-push-ecr.sh publish path with CI (TCL-9012 §E).
+#
+# Auth: GitHub Actions OIDC -> arn:aws:iam::651706779278:role/github-actions-oidc-role
+# (tcloud-infra terraform/gha.tf). The role trust StringLike-matches
+# repo:togethercomputer/* and carries the ecr-public:* push statement on
+# arn:aws:ecr-public::651706779278:repository/*, so no secrets are stored in
+# this repo. Public ECR auth/control plane is us-east-1 ONLY.
+#
+# Target registry: the tc-prod account's OWN public registry,
+# public.ecr.aws/p0n1u5b4 (verified via `aws ecr-public describe-registries`,
+# primaryRegistryAlias p0n1u5b4 ACTIVE). Pinned literally because the OIDC
+# role's ecr-public policy covers repository/* actions only — it lacks
+# ecr-public:DescribeRegistries, so the URI cannot be resolved at run time.
+# NOTE: the legacy hand-push gallery alias public.ecr.aws/k6t4m3l7 is NOT an
+# alias of this account's registry (verified via describe-registries) and is
+# not pushable by this role — pushes there 403. See PR #27 for the full story.
+#
+# Tags are immutable per-commit (<short-sha-8>); nothing here mutates release
+# tags. The private substrate-apps copy stays a human-driven step
+# (hack/build-push-ecr.sh), deliberately NOT part of this workflow.
+name: ECR Push (public, multi-arch)
+
+on:
+  push:
+    branches:
+      - release-1.4/together
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_ROLE: arn:aws:iam::651706779278:role/github-actions-oidc-role
+  # Public ECR authorization tokens are issued from us-east-1 only.
+  AWS_REGION: us-east-1
+  # The tc-prod account's own public registry URI (see header comment).
+  PUBLIC_ECR: public.ecr.aws/p0n1u5b4
+  PLATFORMS: linux/amd64,linux/arm64
+
+concurrency:
+  group: ecr-push-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: Dockerfile
+            image: sriov-network-operator
+          - dockerfile: Dockerfile.sriov-network-config-daemon
+            image: sriov-network-operator-config-daemon
+          - dockerfile: Dockerfile.webhook
+            image: sriov-network-operator-webhook
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to public ECR
+        run: |
+          aws ecr-public get-login-password --region "${AWS_REGION}" | \
+            docker login --username AWS --password-stdin public.ecr.aws
+
+      - name: Ensure public ECR repository exists
+        run: |
+          aws ecr-public describe-repositories --region "${AWS_REGION}" \
+            --repository-names "${{ matrix.image }}" >/dev/null 2>&1 || \
+          aws ecr-public create-repository --region "${AWS_REGION}" \
+            --repository-name "${{ matrix.image }}"
+
+      - name: Build and push ${{ matrix.image }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_SHA::8}"
+          echo "Building ${PUBLIC_ECR}/${{ matrix.image }}:${TAG} for ${PLATFORMS}"
+          docker buildx build \
+            --platform "${PLATFORMS}" \
+            -f "${{ matrix.dockerfile }}" \
+            -t "${PUBLIC_ECR}/${{ matrix.image }}:${TAG}" \
+            --push \
+            .
+
+      - name: Verify manifest has both architectures
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_SHA::8}"
+          REF="${PUBLIC_ECR}/${{ matrix.image }}:${TAG}"
+          INSPECT=$(docker buildx imagetools inspect "${REF}")
+          echo "${INSPECT}"
+          echo "${INSPECT}" | grep -q "linux/amd64"
+          echo "${INSPECT}" | grep -q "linux/arm64"
