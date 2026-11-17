@@ -9,6 +9,12 @@
 # arn:aws:ecr-public::651706779278:repository/*, so no secrets are stored in
 # this repo. Public ECR auth/control plane is us-east-1 ONLY.
 #
+# Target registry: the tc-prod account's OWN public registry, resolved at run
+# time via `aws ecr-public describe-registries` (currently public.ecr.aws/p0n1u5b4).
+# NOTE: the legacy hand-push gallery alias public.ecr.aws/k6t4m3l7 is NOT an
+# alias of this account's registry (verified via describe-registries) and is
+# not pushable by this role — pushes there 403. See PR #27 for the full story.
+#
 # Tags are immutable per-commit (<short-sha-8>); nothing here mutates release
 # tags. The private substrate-apps copy stays a human-driven step
 # (hack/build-push-ecr.sh), deliberately NOT part of this workflow.
@@ -32,7 +38,6 @@ env:
   AWS_ROLE: arn:aws:iam::651706779278:role/github-actions-oidc-role
   # Public ECR authorization tokens are issued from us-east-1 only.
   AWS_REGION: us-east-1
-  PUBLIC_ECR: public.ecr.aws/k6t4m3l7
   PLATFORMS: linux/amd64,linux/arm64
 
 concurrency:
@@ -68,6 +73,13 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve public ECR registry URI
+        run: |
+          REGISTRY_URI=$(aws ecr-public describe-registries --region "${AWS_REGION}" \
+            --query 'registries[0].registryUri' --output text)
+          echo "Resolved public registry: ${REGISTRY_URI}"
+          echo "PUBLIC_ECR=${REGISTRY_URI}" >> "${GITHUB_ENV}"
 
       - name: Login to public ECR
         run: |
