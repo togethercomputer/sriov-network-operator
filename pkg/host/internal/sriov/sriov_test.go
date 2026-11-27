@@ -271,6 +271,59 @@ var _ = Describe("SRIOV", func() {
 				false)).NotTo(HaveOccurred())
 			helpers.GinkgoAssertFileContentsEquals("/sys/bus/pci/devices/0000:d8:00.0/sriov_numvfs", "2")
 		})
+		It("should leave a VF whose netdev is in another namespace alone", func() {
+			origDelay := vfNetdevRecheckDelay
+			vfNetdevRecheckDelay = 0
+			DeferCleanup(func() { vfNetdevRecheckDelay = origDelay })
+			helpers.GinkgoConfigureFakeFS(&fakefilesystem.FS{
+				Dirs: []string{
+					"/sys/bus/pci/devices/0000:d8:00.0",
+					// An empty net directory: the VF's netdev is in a Pod's namespace.
+					"/sys/bus/pci/devices/0000:d8:00.2/net",
+				},
+				Files: map[string][]byte{"/sys/bus/pci/devices/0000:d8:00.0/sriov_numvfs": {}},
+			})
+
+			dputilsLibMock.EXPECT().GetSriovVFcapacity("0000:d8:00.0").Return(2)
+			dputilsLibMock.EXPECT().GetVFconfigured("0000:d8:00.0").Return(0)
+			dputilsLibMock.EXPECT().GetDriverName("0000:d8:00.0").Return("mlx5_core", nil)
+			netlinkLibMock.EXPECT().DevLinkGetDeviceByName("pci", "0000:d8:00.0").Return(&netlink.DevlinkDevice{
+				Attrs: netlink.DevlinkDevAttrs{Eswitch: netlink.DevlinkDevEswitchAttr{Mode: "legacy"}}}, nil)
+			hostMock.EXPECT().RemoveDisableNMUdevRule("0000:d8:00.0").Return(nil)
+			hostMock.EXPECT().RemovePersistPFNameUdevRule("0000:d8:00.0").Return(nil)
+			hostMock.EXPECT().RemoveVfRepresentorUdevRule("0000:d8:00.0").Return(nil)
+			hostMock.EXPECT().AddDisableNMUdevRule("0000:d8:00.0").Return(nil)
+			dputilsLibMock.EXPECT().GetVFList("0000:d8:00.0").Return([]string{"0000:d8:00.2", "0000:d8:00.3"}, nil)
+			pfLinkMock := netlinkMockPkg.NewMockLink(testCtrl)
+			netlinkLibMock.EXPECT().LinkByName("enp216s0f0np0").Return(pfLinkMock, nil).Times(2)
+			netlinkLibMock.EXPECT().IsLinkAdminStateUp(pfLinkMock).Return(false)
+			netlinkLibMock.EXPECT().LinkSetUp(pfLinkMock).Return(nil)
+
+			// The VF in the Pod: no wait for its link, no rebind, no MAC, no MTU, no driver change.
+			dputilsLibMock.EXPECT().GetVFID("0000:d8:00.2").Return(0, nil)
+			hostMock.EXPECT().HasDriver("0000:d8:00.2").Return(true, "mlx5_core")
+
+			// A VF of another group on vfio-pci is configured as before.
+			dputilsLibMock.EXPECT().GetVFID("0000:d8:00.3").Return(1, nil)
+			hostMock.EXPECT().HasDriver("0000:d8:00.3").Return(true, "vfio-pci").Times(2)
+			hostMock.EXPECT().UnbindDriverIfNeeded("0000:d8:00.3", false).Return(nil)
+			hostMock.EXPECT().BindDpdkDriver("0000:d8:00.3", "vfio-pci").Return(nil)
+
+			storeManagerMode.EXPECT().SaveLastPfAppliedStatus(gomock.Any()).Return(nil)
+
+			Expect(s.ConfigSriovInterfaces(storeManagerMode,
+				[]sriovnetworkv1.Interface{{
+					Name:       "enp216s0f0np0",
+					PciAddress: "0000:d8:00.0",
+					NumVfs:     2,
+					VfGroups: []sriovnetworkv1.VfGroup{
+						{VfRange: "0-0", ResourceName: "pod", PolicyName: "pod", Mtu: 9000},
+						{VfRange: "1-1", ResourceName: "vm", PolicyName: "vm", DeviceType: "vfio-pci"},
+					},
+				}},
+				[]sriovnetworkv1.InterfaceExt{{PciAddress: "0000:d8:00.0"}},
+				false)).NotTo(HaveOccurred())
+		})
 		It("should configure IB", func() {
 			helpers.GinkgoConfigureFakeFS(&fakefilesystem.FS{
 				Dirs:  []string{"/sys/bus/pci/devices/0000:d8:00.0"},
@@ -606,6 +659,25 @@ var _ = Describe("SRIOV", func() {
 				[]sriovnetworkv1.InterfaceExt{{PciAddress: "0000:d8:00.0"}},
 				true)).NotTo(HaveOccurred())
 			helpers.GinkgoAssertFileContentsEquals("/sys/bus/pci/devices/0000:d8:00.0/sriov_numvfs", "2")
+		})
+	})
+
+	Context("vfNetdevInOtherNamespace", func() {
+		It("tells the three sysfs states apart", func() {
+			origDelay := vfNetdevRecheckDelay
+			vfNetdevRecheckDelay = 0
+			DeferCleanup(func() { vfNetdevRecheckDelay = origDelay })
+			helpers.GinkgoConfigureFakeFS(&fakefilesystem.FS{
+				Dirs: []string{
+					"/sys/bus/pci/devices/0000:d8:00.2/net",
+					"/sys/bus/pci/devices/0000:d8:00.3/net/enp216s0f0v1",
+					"/sys/bus/pci/devices/0000:d8:00.4",
+				},
+			})
+			Expect(vfNetdevInOtherNamespace("0000:d8:00.2")).To(BeTrue(), "empty net: in another namespace")
+			Expect(vfNetdevInOtherNamespace("0000:d8:00.3")).To(BeFalse(), "netdev in this namespace")
+			Expect(vfNetdevInOtherNamespace("0000:d8:00.4")).To(BeFalse(), "no netdev at all")
+			Expect(vfNetdevInOtherNamespace("0000:d8:00.5")).To(BeFalse(), "no device")
 		})
 	})
 

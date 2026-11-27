@@ -197,6 +197,27 @@ func (s *sriov) VFIsReady(pciAddr string) (netlink.Link, error) {
 	return vfLink, nil
 }
 
+// vfNetdevRecheckDelay separates the two looks of vfNetdevInOtherNamespace.
+var vfNetdevRecheckDelay = time.Second
+
+// vfNetdevInOtherNamespace reports whether a VF's netdev exists in another network namespace, such
+// as a Pod's. Sysfs lists only the netdevs of its own namespace, so the VF's "net" directory is
+// there and empty; a VF with no netdev at all has no such directory. The second look covers the
+// moment in which a new netdev's directory exists before its entry does.
+func vfNetdevInOtherNamespace(pciAddr string) bool {
+	netDir := filepath.Join(vars.FilesystemRoot, consts.SysBusPciDevices, pciAddr, "net")
+	for look := 0; look < 2; look++ {
+		if look > 0 {
+			time.Sleep(vfNetdevRecheckDelay)
+		}
+		entries, err := os.ReadDir(netDir)
+		if err != nil || len(entries) > 0 {
+			return false
+		}
+	}
+	return true
+}
+
 func (s *sriov) SetVfAdminMac(vfAddr string, pfLink, vfLink netlink.Link) error {
 	log.Log.Info("SetVfAdminMac()", "vf", vfAddr)
 
@@ -472,6 +493,14 @@ func (s *sriov) configSriovVFDevices(iface *sriovnetworkv1.Interface) error {
 
 			// VF group not found.
 			if group == nil {
+				continue
+			}
+
+			// A VF whose netdev sits in another network namespace is in use by a workload. The steps
+			// below can't see that netdev, and their rebind would move it out of the workload.
+			if vfNetdevInOtherNamespace(addr) {
+				log.Log.Info("configSriovVFDevices(): VF netdev is in another network namespace, leaving the VF as it is",
+					"device", addr)
 				continue
 			}
 
