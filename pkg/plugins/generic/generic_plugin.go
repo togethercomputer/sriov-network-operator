@@ -397,7 +397,11 @@ func (p *GenericPlugin) needToUpdateVFs(desired sriovnetworkv1.SriovNetworkNodeS
 						"address", iface.PciAddress)
 					break
 				}
-				if sriovnetworkv1.NeedToUpdateSriov(&iface, &ifaceStatus) {
+				// An externally managed PF is always walked again to reapply the VFs' admin MACs,
+				// which disturbs no workload; only a real difference is a reason to drain.
+				spec := iface
+				spec.ExternallyManaged = false
+				if sriovnetworkv1.NeedToUpdateSriov(&spec, &ifaceStatus) {
 					log.Log.V(2).Info("generic plugin needToUpdateVFs(): need drain, for PCI address request update",
 						"address", iface.PciAddress)
 					return true

@@ -42,6 +42,7 @@ var _ = Describe("Generic plugin", func() {
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgRdmaExclusive).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgRdmaShared).Return(false).AnyTimes()
 		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIommuPassthrough).Return(false).AnyTimes()
+		hostHelper.EXPECT().IsKernelArgsSet("", consts.KernelArgIommuOn).Return(false).AnyTimes()
 
 		hostHelper.EXPECT().RunCommand(gomock.Any(), gomock.Any()).Return("", "", nil).AnyTimes()
 
@@ -99,6 +100,62 @@ var _ = Describe("Generic plugin", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(needReboot).To(BeFalse())
 			Expect(needDrain).To(BeFalse())
+		})
+
+		Context("externally managed PF", func() {
+			externalState := func(statusNumVfs int) *sriovnetworkv1.SriovNetworkNodeState {
+				return &sriovnetworkv1.SriovNetworkNodeState{
+					Spec: sriovnetworkv1.SriovNetworkNodeStateSpec{
+						Interfaces: sriovnetworkv1.Interfaces{{
+							PciAddress:        "0000:00:00.0",
+							NumVfs:            2,
+							ExternallyManaged: true,
+							VfGroups: []sriovnetworkv1.VfGroup{{
+								DeviceType:   "netdevice",
+								PolicyName:   "policy-1",
+								ResourceName: "resource-1",
+								VfRange:      "0-1",
+								Mtu:          9000,
+							}}}},
+					},
+					Status: sriovnetworkv1.SriovNetworkNodeStateStatus{
+						Interfaces: sriovnetworkv1.InterfaceExts{{
+							PciAddress:     "0000:00:00.0",
+							NumVfs:         statusNumVfs,
+							TotalVfs:       2,
+							Name:           "sriovif1",
+							Mtu:            9000,
+							Driver:         "mlx5_core",
+							EswitchMode:    "legacy",
+							LinkType:       "ETH",
+							LinkAdminState: "up",
+							VFs: []sriovnetworkv1.VirtualFunction{
+								{PciAddress: "0000:00:00.1", VfID: 0, Name: "sriovif1v0", Mtu: 9000, Driver: "mlx5_core"},
+								// A VF in a Pod: its netdev is not seen, so no name and no MTU.
+								{PciAddress: "0000:00:00.2", VfID: 1, Driver: "mlx5_core"},
+							},
+						}},
+					},
+				}
+			}
+
+			It("should not drain when nothing differs", func() {
+				needDrain, needReboot, err := genericPlugin.OnNodeStateChange(externalState(2))
+				Expect(err).ToNot(HaveOccurred())
+				Expect(needReboot).To(BeFalse())
+				Expect(needDrain).To(BeFalse())
+			})
+
+			It("should drain when the VF count differs", func() {
+				needDrain, _, err := genericPlugin.OnNodeStateChange(externalState(1))
+				Expect(err).ToNot(HaveOccurred())
+				Expect(needDrain).To(BeTrue())
+			})
+
+			It("should still be configured when nothing differs", func() {
+				state := externalState(2)
+				Expect(sriovnetworkv1.NeedToUpdateSriov(&state.Spec.Interfaces[0], &state.Status.Interfaces[0])).To(BeTrue())
+			})
 		})
 
 		It("should drain because MTU value has changed on PF", func() {
